@@ -1,4 +1,4 @@
-$ErrorActionPreference = "Stop"
+﻿$ErrorActionPreference = "Stop"
 
 $ProjectRoot = $PSScriptRoot
 $ClaspEntry = Join-Path $ProjectRoot "node_modules\@google\clasp\build\src\index.js"
