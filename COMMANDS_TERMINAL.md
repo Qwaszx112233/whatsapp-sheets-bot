@@ -53,12 +53,7 @@ cd "C:\Users\User\Desktop\whatsapp-sheets-bot"
 ```powershell
 # === САМЫЙ БЕЗОПАСНЫЙ СТАРТ (рекомендуется всегда) ===
 cd "C:\Users\User\Desktop\whatsapp-sheets-bot"
-$PSVersionTable.PSVersion
-. .\dev-shell.ps1
-project-health
-clasp whoami
-gas-status
-git-status-short
+
 ```
 
 Что это даёт:
