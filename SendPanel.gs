@@ -118,91 +118,6 @@ function ensureSendPanelStructure_(panel, botMonth, panelDate) {
   }
 }
 
-function buildSendPanelRowsFast_(source, col, phonesMap, dictMap, prevSent, reportDate) {
-  const ref = source.getRange(CONFIG.CODE_RANGE_A1);
-  const start = ref.getRow();
-  const num = ref.getNumRows();
-
-  const fios = source.getRange(start, CONFIG.FIO_COL, num, 1).getDisplayValues().flat();
-  const brs = source.getRange(start, 6, num, 1).getDisplayValues().flat();
-  const codes = source.getRange(start, col, num, 1).getDisplayValues().flat();
-
-  const rows = [];
-
-  for (let i = 0; i < num; i++) {
-    const fioRaw = String(fios[i] || '').trim();
-    const code = String(codes[i] || '').trim();
-
-    if (!fioRaw || !code) continue;
-
-    try {
-      const fioNorm = normalizeFIO_(fioRaw);
-
-      let phone = '';
-      if (phonesMap) {
-        phone = String(phonesMap[fioRaw] || phonesMap[fioNorm] || '').trim();
-      }
-
-      const phoneDigits = phone ? phone.replace(/[^\d+]/g, '') : '';
-      const waPhone = phoneDigits
-        ? (phoneDigits.startsWith('+') ? phoneDigits : '+' + phoneDigits)
-        : '';
-
-      const dict = (dictMap && dictMap[code]) ? dictMap[code] : null;
-      const service = dict ? String(dict.service || '').trim() : '';
-      const place = dict ? String(dict.place || '').trim() : '';
-      const tasks = dict ? String(dict.tasks || '').trim() : '';
-
-      const brRaw = String(brs[i] || '').trim();
-      const brDays = brRaw ? (Number(brRaw.replace(',', '.')) || 0) : 0;
-
-      const msg = buildMessage_({
-        reportDate: reportDate,
-        service: service,
-        place: place,
-        tasks: tasks,
-        brDays: brDays,
-        minimal: false
-      });
-
-      const safeMessage = trimToEncoded_(msg, CONFIG.MAX_WA_TEXT);
-      const link = waPhone
-        ? `https://wa.me/${waPhone.replace('+', '')}?text=${encodeURIComponent(safeMessage)}`
-        : '';
-
-      const key = makeSendPanelKey_(fioRaw, waPhone, code);
-      const isSent = prevSent[key] === true;
-
-      let formattedPhone = waPhone;
-      if (formattedPhone.startsWith('+')) {
-        formattedPhone = "'" + formattedPhone;
-      }
-
-      rows.push([
-        fioRaw,
-        formattedPhone || '—',
-        code,
-        tasks || '—',
-        isSent ? getSendPanelSentStatus_() : getSendPanelReadyStatus_(),
-        link ? `=HYPERLINK("${link}"; "📱 НАДІСЛАТИ")` : '',
-        isSent
-      ]);
-    } catch (e) {
-      rows.push([
-        fioRaw,
-        '—',
-        code,
-        '—',
-        `${getSendPanelErrorPrefix_()} ${e && e.message ? e.message : String(e)}`,
-        '',
-        false
-      ]);
-    }
-  }
-
-  return rows;
-}
-
 function ensureSendPanelFreshForToday_() {
   const ss = SpreadsheetApp.getActive();
   const today = Utilities.formatDate(new Date(), CONFIG.TZ, 'dd.MM.yyyy');
@@ -228,48 +143,99 @@ function ensureSendPanelFreshForToday_() {
 function rebuildSendPanelCore_() {
   const ss = SpreadsheetApp.getActive();
   const source = getBotSheet_();
+  const today = Utilities.formatDate(new Date(), CONFIG.TZ, 'dd.MM.yyyy');
 
   let panel = ss.getSheetByName(CONFIG.SEND_PANEL_SHEET);
-  const prevSent = panel ? readSendPanelSentMap_(panel) : {};
-  const isNewPanel = !panel;
+  let prevState = {};
 
-  if (!panel) {
-    panel = ss.insertSheet(CONFIG.SEND_PANEL_SHEET);
+  if (panel) {
+    const storedDate = readSendPanelStoredDate_(panel);
+    if (storedDate === today) {
+      prevState = readSendPanelStateMap_(panel);
+    }
   }
 
+  if (!panel) panel = ss.insertSheet(CONFIG.SEND_PANEL_SHEET);
+
   const botMonth = getBotMonthSheetName_();
+  ensureSendPanelStructure_(panel, botMonth, today);
+
   const phones = loadPhonesMap_();
   const dict = loadDictMap_();
-
-  const today = Utilities.formatDate(new Date(), CONFIG.TZ, 'dd.MM.yyyy');
+  const ref = source.getRange(CONFIG.CODE_RANGE_A1);
   const col = findTodayColumn_(source, today);
+
   if (col === -1) {
     throw new Error(`Колонка ${today} не знайдена в аркуші "${source.getName()}"`);
   }
 
-  const dateCell = source.getRange(Number(CONFIG.DATE_ROW) || 1, col);
-  const reportDate = normalizeDate_(dateCell.getValue(), dateCell.getDisplayValue());
+  const rows = [];
+  const start = ref.getRow();
+  const num = ref.getNumRows();
+  const codes = source.getRange(start, col, num, 1).getDisplayValues();
+  const fios = source.getRange(start, CONFIG.FIO_COL, num, 1).getDisplayValues();
 
-  const rows = buildSendPanelRowsFast_(source, col, phones, dict, prevSent, reportDate);
+  for (let i = 0; i < num; i++) {
+    const code = String(codes[i][0] || '').trim();
+    const fio = String(fios[i][0] || '').trim();
+    if (!code || !fio) continue;
+
+    try {
+      const payload = buildPayloadForCell_(source, start + i, col, phones, dict);
+      const linkFormula = `=HYPERLINK("${payload.link}"; "📱 НАДІСЛАТИ")`;
+      const key = makeSendPanelKey_(payload.fio, payload.phone, payload.code);
+      const restored = normalizeSendPanelState_(prevState[key]);
+
+      let formattedPhone = String(payload.phone || '').trim();
+      if (formattedPhone.startsWith('+')) {
+        formattedPhone = "'" + formattedPhone;
+      }
+
+      rows.push([
+        payload.fio,
+        formattedPhone || '—',
+        payload.code,
+        payload.tasks || '—',
+        restored.status,
+        linkFormula,
+        restored.sent
+      ]);
+    } catch (e) {
+      rows.push([
+        fio,
+        '—',
+        code,
+        '—',
+        `${getSendPanelErrorPrefix_()} ${e && e.message ? e.message : String(e)}`,
+        '',
+        false
+      ]);
+    }
+  }
 
   if (!rows.length) {
     throw new Error('На сьогодні немає даних для SEND_PANEL');
   }
 
-  ensureSendPanelStructure_(panel, botMonth);
-
   panel.getRange(CONFIG.SEND_PANEL_DATA_START_ROW, 1, rows.length, 7).setValues(rows);
   panel.getRange(CONFIG.SEND_PANEL_DATA_START_ROW, 7, rows.length, 1).insertCheckboxes();
-
-  if (isNewPanel) {
-    applyColumnWidthsStandardsToSheet_(panel);
-  }
+  applyColumnWidthsStandardsToSheet_(panel);
 
   const statusRng = panel.getRange(CONFIG.SEND_PANEL_DATA_START_ROW, 5, rows.length, 1);
   panel.setConditionalFormatRules([
     SpreadsheetApp.newConditionalFormatRule()
       .whenTextContains(getSendPanelReadyStatus_())
       .setBackground('#e6f4e6')
+      .setRanges([statusRng])
+      .build(),
+    SpreadsheetApp.newConditionalFormatRule()
+      .whenTextContains(getSendPanelOpenedStatus_())
+      .setBackground('#e6f0ff')
+      .setRanges([statusRng])
+      .build(),
+    SpreadsheetApp.newConditionalFormatRule()
+      .whenTextContains(getSendPanelNotSentStatus_())
+      .setBackground('#fff3cd')
       .setRanges([statusRng])
       .build(),
     SpreadsheetApp.newConditionalFormatRule()

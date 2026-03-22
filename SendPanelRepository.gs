@@ -153,7 +153,7 @@ const SendPanelRepository_ = (function() {
     const ss = SpreadsheetApp.getActive();
     const built = buildRowsForDate(dateStr);
     let panel = ss.getSheetByName(CONFIG.SEND_PANEL_SHEET);
-    const prevSent = panel ? readSendPanelSentMap_(panel) : {};
+    const prevSent = panel ? readSendPanelStateMap_(panel) : {};
     if (!panel) panel = ss.insertSheet(CONFIG.SEND_PANEL_SHEET);
 
     ensureSendPanelStructure_(panel, built.month);

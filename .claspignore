@@ -1,0 +1,6 @@
+﻿**/**
+!appsscript.json
+!**/*.gs
+!**/*.html
+.git/**
+node_modules/**
