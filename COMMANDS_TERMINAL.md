@@ -110,7 +110,7 @@ WAPB DEV ENV LOADED
 
 Сразу после загрузки shell выполни:
 
-```powershell
+```
 Get-Command gas-status
 Get-Command gas-pull
 Get-Command gas-push
@@ -119,7 +119,7 @@ Get-Command project-health
 
 Потом выполни:
 
-```powershell
+```
 project-health
 ```
 
@@ -131,7 +131,7 @@ clasp whoami
 
 Если `clasp whoami` падает, попробуй:
 
-```powershell
+```
 clasp logout
 clasp login
 clasp whoami

@@ -158,16 +158,16 @@ function Get-WapbTrackedSourceFiles {
     [CmdletBinding()]
     param()
 
-    $allowedExtensions = @(".gs", ".html", ".json")
-
     Get-ChildItem -Path $ProjectRoot -Recurse -File |
         Where-Object {
-            $_.Extension -in $allowedExtensions -and
-            $_.FullName -notmatch "\\node_modules\\" -and
-            $_.FullName -notmatch "\\\.git\\" -and
-            $_.FullName -notmatch "\\dist\\" -and
-            $_.FullName -notmatch "\\build\\" -and
-            $_.Name -in @("appsscript.json") -or $_.Extension -in @(".gs", ".html")
+            $_.FullName -notmatch '\\node_modules\\' -and
+            $_.FullName -notmatch '\\\.git\\' -and
+            $_.FullName -notmatch '\\dist\\' -and
+            $_.FullName -notmatch '\\build\\' -and
+            (
+                $_.Name -eq 'appsscript.json' -or
+                $_.Extension -in @('.gs', '.html')
+            )
         } |
         Sort-Object FullName
 }
@@ -184,7 +184,8 @@ function Get-WapbSourceHash {
 
     $parts = foreach ($file in $files) {
         $hash = (Get-FileHash -Algorithm SHA256 -LiteralPath $file.FullName).Hash
-        "$($file.FullName)|$hash"
+        $relativePath = [System.IO.Path]::GetRelativePath($ProjectRoot, $file.FullName)
+        "$relativePath|$hash"
     }
 
     $joined = $parts -join "`n"
@@ -367,7 +368,7 @@ function Sync-GitBranch {
 # -------------------------
 # FULL WORKFLOW
 # -------------------------
-function Deploy-All {
+function Invoke-DeployAll {
     [CmdletBinding()]
     param(
         [string]$Message = "update"
@@ -494,7 +495,7 @@ Set-Alias gas-watch        Start-GasWatch
 Set-Alias git-status-short Get-GitStatusShort
 Set-Alias git-save         Save-GitChanges
 Set-Alias git-sync         Sync-GitBranch
-Set-Alias deploy-all       Deploy-All
+Set-Alias deploy-all       Invoke-DeployAll
 Set-Alias project-health   Test-ProjectHealth
 Set-Alias wapb-help        Show-WapbCommands
 
@@ -524,7 +525,7 @@ Write-Host "  Start-GasWatch"
 Write-Host "  Get-GitStatusShort"
 Write-Host "  Save-GitChanges 'msg'"
 Write-Host "  Sync-GitBranch 'msg'"
-Write-Host "  Deploy-All 'msg'"
+Write-Host "  Invoke-DeployAll 'msg'"
 Write-Host "  Test-ProjectHealth"
 Write-Host "  Show-WapbCommands"
 Write-Host ""
@@ -539,7 +540,7 @@ Write-Host "  gas-watch"
 Write-Host "  git-status-short"
 Write-Host "  git-save 'msg'"
 Write-Host "  git-sync 'msg'"
-Write-Host "  deploy-all 'msg'"
+Write-Host "  Invoke-DeployAll 'msg'"
 Write-Host "  project-health"
 Write-Host "  wapb-help"
 Write-Host "  npm -v"
