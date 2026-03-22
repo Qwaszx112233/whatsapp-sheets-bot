@@ -3,11 +3,11 @@
  * Reconciliation.gs — stage 5 reconciliation 2.0 with targeted safe repair.
  */
 
-const Reconciliation_ = (function() {
+const Reconciliation_ = (function () {
   function _indexRows(rows) {
     const map = {};
     const duplicates = [];
-    stage4AsArray_(rows).forEach(function(row) {
+    stage4AsArray_(rows).forEach(function (row) {
       const key = makeSendPanelKey_(row.fio, row.phone, row.code);
       if (!key || key === '||') return;
       if (!map[key]) map[key] = [];
@@ -37,7 +37,7 @@ const Reconciliation_ = (function() {
     const actualIndex = _indexRows(actualRows || []);
     const issues = [];
 
-    Object.keys(expectedIndex.map).forEach(function(key) {
+    Object.keys(expectedIndex.map).forEach(function (key) {
       if (!actualIndex.map[key]) {
         const sample = expectedIndex.map[key][0];
         issues.push(_issue('missingExpectedItem', 'CRITICAL', true, {
@@ -50,7 +50,7 @@ const Reconciliation_ = (function() {
       }
     });
 
-    Object.keys(actualIndex.map).forEach(function(key) {
+    Object.keys(actualIndex.map).forEach(function (key) {
       if (!expectedIndex.map[key]) {
         const sample = actualIndex.map[key][0];
         issues.push(_issue('orphanSendPanelRow', 'WARN', true, {
@@ -63,18 +63,18 @@ const Reconciliation_ = (function() {
       }
     });
 
-    actualIndex.duplicates.forEach(function(key) {
+    actualIndex.duplicates.forEach(function (key) {
       const sample = actualIndex.map[key][0];
       issues.push(_issue('duplicateSendPanelRow', 'CRITICAL', true, {
         key: key,
         fio: sample.fio,
         code: sample.code,
         count: actualIndex.map[key].length,
-        rows: actualIndex.map[key].map(function(item) { return item.row; })
+        rows: actualIndex.map[key].map(function (item) { return item.row; })
       }));
     });
 
-    Object.keys(expectedIndex.map).forEach(function(key) {
+    Object.keys(expectedIndex.map).forEach(function (key) {
       if (!actualIndex.map[key]) return;
 
       const exp = expectedIndex.map[key][0];
@@ -164,7 +164,7 @@ const Reconciliation_ = (function() {
 
   function _expectedRowMap(check) {
     const map = {};
-    stage4AsArray_(check.expectedRows).forEach(function(item) {
+    stage4AsArray_(check.expectedRows).forEach(function (item) {
       map[makeSendPanelKey_(item.fio, item.phone, item.code)] = item;
     });
     return map;
@@ -173,7 +173,7 @@ const Reconciliation_ = (function() {
   function _actualRowMap(check) {
     const indexed = _indexRows(check.actualRows || []);
     const flat = {};
-    Object.keys(indexed.map).forEach(function(key) {
+    Object.keys(indexed.map).forEach(function (key) {
       flat[key] = indexed.map[key];
     });
     return flat;
@@ -182,14 +182,14 @@ const Reconciliation_ = (function() {
   function previewRepairPlan(issues, options) {
     const opts = options || {};
     const allowedTypes = stage4AsArray_(opts.issueTypes).map(String);
-    const selected = stage4AsArray_(issues).filter(function(item) {
+    const selected = stage4AsArray_(issues).filter(function (item) {
       return !allowedTypes.length || allowedTypes.indexOf(item.type) !== -1;
     });
     return {
       selectedCount: selected.length,
-      repairableCount: selected.filter(function(item) { return item.repairable; }).length,
+      repairableCount: selected.filter(function (item) { return item.repairable; }).length,
       canRebuild: selected.length > 0,
-      plannedOperations: selected.map(function(item) {
+      plannedOperations: selected.map(function (item) {
         return {
           type: item.type,
           key: item.key || '',
@@ -204,7 +204,7 @@ const Reconciliation_ = (function() {
     const opts = options || {};
     const check = compareMonthlyToSendPanel(String(opts.date || opts.dateStr || _todayStr_()).trim());
     const allowedTypes = stage4AsArray_(opts.issueTypes).map(String);
-    const selected = check.issues.filter(function(item) {
+    const selected = check.issues.filter(function (item) {
       return !allowedTypes.length || allowedTypes.indexOf(item.type) !== -1;
     });
 
@@ -254,8 +254,8 @@ const Reconciliation_ = (function() {
   function _deleteRowsDescending(rows) {
     const panel = DataAccess_.getSheet('SEND_PANEL', null, true);
     [...new Set(stage4AsArray_(rows).map(Number).filter(Number.isFinite))]
-      .sort(function(a, b) { return b - a; })
-      .forEach(function(row) { panel.deleteRow(row); });
+      .sort(function (a, b) { return b - a; })
+      .forEach(function (row) { panel.deleteRow(row); });
   }
 
   function repairSelectedIssues(options) {
@@ -269,7 +269,7 @@ const Reconciliation_ = (function() {
     const expectedMap = _expectedRowMap(check);
     const actualMap = _actualRowMap(check);
     const allowedTypes = stage4AsArray_(opts.issueTypes).map(String);
-    const selected = check.issues.filter(function(item) {
+    const selected = check.issues.filter(function (item) {
       return item.repairable && (!allowedTypes.length || allowedTypes.indexOf(item.type) !== -1);
     }).slice(0, Number(opts.limit) || STAGE5_CONFIG.MAX_SAFE_REPAIR_ITEMS);
 
@@ -277,7 +277,7 @@ const Reconciliation_ = (function() {
     const warnings = [];
     const deferredDeletes = [];
 
-    selected.forEach(function(issue) {
+    selected.forEach(function (issue) {
       if (issue.type === 'missingExpectedItem') {
         const expected = expectedMap[issue.key];
         if (!expected) return;
@@ -316,7 +316,7 @@ const Reconciliation_ = (function() {
       }
 
       if (issue.type === 'duplicateSendPanelRow') {
-        const rows = stage4AsArray_(issue.rows).map(Number).filter(Number.isFinite).sort(function(a, b) { return a - b; });
+        const rows = stage4AsArray_(issue.rows).map(Number).filter(Number.isFinite).sort(function (a, b) { return a - b; });
         const rowsToDelete = rows.slice(1);
         if (opts.dryRun) {
           repairs.push({ type: issue.type, key: issue.key, rowsToDelete: rowsToDelete, dryRun: true });
@@ -364,7 +364,7 @@ const Reconciliation_ = (function() {
     return {
       beforeIssues: stage4AsArray_(beforeCheck && beforeCheck.issues).length,
       remainingIssues: afterIssues.length,
-      criticalRemaining: afterIssues.filter(function(item) { return item.severity === 'CRITICAL'; }).length
+      criticalRemaining: afterIssues.filter(function (item) { return item.severity === 'CRITICAL'; }).length
     };
   }
 
@@ -394,7 +394,7 @@ const Reconciliation_ = (function() {
       const sidebar = PersonsRepository_.getSidebarPersonnel(dateStr);
       checks.push({
         name: 'monthly ↔ sidebar-view data',
-        status: (sidebar.personnel || []).filter(function(item) { return item.status === 'error'; }).length ? 'WARN' : 'OK',
+        status: (sidebar.personnel || []).filter(function (item) { return item.status === 'error'; }).length ? 'WARN' : 'OK',
         details: {
           month: sidebar.month,
           count: (sidebar.personnel || []).length
@@ -458,8 +458,8 @@ const Reconciliation_ = (function() {
         checks: checks,
         issues: check.issues,
         repairs: preview.plannedOperations,
-        criticalCount: (check.issues || []).filter(function(item) { return item.severity === 'CRITICAL'; }).length,
-        repairableCount: (check.issues || []).filter(function(item) { return item.repairable; }).length,
+        criticalCount: (check.issues || []).filter(function (item) { return item.severity === 'CRITICAL'; }).length,
+        repairableCount: (check.issues || []).filter(function (item) { return item.repairable; }).length,
         canRepairAutomatically: true,
         affectedSheets: [CONFIG.SEND_PANEL_SHEET, getBotMonthSheetName_()],
         appliedChangesCount: 0,
@@ -467,7 +467,7 @@ const Reconciliation_ = (function() {
         partial: false,
         warnings: [],
         summary: {
-          checked: checks.map(function(item) { return item.name; }),
+          checked: checks.map(function (item) { return item.name; }),
           issues: check.summary.issueCount,
           previewedRepairs: preview.selectedCount
         },
@@ -486,8 +486,8 @@ const Reconciliation_ = (function() {
         checks: checks,
         issues: check.issues,
         repairs: repaired.repairs,
-        criticalCount: (check.issues || []).filter(function(item) { return item.severity === 'CRITICAL'; }).length,
-        repairableCount: (check.issues || []).filter(function(item) { return item.repairable; }).length,
+        criticalCount: (check.issues || []).filter(function (item) { return item.severity === 'CRITICAL'; }).length,
+        repairableCount: (check.issues || []).filter(function (item) { return item.repairable; }).length,
         canRepairAutomatically: true,
         affectedSheets: repaired.affectedSheets,
         appliedChangesCount: repaired.appliedChangesCount,
@@ -497,7 +497,7 @@ const Reconciliation_ = (function() {
         operationId: repaired.operationId,
         postCheck: repaired.postCheck || null,
         summary: {
-          checked: checks.map(function(item) { return item.name; }),
+          checked: checks.map(function (item) { return item.name; }),
           issues: check.summary.issueCount,
           repairs: (repaired.repairs || []).length,
           remainingIssues: repaired.postCheck ? repaired.postCheck.remainingIssues : undefined
@@ -518,8 +518,8 @@ const Reconciliation_ = (function() {
         issues: check.issues,
         repairs: repaired.repairs,
         postCheck: repaired.postCheck,
-        criticalCount: (check.issues || []).filter(function(item) { return item.severity === 'CRITICAL'; }).length,
-        repairableCount: (check.issues || []).filter(function(item) { return item.repairable; }).length,
+        criticalCount: (check.issues || []).filter(function (item) { return item.severity === 'CRITICAL'; }).length,
+        repairableCount: (check.issues || []).filter(function (item) { return item.repairable; }).length,
         canRepairAutomatically: true,
         affectedSheets: repaired.affectedSheets,
         appliedChangesCount: repaired.appliedChangesCount,
@@ -528,7 +528,7 @@ const Reconciliation_ = (function() {
         warnings: repaired.warnings || [],
         operationId: repaired.operationId,
         summary: {
-          checked: checks.map(function(item) { return item.name; }),
+          checked: checks.map(function (item) { return item.name; }),
           issues: check.summary.issueCount,
           repairs: (repaired.repairs || []).length,
           remainingIssues: repaired.postCheck.remainingIssues
@@ -545,9 +545,9 @@ const Reconciliation_ = (function() {
       dryRun: !!opts.dryRun,
       checks: checks,
       issues: check.issues,
-      criticalCount: (check.issues || []).filter(function(item) { return item.severity === 'CRITICAL'; }).length,
-      repairableCount: (check.issues || []).filter(function(item) { return item.repairable; }).length,
-      canRepairAutomatically: (check.issues || []).some(function(item) { return item.repairable; }),
+      criticalCount: (check.issues || []).filter(function (item) { return item.severity === 'CRITICAL'; }).length,
+      repairableCount: (check.issues || []).filter(function (item) { return item.repairable; }).length,
+      canRepairAutomatically: (check.issues || []).some(function (item) { return item.repairable; }),
       repairs: [],
       affectedSheets: [CONFIG.SEND_PANEL_SHEET, getBotMonthSheetName_()],
       appliedChangesCount: 0,
@@ -555,10 +555,10 @@ const Reconciliation_ = (function() {
       partial: false,
       warnings: [],
       summary: {
-        checked: checks.map(function(item) { return item.name; }),
+        checked: checks.map(function (item) { return item.name; }),
         issues: check.summary.issueCount,
-        critical: (check.issues || []).filter(function(item) { return item.severity === 'CRITICAL'; }).length,
-        repairable: (check.issues || []).filter(function(item) { return item.repairable; }).length
+        critical: (check.issues || []).filter(function (item) { return item.severity === 'CRITICAL'; }).length,
+        repairable: (check.issues || []).filter(function (item) { return item.repairable; }).length
       },
       message: (check.issues || []).length
         ? `Reconciliation завершено: проблем ${(check.issues || []).length}`

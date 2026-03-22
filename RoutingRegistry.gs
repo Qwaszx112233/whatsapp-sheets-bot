@@ -13,6 +13,7 @@
  */
 
 var WAPB_STAGE7_ROUTING_REGISTRY_STORE_ = (typeof WAPB_STAGE7_ROUTING_REGISTRY_STORE_ !== 'undefined' && WAPB_STAGE7_ROUTING_REGISTRY_STORE_) || Object.freeze({
+
   sidebar: Object.freeze({
     getMonthsList: Object.freeze({
       routeName: 'sidebar.getMonthsList',
@@ -27,6 +28,7 @@ var WAPB_STAGE7_ROUTING_REGISTRY_STORE_ = (typeof WAPB_STAGE7_ROUTING_REGISTRY_S
       clientActionAliases: [],
       verifyAfterWrite: false
     }),
+
     getSidebarData: Object.freeze({
       routeName: 'sidebar.getSidebarData',
       publicApiMethod: 'apiStage4GetSidebarData',
@@ -40,6 +42,7 @@ var WAPB_STAGE7_ROUTING_REGISTRY_STORE_ = (typeof WAPB_STAGE7_ROUTING_REGISTRY_S
       clientActionAliases: [],
       verifyAfterWrite: false
     }),
+
     getSendPanelData: Object.freeze({
       routeName: 'sidebar.getSendPanelData',
       publicApiMethod: 'apiStage4GetSendPanelData',
@@ -53,6 +56,7 @@ var WAPB_STAGE7_ROUTING_REGISTRY_STORE_ = (typeof WAPB_STAGE7_ROUTING_REGISTRY_S
       clientActionAliases: [],
       verifyAfterWrite: false
     }),
+
     generateSendPanelForDate: Object.freeze({
       routeName: 'sidebar.generateSendPanelForDate',
       publicApiMethod: 'apiGenerateSendPanelForDate',
@@ -66,6 +70,7 @@ var WAPB_STAGE7_ROUTING_REGISTRY_STORE_ = (typeof WAPB_STAGE7_ROUTING_REGISTRY_S
       clientActionAliases: ['generatePanel'],
       verifyAfterWrite: true
     }),
+
     generateSendPanelForRange: Object.freeze({
       routeName: 'sidebar.generateSendPanelForRange',
       publicApiMethod: 'apiGenerateSendPanelForRange',
@@ -79,6 +84,7 @@ var WAPB_STAGE7_ROUTING_REGISTRY_STORE_ = (typeof WAPB_STAGE7_ROUTING_REGISTRY_S
       clientActionAliases: [],
       verifyAfterWrite: true
     }),
+
     markPanelRowsAsSent: Object.freeze({
       routeName: 'sidebar.markPanelRowsAsSent',
       publicApiMethod: 'apiMarkPanelRowsAsSent',
@@ -92,6 +98,7 @@ var WAPB_STAGE7_ROUTING_REGISTRY_STORE_ = (typeof WAPB_STAGE7_ROUTING_REGISTRY_S
       clientActionAliases: ['markPanelRowsAsSent', 'markSendPanelRowsAsSent'],
       verifyAfterWrite: true
     }),
+
     markPanelRowsAsUnsent: Object.freeze({
       routeName: 'sidebar.markPanelRowsAsUnsent',
       publicApiMethod: 'apiMarkPanelRowsAsUnsent',
@@ -105,6 +112,7 @@ var WAPB_STAGE7_ROUTING_REGISTRY_STORE_ = (typeof WAPB_STAGE7_ROUTING_REGISTRY_S
       clientActionAliases: ['markPanelRowsAsUnsent'],
       verifyAfterWrite: true
     }),
+
     sendPendingRows: Object.freeze({
       routeName: 'sidebar.sendPendingRows',
       publicApiMethod: 'apiSendPendingRows',
@@ -118,6 +126,7 @@ var WAPB_STAGE7_ROUTING_REGISTRY_STORE_ = (typeof WAPB_STAGE7_ROUTING_REGISTRY_S
       clientActionAliases: ['sendUnsent'],
       verifyAfterWrite: true
     }),
+
     buildDaySummary: Object.freeze({
       routeName: 'sidebar.buildDaySummary',
       publicApiMethod: 'apiBuildDaySummary',
@@ -131,6 +140,7 @@ var WAPB_STAGE7_ROUTING_REGISTRY_STORE_ = (typeof WAPB_STAGE7_ROUTING_REGISTRY_S
       clientActionAliases: ['daySummary'],
       verifyAfterWrite: false
     }),
+
     buildDetailedSummary: Object.freeze({
       routeName: 'sidebar.buildDetailedSummary',
       publicApiMethod: 'apiBuildDetailedSummary',
@@ -144,6 +154,7 @@ var WAPB_STAGE7_ROUTING_REGISTRY_STORE_ = (typeof WAPB_STAGE7_ROUTING_REGISTRY_S
       clientActionAliases: ['detailedDay'],
       verifyAfterWrite: false
     }),
+
     openPersonCard: Object.freeze({
       routeName: 'sidebar.openPersonCard',
       publicApiMethod: 'apiOpenPersonCard',
@@ -157,6 +168,7 @@ var WAPB_STAGE7_ROUTING_REGISTRY_STORE_ = (typeof WAPB_STAGE7_ROUTING_REGISTRY_S
       clientActionAliases: [],
       verifyAfterWrite: false
     }),
+
     checkVacationsAndBirthdays: Object.freeze({
       routeName: 'sidebar.checkVacationsAndBirthdays',
       publicApiMethod: 'apiCheckVacationsAndBirthdays',
@@ -170,6 +182,7 @@ var WAPB_STAGE7_ROUTING_REGISTRY_STORE_ = (typeof WAPB_STAGE7_ROUTING_REGISTRY_S
       clientActionAliases: ['vacationReminder', 'birthdayCheck'],
       verifyAfterWrite: false
     }),
+
     switchBotToMonth: Object.freeze({
       routeName: 'sidebar.switchBotToMonth',
       publicApiMethod: 'apiStage4SwitchBotToMonth',
@@ -183,6 +196,7 @@ var WAPB_STAGE7_ROUTING_REGISTRY_STORE_ = (typeof WAPB_STAGE7_ROUTING_REGISTRY_S
       clientActionAliases: ['switchMonth'],
       verifyAfterWrite: false
     }),
+
     createNextMonth: Object.freeze({
       routeName: 'sidebar.createNextMonth',
       publicApiMethod: 'apiCreateNextMonthStage4',
@@ -196,6 +210,7 @@ var WAPB_STAGE7_ROUTING_REGISTRY_STORE_ = (typeof WAPB_STAGE7_ROUTING_REGISTRY_S
       clientActionAliases: ['createNextMonth'],
       verifyAfterWrite: true
     }),
+
     runReconciliation: Object.freeze({
       routeName: 'sidebar.runReconciliation',
       publicApiMethod: 'apiRunReconciliation',
@@ -210,6 +225,7 @@ var WAPB_STAGE7_ROUTING_REGISTRY_STORE_ = (typeof WAPB_STAGE7_ROUTING_REGISTRY_S
       verifyAfterWrite: true
     })
   }),
+
   spreadsheet: Object.freeze({
     previewSelectionMessage: Object.freeze({ routeName: 'spreadsheet.previewSelectionMessage', publicApiMethod: 'apiPreviewSelectionMessage', useCase: 'SelectionActionService_', category: 'spreadsheet', compatibilityStatus: 'canonical', mode: 'read', lockRequired: false, dryRunSupported: true, uiAllowed: false, clientActionAliases: [], verifyAfterWrite: false }),
     previewMultipleMessages: Object.freeze({ routeName: 'spreadsheet.previewMultipleMessages', publicApiMethod: 'apiPreviewMultipleMessages', useCase: 'SelectionActionService_', category: 'spreadsheet', compatibilityStatus: 'canonical', mode: 'read', lockRequired: false, dryRunSupported: true, uiAllowed: false, clientActionAliases: [], verifyAfterWrite: false }),
@@ -220,6 +236,7 @@ var WAPB_STAGE7_ROUTING_REGISTRY_STORE_ = (typeof WAPB_STAGE7_ROUTING_REGISTRY_S
     logPreparedMessages: Object.freeze({ routeName: 'spreadsheet.logPreparedMessages', publicApiMethod: 'apiLogPreparedMessages', useCase: 'SelectionActionService_', category: 'spreadsheet', compatibilityStatus: 'canonical', mode: 'write', lockRequired: true, dryRunSupported: true, uiAllowed: false, clientActionAliases: [], verifyAfterWrite: false }),
     runSelectionDiagnostics: Object.freeze({ routeName: 'spreadsheet.runSelectionDiagnostics', publicApiMethod: 'apiRunSelectionDiagnostics', useCase: 'SelectionActionService_', category: 'spreadsheet', compatibilityStatus: 'canonical', mode: 'read', lockRequired: false, dryRunSupported: true, uiAllowed: false, clientActionAliases: [], verifyAfterWrite: false })
   }),
+
   maintenance: Object.freeze({
     clearCache: Object.freeze({ routeName: 'maintenance.clearCache', publicApiMethod: 'apiStage5ClearCache', useCase: 'Stage4UseCases_.runMaintenanceScenario', category: 'maintenance', compatibilityStatus: 'canonical', mode: 'write', lockRequired: true, dryRunSupported: false, uiAllowed: true, clientActionAliases: ['clearCache'], verifyAfterWrite: false }),
     clearLog: Object.freeze({ routeName: 'maintenance.clearLog', publicApiMethod: 'apiStage5ClearLog', useCase: 'Stage4UseCases_.runMaintenanceScenario', category: 'maintenance', compatibilityStatus: 'canonical', mode: 'write', lockRequired: true, dryRunSupported: false, uiAllowed: true, clientActionAliases: ['clearLog'], verifyAfterWrite: false }),
@@ -259,8 +276,8 @@ function getRoutingRegistry_() {
 function listStage6ARoutes_() {
   const groups = WAPB_STAGE7_ROUTING_REGISTRY_STORE_ || {};
   const out = [];
-  Object.keys(groups).forEach(function(group) {
-    Object.keys(groups[group] || {}).forEach(function(key) {
+  Object.keys(groups).forEach(function (group) {
+    Object.keys(groups[group] || {}).forEach(function (key) {
       out.push(Object.assign({ group: group, action: key }, groups[group][key] || {}));
     });
   });
@@ -269,18 +286,18 @@ function listStage6ARoutes_() {
 
 function getStage6ARouteByName_(routeName) {
   const target = String(routeName || '').trim();
-  return listStage6ARoutes_().find(function(item) { return item.routeName === target; }) || null;
+  return listStage6ARoutes_().find(function (item) { return item.routeName === target; }) || null;
 }
 
 function getStage6ARouteByApiMethod_(methodName) {
   const target = String(methodName || '').trim();
-  return listStage6ARoutes_().find(function(item) { return item.publicApiMethod === target; }) || null;
+  return listStage6ARoutes_().find(function (item) { return item.publicApiMethod === target; }) || null;
 }
 
 function getStage6AUiActionMap_() {
   const map = {};
-  listStage6ARoutes_().forEach(function(item) {
-    (item.clientActionAliases || []).forEach(function(alias) {
+  listStage6ARoutes_().forEach(function (item) {
+    (item.clientActionAliases || []).forEach(function (alias) {
       map[String(alias)] = item.routeName;
     });
   });
@@ -294,7 +311,7 @@ function normalizeStage6AUiAction_(action) {
 }
 
 function getStage6ACriticalWriteRoutes_() {
-  return listStage6ARoutes_().filter(function(item) {
+  return listStage6ARoutes_().filter(function (item) {
     return String(item.mode || '').indexOf('write') === 0;
   });
 }
@@ -304,11 +321,11 @@ function getStage6ARouteCoverageReport_() {
   const critical = getStage6ACriticalWriteRoutes_();
   return {
     total: routes.length,
-    groups: [...new Set(routes.map(function(item) { return item.group; }))],
+    groups: [...new Set(routes.map(function (item) { return item.group; }))],
     criticalWrites: critical.length,
-    lockCoverage: critical.filter(function(item) { return item.lockRequired; }).length,
-    dryRunCoverage: critical.filter(function(item) { return item.dryRunSupported; }).length,
-    uiAllowedRoutes: routes.filter(function(item) { return item.uiAllowed; }).length,
-    missingLockCoverage: critical.filter(function(item) { return !item.lockRequired; }).map(function(item) { return item.routeName; })
+    lockCoverage: critical.filter(function (item) { return item.lockRequired; }).length,
+    dryRunCoverage: critical.filter(function (item) { return item.dryRunSupported; }).length,
+    uiAllowedRoutes: routes.filter(function (item) { return item.uiAllowed; }).length,
+    missingLockCoverage: critical.filter(function (item) { return !item.lockRequired; }).map(function (item) { return item.routeName; })
   };
 }

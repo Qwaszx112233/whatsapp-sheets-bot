@@ -3,7 +3,7 @@
  * DialogTemplates.gs — stage 5 presentation templates.
  */
 
-const DialogTemplates_ = (function() {
+const DialogTemplates_ = (function () {
   function esc(value) {
     return PreviewLinkService_.escapeHtml(value);
   }
@@ -21,6 +21,7 @@ const DialogTemplates_ = (function() {
         try { document.execCommand('copy'); } catch (e) {}
         document.body.removeChild(el);
       }
+      
       function copyTextSmart(text) {
         if (navigator.clipboard && navigator.clipboard.writeText) {
           return navigator.clipboard.writeText(text).catch(function() { fallbackCopy(text); });
@@ -76,7 +77,7 @@ const DialogTemplates_ = (function() {
   function multipleMessages(data) {
     const items = Array.isArray(data && data.items) ? data.items : [];
     const errors = Array.isArray(data && data.errors) ? data.errors : [];
-    const cards = items.map(function(item, index) {
+    const cards = items.map(function (item, index) {
       return `
         <div style="border:1px solid #e2e8f0;border-radius:12px;padding:12px;margin-bottom:10px;background:#fff;">
           <div style="font-weight:700;color:#0f172a;margin-bottom:4px;">${index + 1}. ${esc(item.fio || '')}</div>
@@ -93,9 +94,9 @@ const DialogTemplates_ = (function() {
     const errorsBlock = errors.length ? `
       <div style="border:1px solid #fecaca;background:#fff1f2;border-radius:12px;padding:12px;margin-bottom:12px;">
         <div style="font-weight:700;color:#991b1b;margin-bottom:8px;">⚠️ Помилки підготовки: ${errors.length}</div>
-        ${errors.map(function(item) {
-          return `<div style="font-size:12px;color:#7f1d1d;margin-bottom:4px;">${esc(item.cell || '')} ${esc(item.message || '')}</div>`;
-        }).join('')}
+        ${errors.map(function (item) {
+      return `<div style="font-size:12px;color:#7f1d1d;margin-bottom:4px;">${esc(item.cell || '')} ${esc(item.message || '')}</div>`;
+    }).join('')}
       </div>
     ` : '';
 

@@ -1,750 +1,724 @@
-# TERMINAL COMMANDS — WAPB
+# TERMINAL COMMANDS — WAPB (STAGE-BY-STAGE)
 
-Пошаговая шпаргалка для работы с проектом из терминала VS Code.
+Пошаговая шпаргалка для работы с проектом из терминала VS Code / VS Code Insiders.
 
-Проект:
+- **PowerShell 5.1**
+- **без прав администратора**
+- **cmd.exe заблокирован администратором**
+- **Node portable**
+- **PortableGit**
+- **Google Apps Script через clasp**
+- проект лежит в:
 
-`C:\Users\User\Desktop\whatsapp-sheets-bot`
+```text
+C:\Users\User\Documents\whatsapp-sheets-bot
+```
+
+Node лежит в:
+
+```text
+C:\Users\User\Documents\node-v20.20.1-win-x64
+```
+
+Git лежит в:
+
+```text
+C:\Users\User\Documents\PortableGit
+```
 
 ---
 
 ## Оглавление
 
-1. [Открытие проекта](#1-открытие-проекта)
-2. [Самый безопасный старт](#2-самый-безопасный-старт)
-3. [Загрузка project shell](#3-загрузка-project-shell)
-4. [Проверка, что окружение реально работает](#4-проверка-что-окружение-реально-работает)
-5. [Быстрые команды](#5-быстрые-команды)
-6. [Команды, которыми работаешь каждый день](#6-команды-которыми-работаешь-каждый-день)
-7. [Правильный порядок работы с начала до конца](#7-правильный-порядок-работы-с-начала-до-конца)
-8. [Если shell не загрузился](#8-если-shell-не-загрузился)
-9. [Если команды не найдены](#9-если-команды-не-найдены)
-10. [Если что-то не работает](#10-если-что-то-не-работает)
-11. [Работа с Git](#11-работа-с-git)
-12. [Работа с GAS](#12-работа-с-gas)
-13. [Работа с Node / npm / clasp](#13-работа-с-node--npm--clasp)
-14. [Проверка перед закрытием VS Code](#14-проверка-перед-закрытием-vs-code)
-15. [Что нельзя делать](#15-что-нельзя-делать)
-16. [Короткая шпаргалка](#16-короткая-шпаргалка)
+1. [Что здесь главное](#1-что-здесь-главное)
+2. [Этап 1 — открыть проект и терминал](#2-этап-1--открыть-проект-и-терминал)
+3. [Этап 2 — подключить Node и Git в текущую сессию](#3-этап-2--подключить-node-и-git-в-текущую-сессию)
+4. [Этап 3 — проверить, что пути реально живые](#4-этап-3--проверить-что-пути-реально-живые)
+5. [Этап 4 — проверить версии Node / npm / npx / Git](#5-этап-4--проверить-версии-node--npm--npx--git)
+6. [Этап 5 — создать короткие команды для работы](#6-этап-5--создать-короткие-команды-для-работы)
+7. [Этап 6 — перейти в папку проекта](#7-этап-6--перейти-в-папку-проекта)
+8. [Этап 7 — установить зависимости проекта](#8-этап-7--установить-зависимости-проекта)
+9. [Этап 8 — подключить clasp](#9-этап-8--подключить-clasp)
+10. [Этап 9 — проверить GitHub-подключение](#10-этап-9--проверить-github-подключение)
+11. [Этап 10 — проверить подключение к GAS](#11-этап-10--проверить-подключение-к-gas)
+12. [Этап 11 — открыть GAS-проект в браузере](#12-этап-11--открыть-gas-проект-в-браузере)
+13. [Этап 12 — базовый рабочий цикл](#13-этап-12--базовый-рабочий-цикл)
+14. [Этап 13 — если нужно сохранить изменения в GitHub](#14-этап-13--если-нужно-сохранить-изменения-в-github)
+15. [Этап 14 — если нужно отправить изменения в GAS](#15-этап-14--если-нужно-отправить-изменения-в-gas)
+16. [Этап 15 — полный боевой цикл](#16-этап-15--полный-боевой-цикл)
+17. [Этап 16 — старт после перезапуска VS Code](#17-этап-16--старт-после-перезапуска-vs-code)
+18. [Этап 17 — если что-то развалилось](#18-этап-17--если-что-то-развалилось)
+19. [Что нельзя делать](#19-что-нельзя-делать)
+20. [Короткая шпаргалка](#20-короткая-шпаргалка)
 
 ---
 
-## 1. Открытие проекта
+## 1. Что здесь главное
 
-После открытия VS Code:
+В этой системе нельзя опираться на обычные команды Windows-обёрток:
 
-1. Открой папку проекта  
-   `C:\Users\User\Desktop\whatsapp-sheets-bot`
+- `npm`
+- `npx`
+- `clasp.cmd`
 
-2. Открой терминал PowerShell
+Почему:
 
-3. Если терминал открылся не в папке проекта, перейди вручную:
-
-```powershell
-cd "C:\Users\User\Desktop\whatsapp-sheets-bot"
-```
-
----
-
-## 2. Самый безопасный старт
-
-Это рекомендуемый старт почти всегда.
-
-```powershell
-cd "C:\Users\User\Desktop\whatsapp-sheets-bot"
-$PSVersionTable.PSVersion
-. .\dev-shell.ps1
-project-health
-gas-status
-git-status-short
-```
-
-Что это даёт:
-
-- показывает версию PowerShell
-- загружает `dev-shell.ps1`
-- проверяет окружение проекта
-- проверяет авторизацию clasp
-- показывает статус GAS
-- показывает короткий статус Git
-
-### Проверка версии PowerShell
-
-Сразу после открытия терминала полезно выполнить:
-
-```powershell
-$PSVersionTable.PSVersion
-```
-
-Для этого проекта **PowerShell 5.1 уже работает**.  
-PowerShell 7 тоже нормален, но требование «обязательно только 7» здесь не нужно.
-
-Если видишь `5`, это не ошибка. Сначала просто загрузи shell и прогони:
-
-```powershell
-project-health
-```
-
-Если хочешь открыть PowerShell 7 вручную:
-
-```powershell
-pwsh
-```
-
----
-
-## 3. Загрузка project shell
-
-Главная команда после открытия терминала:
-
-```powershell
-. .\dev-shell.ps1
-```
-
-Важно: это команда **с точкой, пробелом и путём**.  
-Она загружает dev-среду в **текущую сессию PowerShell**.
-
-Если всё нормально, должен появиться баннер:
+- у тебя **заблокирован `cmd.exe`**
+- обычные Windows-обёртки часто идут именно через `*.cmd`
+- из-за этого `node` работает, а `npm` может падать с сообщением:
 
 ```text
-WAPB DEV ENV LOADED
+The command prompt has been disabled by your administrator.
 ```
 
-### Как делать нельзя
+Поэтому в этом проекте используется **правильный обходной путь**:
 
-Вот так запускать не надо:
+- `node.exe`
+- `npm-cli.js`
+- `npx-cli.js`
+- `git.exe`
+
+То есть не так:
 
 ```powershell
-dev-shell.ps1
+npm install
+npx clasp status
 ```
 
-Так PowerShell часто отвечает, что команда не найдена. Это не поломка файла, а неправильный способ запуска.
-
----
-
-## 4. Проверка, что окружение реально работает
-
-Сразу после загрузки shell выполни:
+А так:
 
 ```powershell
-Get-Command gas-status
-Get-Command gas-pull
-Get-Command gas-push
-Get-Command project-health
-Get-Command deploy-all
+& $NODE $NPMCLI install
+& $NODE $NPXCLI clasp status
 ```
 
-Потом выполни:
+Или через короткие функции:
 
 ```powershell
-project-health
-```
-
-И отдельно полезно проверить, что alias реально смотрят в нужные команды:
-
-```powershell
-(Get-Command gas-status).Definition
-(Get-Command gas-pull).Definition
-(Get-Command gas-push).Definition
-(Get-Command project-health).Definition
-(Get-Command deploy-all).Definition
-```
-
-Ожидаемо должно быть примерно так:
-
-- `gas-status` -> `Get-GasStatus`
-- `gas-pull` -> `Invoke-GasPull`
-- `gas-push` -> `Invoke-GasPush`
-- `project-health` -> `Test-ProjectHealth`
-- `deploy-all` -> `Invoke-DeployAll`
-
-### Про `clasp whoami`
-
-В этом окружении команда `clasp whoami` может не поддерживаться текущей версией `clasp`.  
-Поэтому **не считай её обязательной проверкой**.
-
-Вместо неё используй:
-
-```powershell
-clasp --version
-gas-status
-project-health
-```
-
-Если реально нужно перелогиниться:
-
-```powershell
-clasp logout
-clasp login
-gas-status
+npmx install
+npxx clasp status
 ```
 
 ---
 
-## 5. Быстрые команды
+## 2. Этап 1 — открыть проект и терминал
 
-| Что нужно | Команда |
-|---|---|
-| Загрузить shell | `. .\dev-shell.ps1` |
-| Проверить всё | `project-health` |
-| Проверить версию clasp | `clasp --version` |
-| Подтянуть из GAS | `gas-pull` |
-| Отправить в GAS | `gas-push` |
-| Отправить только если есть изменения | `gas-push-smart` |
-| Короткий статус Git | `git-status-short` |
-| Сохранить в Git | `git-save "update"` |
-| Сохранить и отправить на GitHub | `git-sync "update"` |
-| Полный цикл | `deploy-all "update"` |
+### Что делаем
 
----
-
-## 6. Команды, которыми работаешь каждый день
-
-### Проверка состояния
-
-```powershell
-project-health
-```
-
-### Проверка авторизации clasp
-
-```powershell
-clasp whoami
-```
-
-### Короткий статус Git
-
-```powershell
-git-status-short
-```
-
-### Статус GAS
-
-```powershell
-gas-status
-```
-
-### Подтянуть изменения из GAS
-
-```powershell
-gas-pull
-```
-
-### Отправить изменения в GAS
-
-```powershell
-gas-push
-```
-
-### Отправить в GAS только при наличии изменений
-
-```powershell
-gas-push-smart
-```
-
-### Сохранить изменения в Git
-
-```powershell
-git-save "update"
-```
-
-### Сохранить и отправить на GitHub
-
-```powershell
-git-sync "update"
-```
-
-### Полный цикл
-
-```powershell
-deploy-all "update"
-```
-
-### Быстрый WIP-коммит с датой
-
-```powershell
-git-save "WIP $(Get-Date -Format yyyy-MM-dd_HH-mm)"
-```
-
-### Быстрый WIP-коммит + push на GitHub
-
-```powershell
-git-sync "WIP $(Get-Date -Format yyyy-MM-dd_HH-mm)"
-```
-
-### Полный WIP-цикл
-
-```powershell
-deploy-all "WIP $(Get-Date -Format yyyy-MM-dd_HH-mm)"
-```
-
----
-
-## 7. Правильный порядок работы с начала до конца
-
-### Сценарий A — обычный старт работы
-
-```powershell
-cd "C:\Users\User\Desktop\whatsapp-sheets-bot"
-$PSVersionTable.PSVersion
-. .\dev-shell.ps1
-project-health
-clasp whoami
-gas-status
-git-status-short
-```
-
-### Сценарий B — если работаешь после правок в GAS editor
-
-```powershell
-gas-pull
-git-status-short
-```
-
-### Сценарий C — после локальных правок в VS Code
-
-```powershell
-gas-push-smart
-git-save "update"
-project-health
-```
-
-### Сценарий D — если нужно сразу отправить и в GitHub, и в GAS
-
-```powershell
-deploy-all "update"
-project-health
-```
-
-### Сценарий E — закончить рабочую сессию
-
-```powershell
-git-status-short
-gas-status
-project-health
-```
-
-Если есть несохранённые изменения:
-
-```powershell
-git-save "final update"
-gas-push-smart
-project-health
-```
-
-### Самый короткий рабочий цикл
-
-```powershell
-cd "C:\Users\User\Desktop\whatsapp-sheets-bot"
-. .\dev-shell.ps1
-gas-pull
-gas-push-smart
-git-save "update"
-project-health
-```
-
----
-
-## 8. Если shell не загрузился
-
-Если после открытия терминала команды вроде `gas-status` не работают, выполни вручную:
-
-```powershell
-cd "C:\Users\User\Desktop\whatsapp-sheets-bot"
-. .\dev-shell.ps1
-```
-
-Потом проверь:
-
-```powershell
-Get-Command gas-status
-Get-Command project-health
-```
-
----
-
-## 9. Если команды не найдены
-
-Если PowerShell пишет:
+1. Открываем **VS Code** или **VS Code Insiders**
+2. Открываем папку проекта:
 
 ```text
-The term 'gas-status' is not recognized...
+C:\Users\User\Documents\whatsapp-sheets-bot
 ```
 
-это значит, что `dev-shell.ps1` **не был загружен в текущую сессию**.
+3. Открываем терминал **PowerShell**
 
-Исправление:
+### Команда проверки текущей версии PowerShell
 
 ```powershell
-. .\dev-shell.ps1
+$PSVersionTable.PSVersion
 ```
 
-Потом:
+### Что ожидаем
+
+Для этого проекта **PowerShell 5.1 уже рабочий**.
+
+---
+
+## 3. Этап 2 — подключить Node и Git в текущую сессию
+
+### Что делаем
+
+Создаём переменные путей к реальным исполняемым файлам и CLI-скриптам.
+
+### Полная формула этапа
 
 ```powershell
-gas-status
-project-health
+$NODE   = "C:\Users\User\Documents\node-v20.20.1-win-x64\node.exe"
+$NPMCLI = "C:\Users\User\Documents\node-v20.20.1-win-x64\node_modules\npm\bin\npm-cli.js"
+$NPXCLI = "C:\Users\User\Documents\node-v20.20.1-win-x64\node_modules\npm\bin\npx-cli.js"
+$GIT    = "C:\Users\User\Documents\PortableGit\bin\git.exe"
+```
+
+### Что это значит
+
+- `$NODE` — сам `node.exe`
+- `$NPMCLI` — скрипт `npm`, запускаемый через `node`
+- `$NPXCLI` — скрипт `npx`, запускаемый через `node`
+- `$GIT` — реальный `git.exe`
+
+---
+
+## 4. Этап 3 — проверить, что пути реально живые
+
+### Что делаем
+
+Проверяем, что все указанные файлы действительно существуют.
+
+### Полная формула этапа
+
+```powershell
+Test-Path $NODE
+Test-Path $NPMCLI
+Test-Path $NPXCLI
+Test-Path $GIT
+```
+
+### Что ожидаем
+
+Все четыре строки должны вернуть:
+
+```text
+True
+```
+
+Если хоть одна строка вернула `False`, значит путь указан неправильно.
+
+---
+
+## 5. Этап 4 — проверить версии Node / npm / npx / Git
+
+### Что делаем
+
+Проверяем, что инструменты реально запускаются.
+
+### Полная формула этапа
+
+```powershell
+& $NODE -v
+& $NODE $NPMCLI -v
+& $NODE $NPXCLI --version
+& $GIT --version
+```
+
+### Что ожидаем
+
+Пример нормального результата:
+
+```text
+v20.20.1
+10.8.2
+10.8.2
+git version 2.53.0.windows.2
 ```
 
 ---
 
-## 10. Если что-то не работает
+## 6. Этап 5 — создать короткие команды для работы
 
-### Базовая диагностика
+### Что делаем
 
-```powershell
-$PSVersionTable.PSVersion
-Get-Command clasp, node, npmps, git | Select-Object Name, CommandType, Version, Source, Path
-project-health
-```
+Чтобы не писать каждый раз портянки с `$NODE` и `$NPMCLI`, создаём функции.
 
-Это покажет:
-
-- какая версия PowerShell запущена
-- откуда реально берутся `clasp`, `node`, `npmps`, `git`
-- полные пути к исполняемым файлам, где это возможно
-- нет ли конфликта путей
-- живо ли окружение проекта
-
-### Если clasp не пускает
+### Полная формула этапа
 
 ```powershell
-clasp logout
-clasp login
-gas-status
+function npmx { & $NODE $NPMCLI @args }
+function npxx { & $NODE $NPXCLI @args }
+function gitx { & $GIT @args }
 ```
 
-### Если проблема с кодировкой
+### Проверка
+
+```powershell
+npmx -v
+gitx --version
+```
+
+### Что это даёт
+
+Теперь можно писать:
+
+```powershell
+npmx install
+npxx clasp --version
+gitx status
+```
+
+вместо длинных команд.
+
+---
+
+## 7. Этап 6 — перейти в папку проекта
+
+### Полная формула этапа
+
+```powershell
+Set-Location "C:\Users\User\Documents\whatsapp-sheets-bot"
+```
+
+или коротко:
+
+```powershell
+cd "C:\Users\User\Documents\whatsapp-sheets-bot"
+```
+
+### Проверка текущей папки
+
+```powershell
+Get-Location
+```
+
+---
+
+## 8. Этап 7 — установить зависимости проекта
+
+### Что делаем
+
+Устанавливаем `node_modules` и зависимости из `package.json`.
+
+### Полная формула этапа
+
+```powershell
+npmx install
+```
+
+### Что это делает
+
+- читает `package.json`
+- ставит зависимости
+- создаёт или обновляет `node_modules`
+- создаёт или обновляет `package-lock.json`
+
+---
+
+## 9. Этап 8 — подключить clasp
+
+### Что делаем
+
+Ставим `@google/clasp` как dev-зависимость проекта.
+
+### Полная формула этапа
+
+```powershell
+npmx install --save-dev @google/clasp
+```
+
+### Проверка версии clasp
+
+```powershell
+npxx clasp --version
+```
+
+### Ожидаемый результат
+
+Пример:
+
+```text
+3.3.0
+```
+
+---
+
+## 10. Этап 9 — проверить GitHub-подключение
+
+### Что делаем
+
+Проверяем, что папка — это Git-репозиторий и что remote уже подключён.
+
+### Полная формула этапа
+
+```powershell
+gitx status
+gitx remote -v
+```
+
+### Что ожидаем
+
+Пример нормального результата:
+
+```text
+On branch main
+Your branch is up to date with 'origin/main'.
+```
+
+и:
+
+```text
+origin  https://github.com/... (fetch)
+origin  https://github.com/... (push)
+```
+
+### Если remote ещё не подключён
+
+```powershell
+gitx remote add origin https://github.com/USERNAME/REPOSITORY.git
+```
 
 Проверка:
 
 ```powershell
-[Console]::OutputEncoding
-```
-
-Временно на одну сессию можно поставить UTF-8:
-
-```powershell
-[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+gitx remote -v
 ```
 
 ---
 
-## 11. Работа с Git
+## 11. Этап 10 — проверить подключение к GAS
 
-### Проверить статус
+### Что делаем
 
-```powershell
-git-status-short
-```
+Проверяем наличие `.clasp.json` и состояние проекта Apps Script.
 
-или обычной командой:
+### Формула проверки файла `.clasp.json`
 
 ```powershell
-git status --short
+Get-Content .clasp.json
 ```
 
-### Сохранить изменения в локальный Git
-
-```powershell
-git-save "message"
-```
+### Что ожидаем
 
 Пример:
 
-```powershell
-git-save "fix sidebar send panel"
+```json
+{
+  "scriptId": "1AB7o3GPo41RchW5k_LAWrgwsIujcfNBQpvqHP5faLldTs0hFglbWI85_",
+  "rootDir": ".",
+  "scriptExtensions": [".gs"],
+  "htmlExtensions": [".html"]
+}
 ```
 
-Что делает:
-
-- `git add .`
-- `git commit -m "message"`
-
-### Сохранить и отправить на GitHub
+### Формула проверки статуса GAS
 
 ```powershell
-git-sync "message"
+npxx clasp status
 ```
 
-Пример:
+### Если нужно войти в Google
 
 ```powershell
-git-sync "stage 7.1 diagnostics cleanup"
+npxx clasp login
 ```
 
-Что делает:
-
-- `git add .`
-- `git commit -m "message"`
-- `git push`
-
-### Полезные обычные команды Git
+### Если нужно выйти и зайти заново
 
 ```powershell
-git status
-git add .
-git commit -m "message"
-git push
-git pull
-git log --oneline -10
+npxx clasp logout
+npxx clasp login
 ```
 
 ---
 
-## 12. Работа с GAS
+## 12. Этап 11 — открыть GAS-проект в браузере
 
-### Проверить статус GAS
-
-```powershell
-gas-status
-```
-
-или:
+### Полная формула этапа
 
 ```powershell
-clasp status
+npxx clasp open-script
 ```
 
-### Подтянуть код из GAS
+### Что это делает
 
-```powershell
-gas-pull
-```
-
-или:
-
-```powershell
-clasp pull
-```
-
-Использовать, если:
-
-- код менялся в Google Apps Script editor
-- нужно подтянуть актуальное облачное состояние в локальную папку
-
-### Отправить код в GAS
-
-```powershell
-gas-push
-```
-
-или:
-
-```powershell
-clasp push
-```
-
-Использовать, если:
-
-- ты изменил `.gs`, `.html`, `appsscript.json` в VS Code
-- нужно отправить это в Google Apps Script
-
-### Отправить только если реально есть изменения
-
-```powershell
-gas-push-smart
-```
-
-### Открыть проект GAS в браузере
-
-```powershell
-gas-open
-```
-
-### Авто-push watcher
-
-```powershell
-gas-watch
-```
-
-или напрямую:
-
-```powershell
-Set-ExecutionPolicy -Scope Process Bypass
-.\watch-sync-simple.ps1
-```
-
-Что делает:
-
-- каждые несколько секунд проверяет изменения
-- при изменениях выполняет `clasp push`
-
-Как остановить:
-
-```text
-Ctrl + C
-```
+Открывает привязанный Apps Script проект в браузере.
 
 ---
 
-## 13. Работа с Node / npm / clasp
+## 13. Этап 12 — базовый рабочий цикл
 
-### Проверка версий
-
-```powershell
-git --version
-node -v
-npmps -v
-clasp --version
-```
-
-### Почему используется `npmps`, а не обычный `npm`
-
-Обычный `npm` в этой системе не используется напрямую, потому что Windows-обёртка `npm.cmd` может упираться в `cmd.exe`.
-
-Используется:
+### Что делаем после открытия VS Code
 
 ```powershell
-npmps
-```
-
-Примеры:
-
-```powershell
-npmps -v
-npmps install
-npmps config get script-shell
-```
-
-### Почему используется функция `clasp`, а не `clasp.cmd`
-
-Обычный `clasp.cmd` тоже может упираться в `cmd.exe`.
-
-Используется функция:
-
-```powershell
-clasp
-```
-
-Примеры:
-
-```powershell
-clasp --version
-clasp status
-clasp pull
-clasp push
-clasp whoami
-```
-
----
-
-## 14. Проверка перед закрытием VS Code
-
-Перед закрытием полезно выполнить:
-
-```powershell
-gas-status
-git-status-short
-project-health
-```
-
-Если есть изменения, сохранить их:
-
-```powershell
-git-save "final update"
-gas-push-smart
-project-health
-```
-
-Если всё чисто — можно закрывать VS Code.
-
----
-
-## 15. Что нельзя делать
-
-### Неправильно
-
-Нельзя вставлять в терминал строки вида:
-
-```powershell
-PS C:\Users\User\Desktop\whatsapp-sheets-bot> gas-status
-```
-
-Нельзя вставлять в терминал текст ошибок:
-
-```text
-At line:1 char:1
-+ gas-status
-...
-```
-
-Нельзя вставлять **весь `.md`-файл целиком** в терминал.
-
-Нельзя запускать `clasp push` / `gas-push`, если перед этим не сделал `gas-pull` после правок в Google Apps Script editor.  
-Иначе можно перезаписать облачные изменения локальной версией.
-
-Нельзя считать, что `&&` будет вести себя одинаково во всех версиях PowerShell.  
-Для этой шпаргалки безопаснее писать команды отдельными строками.
-
-Нельзя запускать `dev-shell.ps1` как обычную команду без точки и пробела:
-
-```powershell
-dev-shell.ps1
-```
-
-Правильно:
-
-```powershell
-. .\dev-shell.ps1
-```
-
-### Правильно
-
-В терминал вставляются только **сами команды**, например:
-
-```powershell
-gas-status
-```
-
-или:
-
-```powershell
-. .\dev-shell.ps1
-```
-
----
-
-## 16. Короткая шпаргалка
-
-```powershell
-# === СТАРТ ===
-cd "C:\Users\User\Desktop\whatsapp-sheets-bot"
 $PSVersionTable.PSVersion
-. .\dev-shell.ps1
-project-health
-clasp whoami
 
-# === РАБОТА ===
-gas-pull
-gas-push-smart
-git-save "update"
+$NODE   = "C:\Users\User\Documents\node-v20.20.1-win-x64\node.exe"
+$NPMCLI = "C:\Users\User\Documents\node-v20.20.1-win-x64\node_modules\npm\bin\npm-cli.js"
+$NPXCLI = "C:\Users\User\Documents\node-v20.20.1-win-x64\node_modules\npm\bin\npx-cli.js"
+$GIT    = "C:\Users\User\Documents\PortableGit\bin\git.exe"
 
-# === ФИНИШ ===
-git-status-short
-gas-status
-project-health
+function npmx { & $NODE $NPMCLI @args }
+function npxx { & $NODE $NPXCLI @args }
+function gitx { & $GIT @args }
+
+cd "C:\Users\User\Documents\whatsapp-sheets-bot"
+
+npmx -v
+gitx --version
+npxx clasp --version
+gitx status
+npxx clasp status
+```
+
+---
+
+## 14. Этап 13 — если нужно сохранить изменения в GitHub
+
+### Что делаем
+
+Фиксируем локальные изменения и отправляем их в GitHub.
+
+### Полная формула этапа
+
+```powershell
+gitx add .
+gitx commit -m "update"
+gitx push
+```
+
+### Пример с нормальным сообщением
+
+```powershell
+gitx add .
+gitx commit -m "fix send panel and sidebar state"
+gitx push
+```
+
+### Проверка перед commit
+
+```powershell
+gitx status
+```
+
+---
+
+## 15. Этап 14 — если нужно отправить изменения в GAS
+
+### Что делаем
+
+Отправляем локальные `.gs`, `.html`, `appsscript.json` в Google Apps Script.
+
+### Полная формула этапа
+
+```powershell
+npxx clasp push
+```
+
+### Если нужно сначала подтянуть изменения из облака
+
+```powershell
+npxx clasp pull
+```
+
+### Важное правило
+
+Если ты менял код **в редакторе GAS**, сначала делай:
+
+```powershell
+npxx clasp pull
+```
+
+Если ты менял код **локально в VS Code**, обычно делаешь:
+
+```powershell
+npxx clasp push
+```
+
+Иначе можно перетереть одно другим. Windows тупит, GAS тупит, а потом виноват почему-то пользователь. Классика жанра.
+
+---
+
+## 16. Этап 15 — полный боевой цикл
+
+### Сценарий: локально поправил код, хочешь отправить и в GAS, и в GitHub
+
+```powershell
+$PSVersionTable.PSVersion
+
+$NODE   = "C:\Users\User\Documents\node-v20.20.1-win-x64\node.exe"
+$NPMCLI = "C:\Users\User\Documents\node-v20.20.1-win-x64\node_modules\npm\bin\npm-cli.js"
+$NPXCLI = "C:\Users\User\Documents\node-v20.20.1-win-x64\node_modules\npm\bin\npx-cli.js"
+$GIT    = "C:\Users\User\Documents\PortableGit\bin\git.exe"
+
+function npmx { & $NODE $NPMCLI @args }
+function npxx { & $NODE $NPXCLI @args }
+function gitx { & $GIT @args }
+
+cd "C:\Users\User\Documents\whatsapp-sheets-bot"
+
+gitx status
+npxx clasp status
+npxx clasp push
+gitx add .
+gitx commit -m "update"
+gitx push
+```
+
+---
+
+## 17. Этап 16 — старт после перезапуска VS Code
+
+### Важный момент
+
+После закрытия PowerShell функции:
+
+- `npmx`
+- `npxx`
+- `gitx`
+
+исчезают.
+
+То есть после нового запуска VS Code их надо создать заново.
+
+### Быстрая формула старта новой сессии
+
+```powershell
+$NODE   = "C:\Users\User\Documents\node-v20.20.1-win-x64\node.exe"
+$NPMCLI = "C:\Users\User\Documents\node-v20.20.1-win-x64\node_modules\npm\bin\npm-cli.js"
+$NPXCLI = "C:\Users\User\Documents\node-v20.20.1-win-x64\node_modules\npm\bin\npx-cli.js"
+$GIT    = "C:\Users\User\Documents\PortableGit\bin\git.exe"
+
+function npmx { & $NODE $NPMCLI @args }
+function npxx { & $NODE $NPXCLI @args }
+function gitx { & $GIT @args }
+
+cd "C:\Users\User\Documents\whatsapp-sheets-bot"
+```
+
+### Проверка после старта
+
+```powershell
+npmx -v
+gitx --version
+npxx clasp --version
+gitx status
+npxx clasp status
+```
+
+---
+
+## 18. Этап 17 — если что-то развалилось
+
+### 1. Проверка PowerShell
+
+```powershell
+$PSVersionTable.PSVersion
+```
+
+### 2. Проверка путей
+
+```powershell
+Test-Path $NODE
+Test-Path $NPMCLI
+Test-Path $NPXCLI
+Test-Path $GIT
+```
+
+### 3. Проверка версий
+
+```powershell
+& $NODE -v
+& $NODE $NPMCLI -v
+& $NODE $NPXCLI --version
+& $GIT --version
+```
+
+### 4. Проверка Git
+
+```powershell
+gitx status
+gitx remote -v
+```
+
+### 5. Проверка GAS
+
+```powershell
+Get-Content .clasp.json
+npxx clasp status
+```
+
+### 6. Перелогиниться в GAS
+
+```powershell
+npxx clasp logout
+npxx clasp login
+npxx clasp status
+```
+
+---
+
+## 19. Что нельзя делать
+
+### Нельзя
+
+Нельзя слепо запускать:
+
+```powershell
+npm install
+npx clasp status
+```
+
+если у тебя `cmd.exe` заблокирован.
+
+Нельзя считать, что проблема в Node, если работает:
+
+```powershell
+node -v
+```
+
+а не работает:
+
+```powershell
+npm -v
+```
+
+В таком случае проблема обычно в Windows-обёртках `*.cmd`, а не в самом Node.
+
+Нельзя забывать, что после закрытия терминала функции `npmx`, `npxx`, `gitx` исчезают.
+
+Нельзя делать `clasp pull`, если у тебя есть важные локальные правки, которые ещё не сохранены. Иначе можно красиво выстрелить себе в ногу. Даже без автомата.
+
+---
+
+## 20. Короткая шпаргалка
+
+```powershell
+# === ПОДНЯТЬ СРЕДУ ===
+$NODE   = "C:\Users\User\Documents\node-v20.20.1-win-x64\node.exe"
+$NPMCLI = "C:\Users\User\Documents\node-v20.20.1-win-x64\node_modules\npm\bin\npm-cli.js"
+$NPXCLI = "C:\Users\User\Documents\node-v20.20.1-win-x64\node_modules\npm\bin\npx-cli.js"
+$GIT    = "C:\Users\User\Documents\PortableGit\bin\git.exe"
+
+function npmx { & $NODE $NPMCLI @args }
+function npxx { & $NODE $NPXCLI @args }
+function gitx { & $GIT @args }
+
+cd "C:\Users\User\Documents\whatsapp-sheets-bot"
+
+# === ПРОВЕРКА ===
+& $NODE -v
+npmx -v
+gitx --version
+npxx clasp --version
+
+# === GIT ===
+gitx status
+gitx add .
+gitx commit -m "update"
+gitx push
+
+# === GAS ===
+Get-Content .clasp.json
+npxx clasp status
+npxx clasp open-script
+npxx clasp pull
+npxx clasp push
 ```
 
 ---
 
 ## Финальное правило
 
-Если не уверен, что делать:
+Если не уверен, что делать, запускай по порядку:
 
 ```powershell
-cd "C:\Users\User\Desktop\whatsapp-sheets-bot"
 $PSVersionTable.PSVersion
-. .\dev-shell.ps1
-project-health
+
+$NODE   = "C:\Users\User\Documents\node-v20.20.1-win-x64\node.exe"
+$NPMCLI = "C:\Users\User\Documents\node-v20.20.1-win-x64\node_modules\npm\bin\npm-cli.js"
+$NPXCLI = "C:\Users\User\Documents\node-v20.20.1-win-x64\node_modules\npm\bin\npx-cli.js"
+$GIT    = "C:\Users\User\Documents\PortableGit\bin\git.exe"
+
+function npmx { & $NODE $NPMCLI @args }
+function npxx { & $NODE $NPXCLI @args }
+function gitx { & $GIT @args }
+
+cd "C:\Users\User\Documents\whatsapp-sheets-bot"
+
+npmx -v
+gitx --version
+npxx clasp --version
+gitx status
+npxx clasp status
 ```
 
-После этого уже видно:
-
-- жива ли среда
-- виден ли Git
-- виден ли Node
-- работает ли clasp
-- авторизован ли clasp
-- чист ли Git-статус
-- видит ли проект GAS-файлы
+Если это работает — окружение живо, Git жив, GAS жив, можно работать дальше.

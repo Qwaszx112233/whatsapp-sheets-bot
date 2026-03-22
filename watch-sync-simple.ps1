@@ -1,4 +1,4 @@
-﻿param(
+﻿﻿param(
     [ValidateRange(1, 3600)]
     [int]$IntervalSeconds = 3
 )
