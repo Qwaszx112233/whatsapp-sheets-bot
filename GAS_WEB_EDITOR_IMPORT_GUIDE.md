@@ -20,7 +20,7 @@ This package is prepared for work **without VS Code**.
 ## Important notes
 - This package does **not require VS Code**.
 - This package does **not require local Node / npm / clasp** for normal editing in the Apps Script web editor.
-- `.clasp.json.example` is kept only as an optional example for future local synchronization. It is not required for the web editor workflow.
+- No `.clasp` files are required for the web editor workflow, and none are included in this archive.
 - The business logic and file split are preserved from the repaired Stage 7.1 baseline.
 - The safest way is to copy files with the exact same names.
 

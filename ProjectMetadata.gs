@@ -270,7 +270,6 @@ const PROJECT_CLIENT_RUNTIME_POLICY_ = Object.freeze({
 });
 
 const PROJECT_BUNDLE_FILE_INDEX_ = Object.freeze([
-  ".clasp.json.example",
   "ARCHITECTURE.md",
   "AUDIT_REPORT_2026-03-24.md",
   "Actions.gs",
@@ -372,14 +371,14 @@ const PROJECT_BUNDLE_METADATA_ = Object.freeze({
   canonicalLayers: PROJECT_CANONICAL_LAYERS_,
   gasFirst: true,
   packagingPolicy: Object.freeze({
-    policy: 'root-manifest-with-root-clasp-example',
+    policy: 'root-manifest-web-editor-only',
     manifestFile: 'appsscript.json',
-    claspConfigFile: '.clasp.json',
-    claspExampleFile: '.clasp.json.example',
+    claspConfigFile: '',
+    claspExampleFile: '',
     manifestPath: 'appsscript.json',
-    claspExamplePath: '.clasp.json.example',
+    claspExamplePath: '',
     localWorkflowOptional: true,
-    notes: ['The release zip must not include .git or node_modules.', 'This web-ready repack omits local PowerShell and Node tooling.', '.clasp.json.example is kept only as an optional future sync example.']
+    notes: ['The release zip must not include .git or node_modules.', 'This web-ready repack omits local PowerShell and Node tooling.', 'No .clasp files are required or shipped for the web-editor workflow.']
   }),
   maintenanceLayerStatus: 'stage5-canonical-maintenance-api',
   maintenanceLayerPolicy: PROJECT_MAINTENANCE_POLICY_,

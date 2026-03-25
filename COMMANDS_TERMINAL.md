@@ -10,5 +10,5 @@ This package is intended to work **without VS Code** and without a required loca
 - Save and reload the spreadsheet
 
 ## Optional note
-`.clasp.json.example` remains in the archive only as an optional future example for local sync.
+No `.clasp` files are included in this web-editor-ready archive.
 It is **not required** for the web editor workflow.

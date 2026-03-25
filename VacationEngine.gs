@@ -171,7 +171,7 @@ function _veParseDate_(value) {
   }
 
   try {
-    if (typeof _parseUaDate_ === 'function') {
+    if (typeof DateUtils_ !== 'undefined' && DateUtils_ && typeof DateUtils_.parseUaDate === 'function') {
       const d = DateUtils_.parseUaDate(s);
       if (d instanceof Date
         && !isNaN(d.getTime())) {

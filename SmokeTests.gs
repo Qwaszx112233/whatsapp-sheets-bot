@@ -306,7 +306,7 @@ function runStage4SmokeTests(options) {
     _smokeAssert_(meta.maintenanceLayerStatus === 'stage5-canonical-maintenance-api', 'maintenanceLayerStatus має вказувати на Stage 5 canonical layer');
     _smokeAssert_(Array.isArray(meta.documentation.historical) && meta.documentation.historical.indexOf('docs/archive/STAGE4_2_REPORT.md') !== -1, 'docs/archive/STAGE4_2_REPORT.md має бути historical');
     _smokeAssert_(_smokeBundleHas_('appsscript.json'), 'appsscript.json має фізично існувати у root bundle');
-    _smokeAssert_(_smokeBundleHas_('.clasp.json.example'), '.clasp.json.example має фізично існувати у root bundle');
+    _smokeAssert_(!_smokeBundleHas_('.clasp.json.example'), '.clasp.json.example не повинен існувати у web-editor-ready root bundle');
     return 'bundle-ok';
   });
 
@@ -435,7 +435,7 @@ function runStage5SmokeTests(options) {
     _smokeAssert_(meta.stageVersion === '7.1.0-reliability-hardened-merged', 'stageVersion має бути 7.1.0-reliability-hardened-merged');
     _smokeAssert_(meta.activeBaseline === 'stage7-1-reliability-hardened-baseline', 'activeBaseline має бути stage7-1-reliability-hardened-baseline');
     _smokeAssert_(meta.maintenanceLayerStatus === 'stage5-canonical-maintenance-api', 'maintenanceLayerStatus не Stage 5 canonical');
-    _smokeAssert_(meta.packagingPolicy && meta.packagingPolicy.policy === 'root-manifest-with-root-clasp-example', 'Packaging policy має бути root-manifest-with-root-clasp-example');
+    _smokeAssert_(meta.packagingPolicy && meta.packagingPolicy.policy === 'root-manifest-web-editor-only', 'Packaging policy має бути root-manifest-web-editor-only');
     _smokeAssert_(meta.requiredDocs.indexOf('docs/reference/PUBLIC_API_STAGE5.md') !== -1, 'docs/reference/PUBLIC_API_STAGE5.md відсутній у metadata');
     _smokeAssert_(meta.requiredDocs.indexOf('docs/reference/STAGE5_REPORT.md') !== -1, 'docs/reference/STAGE5_REPORT.md відсутній у metadata');
     _smokeAssert_(meta.requiredDocs.indexOf('docs/reference/STAGE6A_REPORT.md') !== -1, 'docs/reference/STAGE6A_REPORT.md відсутній у metadata');
@@ -445,7 +445,6 @@ function runStage5SmokeTests(options) {
   _smokePush_(report, 'physical bundle layout', function () {
     [
       'appsscript.json',
-      '.clasp.json.example',
       'README.md',
       'ARCHITECTURE.md',
       'RUNBOOK.md',

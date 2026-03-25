@@ -115,7 +115,7 @@ Everything in `docs/archive/` is historical or archival material and must not be
 The release follows **root manifest policy**:
 
 - `appsscript.json` lives in bundle root
-- `.clasp.json.example` lives in bundle root
+- No `.clasp` files are required in the web-editor-ready bundle
 
 This layout is aligned with metadata, diagnostics, smoke tests, and archive naming.
 

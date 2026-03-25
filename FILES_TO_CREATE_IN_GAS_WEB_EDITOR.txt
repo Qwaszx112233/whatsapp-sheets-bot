@@ -2,7 +2,6 @@
 
 Create/copy these files with the exact same names.
 
-.clasp.json.example
 Actions.gs
 AuditTrail.gs
 Code.gs
