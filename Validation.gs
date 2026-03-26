@@ -19,11 +19,11 @@ function parseFlexibleDateInput_(value) {
 
   if (/^\d{4}-\d{2}-\d{2}$/.test(safe)) {
     const parsedIso = new Date(safe + 'T00:00:00');
-    return isNaN(parsedIso.getTime()) ? null : Utilities.formatDate(parsedIso, CONFIG.TZ, 'dd.MM.yyyy');
+    return isNaN(parsedIso.getTime()) ? null : Utilities.formatDate(parsedIso, getTimeZone_(), 'dd.MM.yyyy');
   }
 
   const parsed = new Date(safe);
-  return isNaN(parsed.getTime()) ? null : Utilities.formatDate(parsed, CONFIG.TZ, 'dd.MM.yyyy');
+  return isNaN(parsed.getTime()) ? null : Utilities.formatDate(parsed, getTimeZone_(), 'dd.MM.yyyy');
 }
 
 function assertUaDateString_(value) {

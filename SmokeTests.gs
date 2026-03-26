@@ -38,12 +38,17 @@ function _smokeHasFn_(name) {
   const target = String(name || '').trim();
   if (!target) return false;
   try {
-    // eslint-disable-next-line no-eval
-    if (eval(`typeof ${target} === 'function'`)) return true;
-  } catch (e) { }
-  try {
-    const g = Function('return this')();
-    if (g && typeof g[target] === 'function') return true;
+    const g = (typeof globalThis !== 'undefined') ? globalThis : Function('return this')();
+    const parts = target.split('.').filter(Boolean);
+    let current = g;
+    for (let i = 0; i < parts.length; i++) {
+      if (!current || !(parts[i] in current)) {
+        current = undefined;
+        break;
+      }
+      current = current[parts[i]];
+    }
+    if (typeof current === 'function') return true;
   } catch (e) { }
   return _smokeHasRouteApi_(target);
 }

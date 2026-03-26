@@ -231,71 +231,87 @@
   }
 
   function startSendingUnsent() {
-    try {
-      const data = Array.isArray(STATE.currentPanelData) ? STATE.currentPanelData : [];
-      const queue = getReadyPanelItems(data);
+  try {
+    const data = Array.isArray(STATE.currentPanelData) ? STATE.currentPanelData : [];
+    const queue = getReadyPanelItems(data);
 
-      if (!queue.length) {
-        logToConsole('✅ Немає рядків для відкриття', 'success');
+    if (!queue.length) {
+      logToConsole('✅ Немає рядків для відкриття', 'success');
+      return;
+    }
+
+    const openedRows = [];
+    const openedRowSet = new Set();
+    let idx = 0;
+
+    stopSending();
+    hideProgressBar();
+    showProgressBar(queue.length, 0);
+    if (!STATE.DIAG_TEST_MODE) primeWhatsAppSenderTab();
+    STATE._sendingCancelled = false;
+
+    const finishBatch = async () => {
+      stopSending();
+
+      if (!openedRows.length) {
+        showSendPanel();
         return;
       }
 
-      const openedRows = [];
-      const openedRowSet = new Set();
-      let idx = 0;
-
-      stopSending();
-      hideProgressBar();
-      showProgressBar(queue.length, 0);
-      if (!STATE.DIAG_TEST_MODE) primeWhatsAppSenderTab();
-
-      STATE.sendingInterval = setInterval(async () => {
-        try {
-          if (idx >= queue.length) {
-            stopSending();
-
-            if (!openedRows.length) {
-              showSendPanel();
-              return;
-            }
-
-            try {
-              const result = await ActionDispatcher.run('markPanelRowsAsPendingBatch', () => Stage4Api.markAsPending(openedRows), { showLoader: false });
-              if (!result?.success) throw new Error(result?.error || 'Не вдалося оновити SEND_PANEL');
-              if (Array.isArray(result.data)) {
-                setCurrentPanelData(result.data);
-              } else {
-                await refreshSendPanelDataFromServer({ silent: true });
-              }
-              logToConsole(`🟡 Відкрито ${openedRows.length} чатів. Підтвердь фактичні відправки вручну.`, 'warning');
-            } catch (error) {
-              logToConsole(`❌ Помилка фіксації стану очікування: ${normalizeError(error)}`, 'error');
-            }
-
-            showSendPanel();
-            return;
-          }
-
-          const item = queue[idx];
-          if (!STATE.DIAG_TEST_MODE) openLinkSafe(item.link);
-
-          const rowNum = Number(item.row);
-          if (rowNum && !openedRowSet.has(rowNum)) {
-            openedRowSet.add(rowNum);
-            openedRows.push(rowNum);
-          }
-
-          showProgressBar(queue.length, idx + 1);
-          idx++;
-        } catch (error) {
-          logToConsole(`❌ Помилка під час серії: ${normalizeError(error)}`, 'error');
-          idx++;
+      try {
+        const result = await ActionDispatcher.run('markPanelRowsAsPendingBatch', () => Stage4Api.markAsPending(openedRows), { showLoader: false });
+        if (!result?.success) throw new Error(result?.error || 'Не вдалося оновити SEND_PANEL');
+        if (Array.isArray(result.data)) {
+          setCurrentPanelData(result.data);
+        } else {
+          await refreshSendPanelDataFromServer({ silent: true });
         }
-      }, SEND_INTERVAL_MS);
-    } catch (error) {
-      logToConsole(`❌ startSendingUnsent: ${normalizeError(error)}`, 'error');
-    }
+        logToConsole(`🟡 Відкрито ${openedRows.length} чатів. Підтвердь фактичні відправки вручну.`, 'warning');
+      } catch (error) {
+        logToConsole(`❌ Помилка фіксації стану очікування: ${normalizeError(error)}`, 'error');
+      }
+
+      showSendPanel();
+    };
+
+    const runNextStep = async () => {
+      if (STATE._sendingCancelled) return;
+
+      if (idx >= queue.length) {
+        await finishBatch();
+        return;
+      }
+
+      try {
+        const item = queue[idx];
+        if (!STATE.DIAG_TEST_MODE) openLinkSafe(item.link);
+
+        const rowNum = Number(item.row);
+        if (rowNum && !openedRowSet.has(rowNum)) {
+          openedRowSet.add(rowNum);
+          openedRows.push(rowNum);
+        }
+
+        idx += 1;
+        showProgressBar(queue.length, idx);
+      } catch (error) {
+        logToConsole(`❌ Помилка під час серії: ${normalizeError(error)}`, 'error');
+        idx += 1;
+      }
+
+      if (STATE._sendingCancelled) return;
+      if (idx >= queue.length) {
+        await finishBatch();
+      } else {
+        STATE.sendingInterval = setTimeout(runNextStep, SEND_INTERVAL_MS);
+      }
+    };
+
+    STATE.sendingInterval = setTimeout(runNextStep, 0);
+  } catch (error) {
+    logToConsole(`❌ startSendingUnsent: ${normalizeError(error)}`, 'error');
   }
+}
 
   // =========================
   // SUPPLEMENTARY BLOCKS

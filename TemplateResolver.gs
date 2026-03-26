@@ -6,10 +6,14 @@
 const TemplateResolver_ = (function() {
   function _missingKeys(template, data) {
     const keys = [];
-    String(template || '').replace(/\{([^}]+)\}/g, function(_, key) {
-      const normalized = String(key || '').trim();
+    String(template || '').replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}|\{\s*([a-zA-Z0-9_]+)\s*\}/g, function(_, keyDouble, keySingle) {
+      const normalized = String(keyDouble || keySingle || '').trim();
       if (!normalized) return _;
-      if (!Object.prototype.hasOwnProperty.call(data || {}, normalized)) {
+      const input = data || {};
+      const hasValue = Object.prototype.hasOwnProperty.call(input, normalized)
+        || Object.prototype.hasOwnProperty.call(input, normalized.toLowerCase())
+        || Object.prototype.hasOwnProperty.call(input, normalized.toUpperCase());
+      if (!hasValue) {
         keys.push(normalized);
       }
       return _;

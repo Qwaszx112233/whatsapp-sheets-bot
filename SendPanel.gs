@@ -29,14 +29,14 @@ function getSendPanelErrorPrefix_() {
 }
 
 function getSendPanelToday_() {
-  return Utilities.formatDate(new Date(), CONFIG.TZ, 'dd.MM.yyyy');
+  return Utilities.formatDate(new Date(), getTimeZone_(), 'dd.MM.yyyy');
 }
 
 function resolveSendPanelStateDate_(arg) {
   if (!arg) return getSendPanelToday_();
 
   if (Object.prototype.toString.call(arg) === '[object Date]' && !isNaN(arg.getTime())) {
-    return Utilities.formatDate(arg, CONFIG.TZ, 'dd.MM.yyyy');
+    return Utilities.formatDate(arg, getTimeZone_(), 'dd.MM.yyyy');
   }
 
   if (typeof arg === 'string') {
@@ -48,7 +48,7 @@ function resolveSendPanelStateDate_(arg) {
 
     const parsed = new Date(s);
     if (!isNaN(parsed.getTime())) {
-      return Utilities.formatDate(parsed, CONFIG.TZ, 'dd.MM.yyyy');
+      return Utilities.formatDate(parsed, getTimeZone_(), 'dd.MM.yyyy');
     }
   }
 
@@ -339,7 +339,7 @@ function rebuildSendPanelCore_() {
   const botMonth = getBotMonthSheetName_();
   ensureSendPanelStructure_(panel, botMonth);
 
-  const phones = loadPhonesMap_();
+  const phones = loadPhonesIndex_();
   const dict = loadDictMap_();
   const today = getSendPanelToday_();
   const sentMap = readSendPanelStateMap_(today);

@@ -141,6 +141,151 @@ const DataAccess_ = (function() {
 
 /************ ЗАВАНТАЖЕННЯ ДАНИХ З КЕШЕМ ************/
 
+function _phonesFindColumnIndex_(headers, predicates, fallbackIndex) {
+  const normalized = Array.isArray(headers)
+    ? headers.map(function(value) { return String(value || '').trim().toLowerCase(); })
+    : [];
+
+  const idx = normalized.findIndex(function(header) {
+    return predicates.some(function(predicate) {
+      return predicate(header);
+    });
+  });
+
+  return idx >= 0 ? idx : fallbackIndex;
+}
+
+function _phonesFormatBirthday_(value) {
+  if (value instanceof Date && !isNaN(value.getTime())) {
+    return Utilities.formatDate(value, getTimeZone_(), 'dd.MM.yyyy');
+  }
+
+  const source = String(value || '').trim();
+  if (!source) return '';
+
+  let match = source.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+  if (match) {
+    return [match[1], match[2], match[3]]
+      .map(function(part, idx) { return idx < 2 ? String(part).padStart(2, '0') : part; })
+      .join('.');
+  }
+
+  match = source.match(/^(\d{1,2})\.(\d{1,2})$/);
+  if (match) {
+    return [match[1], match[2]].map(function(part) { return String(part).padStart(2, '0'); }).join('.');
+  }
+
+  return source;
+}
+
+function loadPhonesIndex_() {
+  const cache = CacheService.getScriptCache();
+  const key = cacheKeyPhonesIndex_();
+  const cached = cache.get(key);
+  if (cached) {
+    try {
+      return JSON.parse(cached);
+    } catch (e) { }
+  }
+
+  const out = {
+    byFio: {},
+    byNorm: {},
+    byRole: {},
+    byCallsign: {},
+    items: [],
+    meta: {
+      sheetName: CONFIG.PHONES_SHEET,
+      rowCount: 0,
+      versionMarker: 'stage7-phone-index-v2'
+    }
+  };
+
+  try {
+    const sh = SpreadsheetApp.getActive().getSheetByName(CONFIG.PHONES_SHEET);
+    if (!sh || sh.getLastRow() < 2) {
+      return out;
+    }
+
+    const values = sh.getDataRange().getValues();
+    const headers = values[0] || [];
+    const cFio = _phonesFindColumnIndex_(headers, [
+      function(h) { return h.includes('піб'); },
+      function(h) { return h.includes('фіо'); },
+      function(h) { return h.includes('фио'); },
+      function(h) { return h.includes('fio'); }
+    ], 0);
+    const cPhone = _phonesFindColumnIndex_(headers, [
+      function(h) { return h.includes('тел'); },
+      function(h) { return h.includes('phone'); },
+      function(h) { return h.includes('номер'); }
+    ], 1);
+    const cRole = _phonesFindColumnIndex_(headers, [
+      function(h) { return h.includes('роль'); },
+      function(h) { return h.includes('посада'); },
+      function(h) { return h.includes('role'); }
+    ], 2);
+    const cCallsign = _phonesFindColumnIndex_(headers, [
+      function(h) { return h.includes('позив'); },
+      function(h) { return h.includes('callsign'); }
+    ], cRole);
+    const cBirth = _phonesFindColumnIndex_(headers, [
+      function(h) { return h.includes('день народ'); },
+      function(h) { return h.includes('дата народ'); },
+      function(h) { return h.includes('birthday'); },
+      function(h) { return h === 'дн' || h === 'д.н'; }
+    ], 3);
+
+    for (let r = 1; r < values.length; r++) {
+      const row = values[r] || [];
+      const fio = String(row[cFio] || '').trim();
+      const phone = normalizePhone_(row[cPhone]);
+      const role = String(row[cRole] || '').trim();
+      const callsign = String(row[cCallsign] || '').trim() || role;
+      const birthday = _phonesFormatBirthday_(row[cBirth]);
+
+      if (!fio && !role && !callsign) continue;
+
+      const fioNorm = normalizeFIO_(fio);
+      const roleNorm = _normCallsignKey_(role);
+      const callsignNorm = _normCallsignKey_(callsign);
+      const item = {
+        fio: fio,
+        fioNorm: fioNorm,
+        phone: phone,
+        role: role,
+        roleNorm: roleNorm,
+        callsign: callsign,
+        callsignNorm: callsignNorm,
+        birthday: birthday,
+        rowNumber: r + 1
+      };
+
+      out.items.push(item);
+
+      if (phone) {
+        if (fio) out.byFio[fio] = phone;
+        if (fioNorm) out.byNorm[fioNorm] = phone;
+        if (role) out.byRole[role] = phone;
+        if (roleNorm) out.byRole[roleNorm] = phone;
+        if (callsign) out.byCallsign[callsign] = phone;
+        if (callsignNorm) out.byCallsign[callsignNorm] = phone;
+      }
+    }
+
+    out.meta.rowCount = out.items.length;
+  } catch (e) {
+    console.error('Помилка читання PHONES:', e);
+  }
+
+  const json = JSON.stringify(out);
+  if (json.length < 90000) {
+    cache.put(key, json, CONFIG.CACHE_TTL_SEC);
+  }
+
+  return out;
+}
+
 function loadPhonesMap_() {
   const cache = CacheService.getScriptCache();
   const key = cacheKeyPhones_();
@@ -152,58 +297,125 @@ function loadPhonesMap_() {
   }
 
   const map = {};
+  const index = loadPhonesIndex_();
 
-  console.log('🔍 Завантаження телефонів з локального листа PHONES...');
-
-  try {
-    const localSheet = SpreadsheetApp.getActive().getSheetByName(CONFIG.PHONES_SHEET);
-    if (localSheet) {
-      console.log('📊 Локальний лист PHONES знайдено');
-      const lastRow = localSheet.getLastRow();
-      console.log('📊 Рядків у листі:', lastRow);
-
-      if (lastRow > 1) {
-        const data = localSheet.getDataRange().getValues();
-        for (let i = 1; i < data.length; i++) {
-          const fio = String(data[i][0] || '').trim();
-          let phone = String(data[i][1] || '').trim();
-          const role = String(data[i][2] || '').trim();
-
-          if (fio && phone) {
-            phone = phone.replace(/[^\d+]/g, '');
-            if (phone && !phone.startsWith('+')) {
-              phone = '+' + phone;
-            }
-
-            map[fio] = phone;
-
-            const norm = normalizeFIO_(fio);
-            if (norm !== fio) map[norm] = phone;
-
-            if (role) {
-              map[`role:${role}`] = phone;
-              map[role] = phone;
-            }
-          }
-        }
-        console.log(`✅ Завантажено ${Object.keys(map).length} телефонів`);
-      } else {
-        console.log('⚠️ Лист PHONES порожній');
-      }
-    } else {
-      console.log('❌ Лист PHONES не знайдено!');
-    }
-  } catch (e) {
-    console.error('Помилка читання PHONES:', e);
-  }
+  Object.keys(index.byFio || {}).forEach(function(keyName) {
+    map[keyName] = index.byFio[keyName];
+  });
+  Object.keys(index.byNorm || {}).forEach(function(keyName) {
+    map[keyName] = index.byNorm[keyName];
+  });
+  Object.keys(index.byRole || {}).forEach(function(keyName) {
+    map[keyName] = index.byRole[keyName];
+    map['role:' + keyName] = index.byRole[keyName];
+  });
+  Object.keys(index.byCallsign || {}).forEach(function(keyName) {
+    map[keyName] = index.byCallsign[keyName];
+  });
 
   const jsonStr = JSON.stringify(map);
   if (jsonStr.length < 90000) {
     cache.put(key, jsonStr, CONFIG.CACHE_TTL_SEC);
-    console.log('💾 Дані закешовано');
   }
 
   return map;
+}
+
+function _normalizePhonesLookupSource_(source) {
+  if (source && typeof source === 'object' && source.byFio && source.byNorm && source.byRole && source.byCallsign) {
+    return source;
+  }
+
+  if (source && typeof source === 'object') {
+    return {
+      byFio: {},
+      byNorm: {},
+      byRole: {},
+      byCallsign: {},
+      legacyMap: source,
+      items: []
+    };
+  }
+
+  return loadPhonesIndex_();
+}
+
+function _legacyPhoneLookup_(legacyMap, criteria) {
+  const map = legacyMap || {};
+  const fio = String(criteria && criteria.fio || '').trim();
+  const fioNorm = String(criteria && criteria.fioNorm || '').trim();
+  const role = String(criteria && criteria.role || '').trim();
+  const roleNorm = _normCallsignKey_(role);
+  const callsign = String(criteria && criteria.callsign || '').trim();
+  const callsignNorm = _normCallsignKey_(callsign);
+
+  const candidates = [
+    fio,
+    fioNorm,
+    callsign,
+    callsignNorm,
+    role,
+    'role:' + role,
+    roleNorm,
+    'role:' + roleNorm
+  ].filter(Boolean);
+
+  for (let i = 0; i < candidates.length; i++) {
+    if (map[candidates[i]]) return map[candidates[i]];
+  }
+
+  return '';
+}
+
+function findPhone_(criteria, options) {
+  const opts = options || {};
+  const index = _normalizePhonesLookupSource_(opts.index || opts.phones || loadPhonesIndex_());
+  const request = (criteria && typeof criteria === 'object') ? criteria : { role: criteria };
+  const fio = String(request.fio || '').trim();
+  const fioNorm = String(request.fioNorm || normalizeFIO_(fio)).trim();
+  const role = String(request.role || '').trim();
+  const roleNorm = _normCallsignKey_(role);
+  const callsign = String(request.callsign || '').trim();
+  const callsignNorm = _normCallsignKey_(callsign);
+
+  const candidates = [
+    index.byCallsign && index.byCallsign[callsign],
+    index.byCallsign && index.byCallsign[callsignNorm],
+    index.byRole && index.byRole[role],
+    index.byRole && index.byRole[roleNorm],
+    index.byFio && index.byFio[fio],
+    index.byNorm && index.byNorm[fioNorm],
+    _legacyPhoneLookup_(index.legacyMap, { fio: fio, fioNorm: fioNorm, role: role, callsign: callsign })
+  ];
+
+  for (let i = 0; i < candidates.length; i++) {
+    const phone = normalizePhone_(candidates[i]);
+    if (phone) return phone;
+  }
+
+  if (roleNorm) {
+    const fuzzyKeywords = ['КОМАНДИР', 'КВ', 'ГРАФ', roleNorm];
+    const items = Array.isArray(index.items) ? index.items : [];
+    const fuzzy = items.find(function(item) {
+      const probe = [item.roleNorm, item.callsignNorm, _normCallsignKey_(item.role), _normCallsignKey_(item.callsign)]
+        .filter(Boolean)
+        .join(' ');
+      return fuzzyKeywords.some(function(keyword) {
+        return keyword && probe.indexOf(keyword) !== -1;
+      });
+    });
+    if (fuzzy && fuzzy.phone) return normalizePhone_(fuzzy.phone);
+  }
+
+  return '';
+}
+
+function findPhoneByFio_(fio, options) {
+  return findPhone_({ fio: fio }, options || {});
+}
+
+function findPhoneByCallsign_(callsign, options) {
+  return findPhone_({ callsign: callsign }, options || {});
 }
 
 function loadDictMap_() {
@@ -296,40 +508,7 @@ function readDictSum_() {
 
 // ==================== ОСНОВНА ФУНКЦІЯ ПОШУКУ ТЕЛЕФОНУ ====================
 function findPhoneByRole_(role) {
-  const phonesMap = loadPhonesMap_();
-
-  const roleKey = `role:${role}`;
-  if (phonesMap[roleKey]) {
-    console.log(`✅ Знайдено телефон за роллю "${roleKey}": ${phonesMap[roleKey]}`);
-    return phonesMap[roleKey];
-  }
-
-  if (phonesMap[role]) {
-    console.log(`✅ Знайдено телефон за прямим співпадінням: ${phonesMap[role]}`);
-    return phonesMap[role];
-  }
-
-  const upperRole = role.toUpperCase();
-  for (const [key, value] of Object.entries(phonesMap)) {
-    const upperKey = key.toUpperCase();
-    if (upperKey === upperRole || upperKey === `ROLE:${upperRole}`) {
-      console.log(`✅ Знайдено телефон (збіг після нормалізації): ${value}`);
-      return value;
-    }
-  }
-
-  const keywords = ['КОМАНДИР', 'КВ', 'ГРАФ', upperRole];
-  for (const [key, value] of Object.entries(phonesMap)) {
-    for (const keyword of keywords) {
-      if (key.toUpperCase().includes(keyword)) {
-        console.log(`⚠️ Знайдено альтернативний телефон (ключ "${key}"): ${value}`);
-        return value;
-      }
-    }
-  }
-
-  console.log(`❌ Телефон для ролі "${role}" не знайдено`);
-  return '';
+  return findPhone_({ role: role });
 }
 
 function buildPayloadForCell_(sheet, row, col, phonesMap, dictMap) {
@@ -361,7 +540,8 @@ function buildPayloadForCell_(sheet, row, col, phonesMap, dictMap) {
   const cellValue = String(sheet.getRange(row, col).getDisplayValue() || '').trim();
   const isEmptyCell = !cellValue;
 
-  let phone = (phonesMap && (phonesMap[fioRaw] || phonesMap[fioNorm])) || '';
+  const phoneSource = phonesMap || loadPhonesIndex_();
+  let phone = findPhone_({ fio: fioRaw, fioNorm: fioNorm }, { index: phoneSource }) || '';
   const phoneDigits = phone ? String(phone).replace(/[^\d+]/g, '') : '';
   const waPhone = phoneDigits ? (phoneDigits.startsWith('+') ? phoneDigits : '+' + phoneDigits) : '';
 
@@ -430,7 +610,7 @@ function collectPayloads_(sheet, ranges) {
   const rMin = codeRef.getRow(), rMax = codeRef.getLastRow();
   const cMin = codeRef.getColumn(), cMax = codeRef.getLastColumn();
 
-  const phonesMap = loadPhonesMap_();
+  const phonesMap = loadPhonesIndex_();
   const dictMap = loadDictMap_();
 
   const payloads = [], errors = [], seen = new Set();

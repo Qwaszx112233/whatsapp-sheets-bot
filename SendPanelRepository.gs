@@ -64,7 +64,7 @@ const SendPanelRepository_ = (function() {
   function buildRowsForDate(dateStr) {
     const ctx = PersonsRepository_.getDateContext(dateStr);
     const source = ctx.sheet;
-    const phones = DictionaryRepository_.getPhonesMap();
+    const phones = DictionaryRepository_.getPhonesIndex();
     const dict = DictionaryRepository_.getDictMap();
     const ref = source.getRange(CONFIG.CODE_RANGE_A1);
     const start = ref.getRow();

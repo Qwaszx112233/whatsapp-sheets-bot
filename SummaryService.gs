@@ -14,7 +14,7 @@ const SummaryService_ = (function() {
 
   function buildCommanderPreview(dateStr) {
     const summary = buildDay(dateStr);
-    const phone = findPhoneByRole_(CONFIG.COMMANDER_ROLE) || '';
+    const phone = findPhone_({ role: CONFIG.COMMANDER_ROLE }) || '';
     const link = phone
       ? PreviewLinkService_.buildWaLink(phone, summary.summary || '')
       : '';

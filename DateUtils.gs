@@ -3,10 +3,33 @@
  * Усі нові сценарії мають спиратися саме на DateUtils_.
  */
 const DateUtils_ = {
+  isValidTimeZone(value) {
+    const tz = String(value || '').trim();
+    if (!tz) return false;
+    try {
+      Utilities.formatDate(new Date(0), tz, 'dd.MM.yyyy');
+      return true;
+    } catch (_) {
+      return false;
+    }
+  },
+
   getTimeZone() {
-    return (typeof CONFIG === 'object' && CONFIG && CONFIG.TZ)
-      ? CONFIG.TZ
-      : Session.getScriptTimeZone();
+    const candidates = [
+      (typeof CONFIG === 'object' && CONFIG && CONFIG.TZ) ? CONFIG.TZ : '',
+      (typeof Session !== 'undefined' && Session && typeof Session.getScriptTimeZone === 'function')
+        ? Session.getScriptTimeZone()
+        : '',
+      'Europe/Kyiv',
+      'Europe/Kiev'
+    ];
+
+    for (let i = 0; i < candidates.length; i++) {
+      const tz = String(candidates[i] || '').trim();
+      if (this.isValidTimeZone(tz)) return tz;
+    }
+
+    return 'Europe/Kyiv';
   },
 
   todayStr() {

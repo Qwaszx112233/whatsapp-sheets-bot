@@ -212,7 +212,7 @@ function sendDetailedSummaryToCommander() {
     const people = collectPeopleDetailed_(sheet, col);
     const text = formatDetailedSummary_(date, people);
 
-    const phone = findPhoneByRole_(CONFIG.COMMANDER_ROLE);
+    const phone = findPhone_({ role: CONFIG.COMMANDER_ROLE });
     if (!phone) {
       const ui = SpreadsheetApp.getUi();
       ui.alert(

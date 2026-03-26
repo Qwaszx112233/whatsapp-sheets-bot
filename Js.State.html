@@ -104,11 +104,12 @@
   }
 
   function stopSending() {
-    if (STATE.sendingInterval) {
-      clearInterval(STATE.sendingInterval);
-      STATE.sendingInterval = null;
-    }
+  STATE._sendingCancelled = true;
+  if (STATE.sendingInterval) {
+    clearTimeout(STATE.sendingInterval);
+    STATE.sendingInterval = null;
   }
+}
 
   function clonePanelRows_(rows) {
     return Array.isArray(rows)

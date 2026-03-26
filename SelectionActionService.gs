@@ -35,7 +35,7 @@ const SelectionActionService_ = (function() {
       ctx.sheet,
       ctx.range.getRow(),
       ctx.range.getColumn(),
-      loadPhonesMap_(),
+      loadPhonesIndex_(),
       loadDictMap_()
     );
 
@@ -143,7 +143,7 @@ const SelectionActionService_ = (function() {
     const ctx = _getContext();
     const ranges = getSelectedRanges_(ctx.sheet);
     const multi = ranges.length ? collectPayloads_(ctx.sheet, ranges) : { payloads: [], errors: [] };
-    const commanderPhone = findPhoneByRole_(CONFIG.COMMANDER_ROLE) || '';
+    const commanderPhone = findPhone_({ role: CONFIG.COMMANDER_ROLE }) || '';
 
     return {
       kind: 'selectionDiagnostics',

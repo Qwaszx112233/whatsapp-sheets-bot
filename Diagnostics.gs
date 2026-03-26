@@ -250,7 +250,7 @@ function healthCheck() {
 
   _runHealthCheckItem_(report, 'Сьогоднішня дата в активному місяці', 'WARN', function () {
     const sh = getBotSheet_();
-    const today = Utilities.formatDate(new Date(), CONFIG.TZ, 'dd.MM.yyyy');
+    const today = Utilities.formatDate(new Date(), getTimeZone_(), 'dd.MM.yyyy');
     const col = findTodayColumn_(sh, today);
 
     return {
@@ -294,8 +294,22 @@ function healthCheck() {
     };
   });
 
+  _runHealthCheckItem_(report, 'Телефонний index', 'CRITICAL', function () {
+    const index = typeof loadPhonesIndex_ === 'function' ? loadPhonesIndex_() : null;
+    const ok = !!(index && index.byFio && index.byNorm && index.byRole && index.byCallsign);
+    const items = ok && Array.isArray(index.items) ? index.items.length : 0;
+
+    return {
+      status: ok && items > 0 ? 'OK' : 'FAIL',
+      details: ok
+        ? `items=${items}; byFio=${Object.keys(index.byFio || {}).length}; byRole=${Object.keys(index.byRole || {}).length}; byCallsign=${Object.keys(index.byCallsign || {}).length}`
+        : 'loadPhonesIndex_() не повернув канонічну структуру',
+      howTo: ok && items > 0 ? '' : 'Перевірте Stage 7 phone-layer і очистіть кеш телефонів'
+    };
+  });
+
   _runHealthCheckItem_(report, 'Телефон командира', 'CRITICAL', function () {
-    const phone = findPhoneByRole_(CONFIG.COMMANDER_ROLE);
+    const phone = findPhone_({ role: CONFIG.COMMANDER_ROLE });
 
     return {
       status: phone ? 'OK' : 'FAIL',
@@ -322,6 +336,8 @@ function healthCheck() {
     const fns = [
       'runVacationEngine_',
       'buildMessage_',
+      'loadPhonesIndex_',
+      'findPhone_',
       'loadPhonesMap_',
       'generateSendPanelSidebar',
       'getSendPanelSidebarData',
@@ -1728,12 +1744,14 @@ function _diagGlobal_() {
   return {};
 }
 
-function _diagSafeEval_(expr) {
-  try {
-    return eval(expr);
-  } catch (_) {
-    return undefined;
+function _diagResolvePath_(scope, path) {
+  var parts = String(path || '').trim().split('.').filter(Boolean);
+  var current = scope;
+  for (var i = 0; i < parts.length; i++) {
+    if (!current || !(parts[i] in current)) return undefined;
+    current = current[parts[i]];
   }
+  return current;
 }
 
 function _diagHasRouteApi_(fnName) {
@@ -1775,12 +1793,10 @@ function _diagResolveSymbolStage7_(name) {
   var target = String(name || '').trim();
   if (!target) return undefined;
 
-  var direct = _diagSafeEval_(target);
-  if (direct !== undefined) return direct;
-
   try {
     var g = _diagGlobal_();
-    if (g && target in g) return g[target];
+    var direct = _diagResolvePath_(g, target);
+    if (direct !== undefined) return direct;
   } catch (_) {}
 
   if (_diagHasRouteApi_(target)) {

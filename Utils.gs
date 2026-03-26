@@ -87,64 +87,33 @@ function normalizePhone_(v) {
 }
 
 function loadPhonesProfiles_() {
-  const cache = CacheService.getScriptCache();
-  const key = 'PHONES_PROFILES_v4';
-  const cached = cache.get(key);
-  if (cached) {
-    try { return JSON.parse(cached); } catch (e) { }
+  if (typeof loadPhonesIndex_ !== 'function') {
+    return { byCallsign: {}, byFio: {}, byNorm: {}, byRole: {}, items: [] };
   }
 
-  const out = { byCallsign: {}, byFio: {} };
-  const ss = SpreadsheetApp.getActive();
-  const sh = ss.getSheetByName(CONFIG.PHONES_SHEET);
-  if (!sh || sh.getLastRow() < 2) return out;
-
-  const values = sh.getDataRange().getValues();
-  const head = values[0].map(v => String(v || '').trim().toLowerCase());
-  const findCol = pred => {
-    const idx = head.findIndex(pred);
-    return idx >= 0 ? idx + 1 : null;
+  const index = loadPhonesIndex_();
+  const out = {
+    byCallsign: {},
+    byFio: {},
+    byNorm: {},
+    byRole: {},
+    items: Array.isArray(index.items) ? index.items.slice() : [],
+    versionMarker: 'stage7-phones-profiles-v2'
   };
 
-  const cFio = findCol(h => h.includes('піб') || h.includes('фіо') || h.includes('фио')) || 1;
-  const cPhone = findCol(h => h.includes('тел') || h.includes('phone')) || 2;
-  const cRole = findCol(h => h.includes('роль') || h.includes('позив') || h.includes('callsign')) || 3;
-  const cBirth = findCol(h => h.includes('дн') || h.includes('д.н') || h.includes('дата народ') || h.includes('день народ') || h.includes('birthday')) || 4;
-
-  for (let r = 1; r < values.length; r++) {
-    const row = values[r];
-    const fio = String(row[cFio - 1] || '').trim();
-    const rawPhone = String(row[cPhone - 1] || '').trim();
-    const role = String(row[cRole - 1] || '').trim();
-    const birthRaw = row[cBirth - 1];
-    if (!fio && !role) continue;
-
-    const phone = normalizePhone_(rawPhone);
-    let birthday = '';
-
-    if (birthRaw instanceof Date && !isNaN(birthRaw.getTime())) {
-      birthday = Utilities.formatDate(birthRaw, getTimeZone_(), 'dd.MM.yyyy');
-    } else {
-      const s = String(birthRaw || '').trim();
-      if (/^\d{1,2}\.\d{1,2}\.\d{4}$/.test(s)) {
-        const parts = s.split('.');
-        birthday = `${String(parts[0]).padStart(2, '0')}.${String(parts[1]).padStart(2, '0')}.${parts[2]}`;
-      } else if (/^\d{1,2}\.\d{1,2}$/.test(s)) {
-        const parts = s.split('.');
-        birthday = `${String(parts[0]).padStart(2, '0')}.${String(parts[1]).padStart(2, '0')}`;
-      }
-    }
-
-    const item = { fio, phone, role, birthday };
-    const fioKey = _normFioForProfiles_(fio);
-    const roleKey = _normCallsignKey_(role);
+  (index.items || []).forEach(function(item) {
+    if (!item || typeof item !== 'object') return;
+    const fioKey = _normFioForProfiles_(item.fio || '');
+    const normKey = normalizeFIO_(item.fio || '');
+    const callsignKey = _normCallsignKey_(item.callsign || item.role || '');
+    const roleKey = _normCallsignKey_(item.role || item.callsign || '');
 
     if (fioKey) out.byFio[fioKey] = item;
-    if (roleKey) out.byCallsign[roleKey] = item;
-  }
+    if (normKey) out.byNorm[normKey] = item;
+    if (callsignKey) out.byCallsign[callsignKey] = item;
+    if (roleKey) out.byRole[roleKey] = item;
+  });
 
-  const json = JSON.stringify(out);
-  if (json.length < 90000) cache.put(key, json, (CONFIG && CONFIG.CACHE_TTL_SEC) ? CONFIG.CACHE_TTL_SEC : 300);
   return out;
 }
 
@@ -219,7 +188,9 @@ function ensureLogHeader_(sheet) {
   sheet.getRange(1, 1, 1, 12).setFontWeight('bold').setBackground('#f0f0f0');
 }
 
-function cacheKeyPhones_() { return `PHONES_${SpreadsheetApp.getActive().getId()}`; }
+function cacheKeyPhones_() { return `PHONES_FLAT_V2_${SpreadsheetApp.getActive().getId()}`; }
+function cacheKeyPhonesIndex_() { return `PHONES_INDEX_V2_${SpreadsheetApp.getActive().getId()}`; }
+function cacheKeyPhonesProfiles_() { return `PHONES_PROFILES_V2_${SpreadsheetApp.getActive().getId()}`; }
 function cacheKeyDict_() { return `DICT_${SpreadsheetApp.getActive().getId()}`; }
 function cacheKeyDictSum_() { return `DICT_SUM_${SpreadsheetApp.getActive().getId()}`; }
 function cacheKeyTemplates_() { return `TEMPLATES_${SpreadsheetApp.getActive().getId()}`; }
@@ -236,6 +207,9 @@ function _safeLoadPhonesMap_() {
 function _getPhoneByFio_(fio) {
   if (!fio) return '';
   try {
+    if (typeof findPhone_ === 'function') {
+      return findPhone_({ fio: fio });
+    }
     const phonesMap = _safeLoadPhonesMap_();
     const raw = String(fio || '').trim();
     const norm = normalizeFIO_(raw);
@@ -266,7 +240,10 @@ function _getCallsignByFio_(fio) {
 
 function clearCacheCore_() {
   CacheService.getScriptCache().removeAll([
+    'PHONES_' + SpreadsheetApp.getActive().getId(),
     cacheKeyPhones_(),
+    cacheKeyPhonesIndex_(),
+    cacheKeyPhonesProfiles_(),
     cacheKeyDict_(),
     cacheKeyDictSum_(),
     cacheKeyTemplates_(),
@@ -298,7 +275,12 @@ function clearLogSheet() {
 
 function clearPhoneCache() {
   try {
-    CacheService.getScriptCache().removeAll([cacheKeyPhones_(), 'PHONES_PROFILES_v4']);
+    CacheService.getScriptCache().removeAll([
+      cacheKeyPhones_(),
+      cacheKeyPhonesIndex_(),
+      cacheKeyPhonesProfiles_(),
+      'PHONES_PROFILES_v4'
+    ]);
     return { success: true, message: 'Кеш телефонів очищено' };
   } catch (e) {
     return { success: false, error: e && e.message ? e.message : String(e) };

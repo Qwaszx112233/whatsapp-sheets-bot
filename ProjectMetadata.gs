@@ -8,12 +8,12 @@ function _projectMetaDeepCopy_(value) {
 
 const PROJECT_RELEASE_NAMING_ = Object.freeze({
   stage: '7.1',
-  stageLabel: 'Stage 7.1 — Reliability Hardened Baseline',
-  stageVersion: '7.1.0-reliability-hardened-merged',
-  activeBaseline: 'stage7-1-reliability-hardened-baseline',
-  archiveBaseName: 'gas_wapb_stage7_1_reliability_hardened_baseline',
-  archiveFileName: 'gas_wapb_stage7_1_reliability_hardened_baseline.zip',
-  rootFolderName: 'gas_wapb_stage7_1_reliability_hardened_baseline'
+  stageLabel: 'Stage 7.1.1 — Final Stabilized Repair Baseline',
+  stageVersion: '7.1.1-final-stabilized-repair',
+  activeBaseline: 'stage7-1-1-final-stabilized-repair-baseline',
+  archiveBaseName: 'gas_wapb_stage7_1_1_final_stabilized_repair',
+  archiveFileName: 'gas_wapb_stage7_1_1_final_stabilized_repair.zip',
+  rootFolderName: 'gas_wapb_stage7_1_1_final_stabilized_repair'
 });
 
 const PROJECT_DOCUMENTATION_MAP_ = Object.freeze({

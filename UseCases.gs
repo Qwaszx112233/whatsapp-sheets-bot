@@ -949,7 +949,7 @@ const Stage4UseCases_ = (function() {
     const activeName = activeSheet ? String(activeSheet.getName() || '').trim() : '';
     if (/^\d{2}$/.test(activeName) && ss.getSheetByName(activeName)) return activeName;
 
-    const currentMonth = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'MM');
+    const currentMonth = Utilities.formatDate(new Date(), getTimeZone_(), 'MM');
     if (ss.getSheetByName(currentMonth)) return currentMonth;
 
     const fallback = ss.getSheets()
@@ -1015,7 +1015,7 @@ const Stage4UseCases_ = (function() {
 
     clearCacheCore_();
     try { resetTemplatesCache_(); } catch (_) {}
-    try { CacheService.getScriptCache().removeAll([cacheKeyPhones_(), 'PHONES_PROFILES_v4']); } catch (_) {}
+    try { CacheService.getScriptCache().removeAll([cacheKeyPhones_(), cacheKeyPhonesIndex_(), cacheKeyPhonesProfiles_(), 'PHONES_PROFILES_v4']); } catch (_) {}
 
     return report;
   }
@@ -1048,7 +1048,7 @@ const Stage4UseCases_ = (function() {
           case 'cleanupCaches':
             clearCacheCore_();
             try { resetTemplatesCache_(); } catch (_) {}
-            try { CacheService.getScriptCache().removeAll([cacheKeyPhones_(), 'PHONES_PROFILES_v4']); } catch (_) {}
+            try { CacheService.getScriptCache().removeAll([cacheKeyPhones_(), cacheKeyPhonesIndex_(), cacheKeyPhonesProfiles_(), 'PHONES_PROFILES_v4']); } catch (_) {}
             return {
               success: true,
               message: 'Кеші очищено',
@@ -1079,7 +1079,7 @@ const Stage4UseCases_ = (function() {
           }
 
           case 'clearPhoneCache': {
-            const keys = [cacheKeyPhones_(), 'PHONES_PROFILES_v4'];
+            const keys = [cacheKeyPhones_(), cacheKeyPhonesIndex_(), cacheKeyPhonesProfiles_(), 'PHONES_PROFILES_v4'];
             CacheService.getScriptCache().removeAll(keys);
             return {
               success: true,

@@ -3,6 +3,12 @@
  */
 
 const DictionaryRepository_ = (function() {
+  function getPhonesIndex() {
+    return typeof loadPhonesIndex_ === 'function'
+      ? loadPhonesIndex_()
+      : { byFio: {}, byNorm: {}, byRole: {}, byCallsign: {}, items: [] };
+  }
+
   function getPhonesMap() {
     return loadPhonesMap_();
   }
@@ -20,15 +26,15 @@ const DictionaryRepository_ = (function() {
   }
 
   function getPhoneByRole(role) {
-    return findPhoneByRole_(role);
+    return findPhone_({ role: role });
   }
 
   function getPhoneByFio(fio) {
-    if (!fio) return '';
-    const phones = getPhonesMap();
-    const raw = String(fio || '').trim();
-    const norm = normalizeFIO_(raw);
-    return phones[raw] || phones[norm] || '';
+    return findPhone_({ fio: fio });
+  }
+
+  function getPhoneByCallsign(callsign) {
+    return findPhone_({ callsign: callsign });
   }
 
   function getProfileByCallsign(callsign) {
@@ -49,12 +55,14 @@ const DictionaryRepository_ = (function() {
   }
 
   return {
+    getPhonesIndex: getPhonesIndex,
     getPhonesMap: getPhonesMap,
     getProfiles: getProfiles,
     getDictMap: getDictMap,
     getSummaryRules: getSummaryRules,
     getPhoneByRole: getPhoneByRole,
     getPhoneByFio: getPhoneByFio,
+    getPhoneByCallsign: getPhoneByCallsign,
     getProfileByCallsign: getProfileByCallsign,
     getProfileByFio: getProfileByFio,
     getDictEntry: getDictEntry

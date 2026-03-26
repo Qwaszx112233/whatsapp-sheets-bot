@@ -43,7 +43,7 @@ function applyColumnWidthsStandardsToSheet_(sheet) {
 
 /************ ПОШУК СЬОГОДНІШНЬОГО СТОВПЦЯ ************/
 function findTodayColumn_(sheet, todayStr) {
-  todayStr = todayStr || Utilities.formatDate(new Date(), CONFIG.TZ, 'dd.MM.yyyy');
+  todayStr = todayStr || Utilities.formatDate(new Date(), getTimeZone_(), 'dd.MM.yyyy');
   const codeRef = sheet.getRange(CONFIG.CODE_RANGE_A1);
   const row = Number(CONFIG.DATE_ROW) || 1;
 

@@ -39,6 +39,12 @@ function runStage6ADomainTests_(options) {
     return out;
   });
 
+  _domainPush_(report, 'templates.renderTemplate double braces', function() {
+    const out = renderTemplate_('Привіт, {{name}}!', { name: 'Сергій' });
+    _domainAssert_(out === 'Привіт, Сергій!', 'Подвійні дужки {{name}} не працюють');
+    return out;
+  });
+
   _domainPush_(report, 'templates.missing keys detection', function() {
     const resolved = TemplateResolver_.resolve('DAY_SUMMARY_HEADER', {}, { preview: true });
     _domainAssert_(resolved.missingKeys.indexOf('date') !== -1, 'missingKeys не містить date');
@@ -66,6 +72,23 @@ function runStage6ADomainTests_(options) {
     const b = makeSendPanelKey_('петренко і.і.', "'+380661234567", 'БР');
     _domainAssert_(a === b, 'makeSendPanelKey_ не нормалізує ключ стабільно');
     return a;
+  });
+
+  _domainPush_(report, 'phone lookup canonical index contract', function() {
+    const index = {
+      byFio: { 'Петренко Іван Іванович': '+380661111111' },
+      byNorm: { 'петренко іван іванович': '+380661111111' },
+      byRole: { 'ГРАФ': '+380662222222' },
+      byCallsign: { 'РОЛАНД': '+380663333333' },
+      items: []
+    };
+    const byFio = findPhone_({ fio: 'Петренко Іван Іванович' }, { index: index });
+    const byRole = findPhone_({ role: 'ГРАФ' }, { index: index });
+    const byCallsign = findPhone_({ callsign: 'роланд' }, { index: index });
+    _domainAssert_(byFio === '+380661111111', 'findPhone_() не знайшов телефон по fio');
+    _domainAssert_(byRole === '+380662222222', 'findPhone_() не знайшов телефон по role');
+    _domainAssert_(byCallsign === '+380663333333', 'findPhone_() не знайшов телефон по callsign');
+    return 'canonical-lookup-ok';
   });
 
   _domainPush_(report, 'sendPanel.normalize rows', function() {

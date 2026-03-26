@@ -101,7 +101,7 @@ var PersonsRepository_ = PersonsRepository_ || (function() {
       ctx.sheet,
       Number(rowNumber),
       Number(ctx.col),
-      DictionaryRepository_.getPhonesMap(),
+      DictionaryRepository_.getPhonesIndex(),
       DictionaryRepository_.getDictMap()
     );
   }
@@ -116,7 +116,7 @@ var PersonsRepository_ = PersonsRepository_ || (function() {
 
     const payload = getPayloadByRow(item._meta.rowNumber, safeDate, sheet);
     const profile = DictionaryRepository_.getProfileByCallsign(item.callsign) || DictionaryRepository_.getProfileByFio(item.fio) || null;
-    const phone = item.phone || payload.phone || DictionaryRepository_.getPhoneByFio(item.fio) || DictionaryRepository_.getPhoneByRole(item.callsign) || '';
+    const phone = item.phone || payload.phone || DictionaryRepository_.getPhoneByFio(item.fio) || DictionaryRepository_.getPhoneByCallsign(item.callsign) || DictionaryRepository_.getPhoneByRole(item.callsign) || '';
     const prevSheet = getPrevMonthSheetByDate(safeDate);
     const prevRow = prevSheet ? findRowByCallsign(item.callsign, prevSheet) : null;
 

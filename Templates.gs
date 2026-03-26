@@ -15,8 +15,9 @@ function renderTemplate_(tpl, data) {
 
   data = data || {};
 
-  return tpl.replace(/{[\s]*(\w+)[\s]*}/g, (m, key) => {
-    const v = data[key] ?? data[key.toLowerCase()] ?? data[key.toUpperCase()];
+  return tpl.replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}|\{\s*([a-zA-Z0-9_]+)\s*\}/g, function(m, keyDouble, keySingle) {
+    const key = keyDouble || keySingle || '';
+    const v = data[key] ?? data[String(key).toLowerCase()] ?? data[String(key).toUpperCase()];
     return (v === undefined || v === null) ? '' : String(v);
   });
 }

@@ -89,7 +89,7 @@ function sendDaySummaryToCommanderSidebar(dateStr, summaryText) {
       throw new Error('Немає тексту зведення');
     }
 
-    const phone = findPhoneByRole_(CONFIG.COMMANDER_ROLE);
+    const phone = findPhone_({ role: CONFIG.COMMANDER_ROLE });
     if (!phone) {
       throw new Error(`Телефон для ролі "${CONFIG.COMMANDER_ROLE}" не знайдено в PHONES`);
     }
@@ -121,7 +121,7 @@ function sendDetailedToCommanderSidebar(dateStr, detailedText) {
       throw new Error('Немає тексту детального зведення');
     }
 
-    const phone = findPhoneByRole_(CONFIG.COMMANDER_ROLE);
+    const phone = findPhone_({ role: CONFIG.COMMANDER_ROLE });
     if (!phone) {
       throw new Error(`Телефон для ролі "${CONFIG.COMMANDER_ROLE}" не знайдено в PHONES`);
     }
@@ -150,7 +150,7 @@ function sendDetailedToCommanderSidebar(dateStr, detailedText) {
 function testCommanderPhone() {
   const ui = SpreadsheetApp.getUi();
   try {
-    const phonesMap = loadPhonesMap_();
+    const phoneIndex = typeof loadPhonesIndex_ === 'function' ? loadPhonesIndex_() : null;
     const role = CONFIG.COMMANDER_ROLE;
     let result = `🔍 ПОШУК ТЕЛЕФОНУ КОМАНДИРА
 `;
@@ -160,18 +160,22 @@ function testCommanderPhone() {
     result += `Роль в конфігу: "${role}"
 
 `;
-    result += `📞 За роллю (role:${role}): ${phonesMap[`role:${role}`] || '❌'}
+    result += `📞 Canonical lookup: ${findPhone_({ role: role }) || '❌'}
 `;
-    result += `📞 За точним співпадінням: ${phonesMap[role] || '❌'}
+    result += `📞 byRole[${role}]: ${phoneIndex && phoneIndex.byRole ? (phoneIndex.byRole[role] || phoneIndex.byRole[_normCallsignKey_(role)] || '❌') : '❌'}
+`;
+    result += `📞 byCallsign[${role}]: ${phoneIndex && phoneIndex.byCallsign ? (phoneIndex.byCallsign[role] || phoneIndex.byCallsign[_normCallsignKey_(role)] || '❌') : '❌'}
 
 `;
     result += `📋 Можливі кандидати:
 `;
 
     let found = 0;
-    Object.keys(phonesMap).forEach(function(key) {
-      if (key.indexOf('КОМАНДИР') !== -1 || key.indexOf('КВ') !== -1 || key.indexOf('ГРАФ') !== -1 || key.indexOf('role:') !== -1 || key.indexOf(role) !== -1) {
-        result += `  ${key} → ${phonesMap[key]}
+    (phoneIndex && Array.isArray(phoneIndex.items) ? phoneIndex.items : []).forEach(function(item) {
+      const probe = [item.role, item.callsign, item.fio].filter(Boolean).join(' | ');
+      const upperProbe = probe.toUpperCase();
+      if (upperProbe.indexOf('КОМАНДИР') !== -1 || upperProbe.indexOf('КВ') !== -1 || upperProbe.indexOf('ГРАФ') !== -1 || upperProbe.indexOf(String(role || '').toUpperCase()) !== -1) {
+        result += `  ${probe} → ${item.phone || '—'}
 `;
         found++;
       }
@@ -181,7 +185,7 @@ function testCommanderPhone() {
       result += `  (нічого не знайдено)
 
 `;
-      result += `❌ В листі PHONES немає запису для командира. Додайте роль "${role}".`;
+      result += `❌ В листі PHONES немає запису для командира. Додайте роль або позивний "${role}".`;
     }
 
     ui.alert('📱 Діагностика командира', result, ui.ButtonSet.OK);

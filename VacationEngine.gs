@@ -64,19 +64,11 @@ function _veTimeZone_() {
       const tz = getTimeZone_();
       if (tz) return tz;
     }
+    if (typeof DateUtils_ !== 'undefined' && DateUtils_ && typeof DateUtils_.getTimeZone === 'function') {
+      return DateUtils_.getTimeZone();
+    }
   } catch (_) { }
-
-  try {
-    return (typeof CONFIG !==
-      'undefined' &&
-      CONFIG &&
-      CONFIG.TZ)
-      ? CONFIG.TZ
-      : Session
-        .getScriptTimeZone();
-  } catch (_) {
-    return 'Europe/Kiev';
-  }
+  return 'Europe/Kyiv';
 }
 
 function _veBool_(
@@ -314,14 +306,11 @@ function _veWaLink_(phone, message) {
 function _veCommanderPhone_() {
   try {
     const role = _veCommanderRole_();
-    if (typeof findPhoneByRole_ === 'function') {
-      const phone = findPhoneByRole_(role);
-      if (phone) return phone;
+    if (typeof findPhone_ === 'function') {
+      return findPhone_({ role: role }) || '';
     }
-    if (typeof loadPhonesMap_ === 'function') {
-      const phonesMap = loadPhonesMap_() || {};
-      return phonesMap[`role:${role}`]
-        || phonesMap[role] || '';
+    if (typeof findPhoneByRole_ === 'function') {
+      return findPhoneByRole_(role) || '';
     }
     return '';
   } catch (e) {
