@@ -110,8 +110,20 @@ const OperationRepository_ = (function() {
     });
   }
 
+  function _normalizeOperationId(value) {
+    return String(value == null ? '' : value).trim();
+  }
+
+  function _sameOperationId(left, right) {
+    var a = _normalizeOperationId(left);
+    var b = _normalizeOperationId(right);
+    return !!a && !!b && a === b;
+  }
+
   function _findByOperationId(sheet, operationId) {
-    return _rowsAsObjects(sheet).filter(function(item) { return String(item.OperationId || '') === String(operationId || ''); })[0] || null;
+    var normalized = _normalizeOperationId(operationId);
+    if (!normalized) return null;
+    return _rowsAsObjects(sheet).filter(function(item) { return _sameOperationId(item.OperationId, normalized); })[0] || null;
   }
 
   function _updateCell(sheet, row, col, value) {
@@ -231,7 +243,7 @@ const OperationRepository_ = (function() {
     var sheet = _sheet(SHEETS.ACTIVE, ACTIVE_HEADERS);
     var nowMs = _now().getTime();
     return _rowsAsObjects(sheet).filter(function(item) {
-      if (String(item.OperationId || '') === String(operationId || '')) return false;
+      if (_sameOperationId(item.OperationId, operationId)) return false;
       if (String(item.Fingerprint || '') !== String(fingerprint || '')) return false;
       if (String(item.Status || '') !== 'STARTED') return false;
       var expiresAt = String(item.ExpiresAt || '').trim();
@@ -248,7 +260,7 @@ const OperationRepository_ = (function() {
     var rows = _rowsAsObjects(sheet).reverse();
     for (var i = 0; i < rows.length; i++) {
       var item = rows[i];
-      if (String(item.OperationId || '') === String(operationId || '')) continue;
+      if (_sameOperationId(item.OperationId, operationId)) continue;
       if (String(item.Fingerprint || '') !== String(fingerprint || '')) continue;
       if (String(item.Status || '') !== 'COMMITTED') continue;
       var finished = new Date(String(item.TimestampFinished || item.LastHeartbeat || item.TimestampStarted || '')).getTime();
@@ -268,7 +280,7 @@ const OperationRepository_ = (function() {
     var fingerprint = String(cfg.fingerprint || buildFingerprint(rawScenario, payload));
     var initiator = String(cfg.initiator || 'manual');
     var runSource = String(cfg.runSource || cfg.source || initiator || 'manual');
-    var parentOperationId = String(cfg.parentOperationId || payload.parentOperationId || '');
+    var parentOperationId = _normalizeOperationId(cfg.parentOperationId || payload.parentOperationId || '');
 
     if (!cfg.dryRun) {
       var duplicateActive = _findDuplicateInActive(rawScenario, fingerprint, operationId);
@@ -507,10 +519,12 @@ const OperationRepository_ = (function() {
   }
 
   function getOperationDetails(operationId) {
-    var entry = _getOperationRow(operationId);
+    var normalizedId = _normalizeOperationId(operationId);
+    if (!normalizedId) return null;
+    var entry = _getOperationRow(normalizedId);
     if (!entry) return null;
     var checkpoints = _rowsAsObjects(_sheet(SHEETS.CHECKPOINTS, CHECKPOINT_HEADERS)).filter(function(item) {
-      return String(item.OperationId || '') === String(operationId || '');
+      return _sameOperationId(item.OperationId, normalizedId);
     }).sort(function(a, b) { return Number(a.CheckpointIndex || 0) - Number(b.CheckpointIndex || 0); });
     return {
       operation: entry,
@@ -523,6 +537,7 @@ const OperationRepository_ = (function() {
 
   function listPendingRepairs(filters) {
     var opts = Object.assign({ limit: 100 }, filters || {});
+    var skippedWithoutOperationId = 0;
     var items = _rowsAsObjects(_sheet(SHEETS.OPS, OPS_HEADERS)).filter(function(item) {
       var status = String(item.Status || '');
       var wantsRepair = _bool(item.RepairNeeded) || ['FAILED', 'FAILED_STALE', 'NEEDS_REPAIR'].indexOf(status) !== -1;
@@ -530,6 +545,10 @@ const OperationRepository_ = (function() {
       if (opts.status && status !== String(opts.status)) return false;
       if (opts.scenario && String(item.Scenario || '') !== String(opts.scenario)) return false;
       if (opts.date && String(item.TimestampStarted || '').indexOf(String(opts.date)) !== 0) return false;
+      if (!_normalizeOperationId(item.OperationId)) {
+        skippedWithoutOperationId++;
+        return false;
+      }
       return true;
     }).sort(function(a, b) {
       return String(b.TimestampStarted || '').localeCompare(String(a.TimestampStarted || ''));
@@ -538,8 +557,8 @@ const OperationRepository_ = (function() {
     return {
       operations: items.slice(0, Number(opts.limit || 100)).map(function(item) {
         return {
-          operationId: String(item.OperationId || ''),
-          parentOperationId: String(item.ParentOperationId || ''),
+          operationId: _normalizeOperationId(item.OperationId),
+          parentOperationId: _normalizeOperationId(item.ParentOperationId),
           scenario: String(item.Scenario || ''),
           rawScenario: String(item.RawScenario || ''),
           startedAt: String(item.TimestampStarted || ''),
@@ -554,24 +573,28 @@ const OperationRepository_ = (function() {
           resolutionStatus: String(item.ResolutionStatus || '')
         };
       }),
-      total: items.length
+      total: items.length,
+      skippedWithoutOperationId: skippedWithoutOperationId
     };
   }
 
   function markNeedsRepair(operationId, reason) {
-    var current = _getOperationRow(operationId);
-    if (!current) throw new Error('Операцію не знайдено: ' + operationId);
+    var normalizedId = _normalizeOperationId(operationId);
+    var current = _getOperationRow(normalizedId);
+    if (!current) throw new Error('Операцію не знайдено: ' + normalizedId);
     var status = String(current.Status || '');
     if (status === 'NEEDS_REPAIR') return current;
     if (status === 'FAILED' || status === 'FAILED_STALE') {
-      return transitionStatus(operationId, 'NEEDS_REPAIR', reason || 'queued-for-repair', { RepairNeeded: true });
+      return transitionStatus(normalizedId, 'NEEDS_REPAIR', reason || 'queued-for-repair', { RepairNeeded: true });
     }
     return current;
   }
 
   function resolveIncident(operationId, resolvedByOperationId, resolutionStatus) {
-    var current = _getOperationRow(operationId);
-    if (!current) throw new Error('Операцію не знайдено: ' + operationId);
+    var normalizedId = _normalizeOperationId(operationId);
+    var normalizedResolvedById = _normalizeOperationId(resolvedByOperationId);
+    var current = _getOperationRow(normalizedId);
+    if (!current) throw new Error('Операцію не знайдено: ' + normalizedId);
     var status = String(current.Status || '');
     if (['FAILED', 'FAILED_STALE', 'NEEDS_REPAIR'].indexOf(status) === -1) {
       throw new Error('Resolve дозволений тільки для FAILED / FAILED_STALE / NEEDS_REPAIR');
@@ -580,12 +603,12 @@ const OperationRepository_ = (function() {
     if (!ALLOWED_RESOLUTION_STATUSES[resolution]) {
       throw new Error('Недопустимий ResolutionStatus: ' + resolution);
     }
-    _updateOpsRow(operationId, {
-      ResolvedByOperationId: String(resolvedByOperationId || ''),
+    _updateOpsRow(normalizedId, {
+      ResolvedByOperationId: normalizedResolvedById,
       ResolvedAt: _iso(_now()),
       ResolutionStatus: resolution
     });
-    return _getOperationRow(operationId);
+    return _getOperationRow(normalizedId);
   }
 
   function detectStaleOperations() {
@@ -673,7 +696,7 @@ const OperationRepository_ = (function() {
       _appendRow(archiveSheet, rowValues);
 
       _rowsAsObjects(checkpointsSheet).slice().reverse().forEach(function(checkpoint) {
-        if (String(checkpoint.OperationId || '') !== String(item.OperationId || '')) return;
+        if (!_sameOperationId(checkpoint.OperationId, item.OperationId)) return;
         var checkpointArchiveName = 'CHECKPOINTS_' + suffix;
         var checkpointArchiveSheet = _sheet(checkpointArchiveName, CHECKPOINT_HEADERS);
         var checkpointRow = CHECKPOINT_HEADERS.map(function(header) { return checkpoint[header]; });
@@ -715,16 +738,19 @@ const OperationRepository_ = (function() {
   }
 
   function runRepair(operationId, options) {
-    var details = getOperationDetails(operationId);
-    if (!details || !details.operation) throw new Error('Операцію для repair не знайдено');
+    var normalizedId = _normalizeOperationId(operationId);
+    if (!normalizedId) throw new Error('Не передано operationId для repair');
+    var details = getOperationDetails(normalizedId);
+    if (!details || !details.operation) throw new Error('Операцію для repair не знайдено: ' + normalizedId);
     var op = details.operation;
-    markNeedsRepair(operationId, 'repair-requested');
+    var targetOperationId = _normalizeOperationId(op.OperationId) || normalizedId;
+    markNeedsRepair(targetOperationId, 'repair-requested');
     var payload = _parseJson(op.PayloadJson, {});
     var rawScenario = String(op.RawScenario || op.Scenario || '');
     var replayPayload = Object.assign({}, payload, options || {}, {
       operationId: '',
-      parentOperationId: operationId,
-      repairTargetOperationId: operationId,
+      parentOperationId: targetOperationId,
+      repairTargetOperationId: targetOperationId,
       repairMode: true,
       dryRun: !!(options && options.dryRun)
     });
@@ -762,18 +788,18 @@ const OperationRepository_ = (function() {
         throw new Error('Repair для сценарію "' + rawScenario + '" ще не реалізовано');
     }
 
-    var newOperationId = result && result.operationId ? result.operationId : (result && result.data && result.data.meta && result.data.meta.operationId || '');
+    var newOperationId = _normalizeOperationId(result && result.operationId ? result.operationId : (result && result.data && result.data.meta && result.data.meta.operationId || ''));
     if (result && result.success) {
-      resolveIncident(operationId, newOperationId, result.partial ? 'RESOLVED_PARTIAL' : 'RESOLVED_SUCCESS');
+      resolveIncident(targetOperationId, newOperationId, result.partial ? 'RESOLVED_PARTIAL' : 'RESOLVED_SUCCESS');
     } else if (newOperationId) {
-      resolveIncident(operationId, newOperationId, 'RESOLVED_FAILED');
+      resolveIncident(targetOperationId, newOperationId, 'RESOLVED_FAILED');
     }
 
     return {
       success: !!(result && result.success),
       message: result && (result.message || result.error) || '',
       operationId: newOperationId || '',
-      originalOperationId: operationId,
+      originalOperationId: targetOperationId,
       result: result
     };
   }

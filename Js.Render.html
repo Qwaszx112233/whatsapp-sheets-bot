@@ -980,7 +980,12 @@ async function showPendingRepairs() {
   try {
     const result = await ActionDispatcher.run('listPendingRepairs', () => MaintenanceApi.listPendingRepairs(), { successMessage: '' });
     const items = result?.operations || result?.data?.operations || [];
-    setHtml('resultContent', renderPendingRepairsTable_(items));
+    const skippedWithoutOperationId = Number(result?.skippedWithoutOperationId || result?.data?.skippedWithoutOperationId || 0);
+    let html = renderPendingRepairsTable_(items);
+    if (skippedWithoutOperationId > 0) {
+      html += `<div class="result-item"><div class="result-label">ℹ️ Пропущені записи</div><div class="result-value">${escapeHtml(String(skippedWithoutOperationId))} запис(ів) без коректного operationId не показано в списку repair.</div></div>`;
+    }
+    setHtml('resultContent', html);
     showToast(items.length ? `⚠️ Потребують виправлення: ${items.length}` : '✅ Операцій для виправлення немає');
   } catch (error) {
     setHtml('resultContent', `<div class="result-item"><div class="result-value">❌ ${escapeHtml(normalizeError(error))}</div></div>`);
@@ -989,17 +994,23 @@ async function showPendingRepairs() {
 }
 
 async function showOperationDetails(operationId) {
+  const opId = String(operationId || '').trim();
+  if (!opId) {
+    setHtml('resultContent', '<div class="result-item"><div class="result-value">❌ Не передано operationId</div></div>');
+    showToast('❌ Не знайдено operationId');
+    return;
+  }
   showStandardResult('🔎 Деталі операції');
   setHtml('resultContent', '<div class="result-item"><div class="result-value">⏳ Завантаження деталей...</div></div>');
   try {
-    const result = await ActionDispatcher.run('getOperationDetails', () => MaintenanceApi.getOperationDetails(operationId), { successMessage: '' });
+    const result = await ActionDispatcher.run('getOperationDetails', () => MaintenanceApi.getOperationDetails(opId), { successMessage: '' });
     const details = result?.operation ? result : (result?.data || {});
     const operation = details.operation || {};
     const checkpoints = Array.isArray(details.checkpoints) ? details.checkpoints : [];
     setHtml('resultContent', `
       <div class="result-item">
         <div class="result-label">Ідентифікатор операції</div>
-        <div class="result-value">${escapeHtml(operation.OperationId || operationId || '')}</div>
+        <div class="result-value">${escapeHtml(operation.OperationId || opId || '')}</div>
       </div>
       <div class="result-item">
         <div class="result-label">Сценарій / Статус</div>
@@ -1032,14 +1043,20 @@ async function showOperationDetails(operationId) {
 }
 
 async function runRepair(operationId) {
+  const opId = String(operationId || '').trim();
+  if (!opId) {
+    setHtml('resultContent', '<div class="result-item"><div class="result-value">❌ Не передано operationId для repair</div></div>');
+    showToast('❌ Не знайдено operationId');
+    return;
+  }
   if (!confirm('Запустити виправлення для цієї операції?')) return;
   showStandardResult('🛠 Запуск виправлення');
   setHtml('resultContent', '<div class="result-item"><div class="result-value">⏳ Запускаю виправлення...</div></div>');
   try {
-    const result = await ActionDispatcher.run('runRepair', () => MaintenanceApi.runRepair(operationId), { successMessage: '' });
+    const result = await ActionDispatcher.run('runRepair', () => MaintenanceApi.runRepair(opId), { successMessage: '' });
     if (result?.success) {
       showToast('✅ Виправлення виконано');
-      await showOperationDetails(result.operationId || operationId);
+      await showOperationDetails(result.operationId || opId);
     } else {
       setHtml('resultContent', `<div class="result-item"><div class="result-value">❌ ${escapeHtml(translateLifecycleText(result?.error || result?.message || 'Repair failed'))}</div></div>`);
       showToast('❌ Виправлення завершилося з помилкою');

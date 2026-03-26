@@ -218,13 +218,24 @@ function apiStage5ListPendingRepairs(filters) {
 }
 
 function apiStage5GetOperationDetails(operationId) {
-  const details = typeof OperationRepository_ === 'object' ? OperationRepository_.getOperationDetails(operationId || '') : null;
+  const normalizedId = String(operationId || '').trim();
+  if (!normalizedId) {
+    return _stage5BuildMaintenanceResponse_(
+      false,
+      'Не передано operationId',
+      { operation: null, checkpoints: [] },
+      'stage5GetOperationDetails',
+      ['Не передано operationId'],
+      { affectedSheets: ['OPS_LOG', 'CHECKPOINTS'] }
+    );
+  }
+  const details = typeof OperationRepository_ === 'object' ? OperationRepository_.getOperationDetails(normalizedId) : null;
   return _stage5BuildMaintenanceResponse_(
     !!details,
-    details ? 'Деталі операції отримано' : 'Операцію не знайдено',
+    details ? 'Деталі операції отримано' : ('Операцію не знайдено: ' + normalizedId),
     details || { operation: null, checkpoints: [] },
     'stage5GetOperationDetails',
-    details ? [] : ['Операцію не знайдено'],
+    details ? [] : [('Операцію не знайдено: ' + normalizedId)],
     { affectedSheets: ['OPS_LOG', 'CHECKPOINTS'] }
   );
 }
@@ -233,16 +244,38 @@ function apiStage5RunRepair(operationId, options) {
   if (typeof OperationRepository_ !== 'object') {
     return _stage5BuildMaintenanceResponse_(false, 'Сховище виправлення недоступне', { success: false }, 'stage5RunRepair', ['Сховище операцій недоступне']);
   }
-  const result = OperationRepository_.runRepair(operationId || '', options || {});
-  if (result && result.result) return result.result;
-  return _stage5BuildMaintenanceResponse_(
-    !!(result && result.success),
-    result && result.message ? result.message : (result && result.success ? 'Виправлення виконано' : 'Виправлення завершилося з помилкою'),
-    result || {},
-    'stage5RunRepair',
-    result && result.success ? [] : [result && result.message ? result.message : 'Виправлення завершилося з помилкою'],
-    { affectedSheets: ['OPS_LOG', 'CHECKPOINTS'] }
-  );
+  const normalizedId = String(operationId || '').trim();
+  if (!normalizedId) {
+    return _stage5BuildMaintenanceResponse_(
+      false,
+      'Не передано operationId для repair',
+      { success: false, operationId: '' },
+      'stage5RunRepair',
+      ['Не передано operationId для repair'],
+      { affectedSheets: ['OPS_LOG', 'CHECKPOINTS'] }
+    );
+  }
+  try {
+    const result = OperationRepository_.runRepair(normalizedId, options || {});
+    if (result && result.result) return result.result;
+    return _stage5BuildMaintenanceResponse_(
+      !!(result && result.success),
+      result && result.message ? result.message : (result && result.success ? 'Виправлення виконано' : 'Виправлення завершилося з помилкою'),
+      result || {},
+      'stage5RunRepair',
+      result && result.success ? [] : [result && result.message ? result.message : 'Виправлення завершилося з помилкою'],
+      { affectedSheets: ['OPS_LOG', 'CHECKPOINTS'] }
+    );
+  } catch (error) {
+    return _stage5BuildMaintenanceResponse_(
+      false,
+      error && error.message ? error.message : 'Виправлення завершилося з помилкою',
+      { success: false, operationId: normalizedId },
+      'stage5RunRepair',
+      [error && error.message ? error.message : 'Виправлення завершилося з помилкою'],
+      { affectedSheets: ['OPS_LOG', 'CHECKPOINTS'] }
+    );
+  }
 }
 
 
