@@ -19,12 +19,11 @@ This archive is the **Stage 7.1.1 Final Stabilized Repair Baseline** with preser
 
 ## What was fixed in this build
 
-- SEND_PANEL no longer treats opening WhatsApp as automatic sending.
+- SEND_PANEL treats sidebar opening of the stored Action link as the sending fixation point.
 - Canonical status model is preserved:
-  - `✓ Готово`
-  - `🟡 Очікує підтвердження`
-  - `↩️ Не відправлено`
-  - `📤 Відправлено`
+  - `Status`: `✔` або `✘`
+  - `Sent`: `✔` або `✘`
+  - `Action`: готове посилання з листа
   - `✕ ...`
 - SEND_PANEL rebuild preserves state from the sheet for the same panel date.
 - Panel date is read from explicit SEND_PANEL metadata instead of silently falling back to "today".

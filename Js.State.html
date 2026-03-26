@@ -154,12 +154,12 @@
 
   function getReadyPanelItems(panelData = STATE.currentPanelData) {
     const data = Array.isArray(panelData) ? panelData : [];
-    return data.filter(item => item && item.link && !item.sent && (item.status === PANEL_READY_STATUS || item.status === PANEL_UNSENT_STATUS));
+    return data.filter(item => item && item.link && !item.sent && item.status === PANEL_READY_STATUS);
   }
 
   function getPanelErrorItems(panelData = STATE.currentPanelData) {
     const data = Array.isArray(panelData) ? panelData : [];
-    return data.filter(item => String(item?.status || '').startsWith(PANEL_ERROR_PREFIX));
+    return data.filter(item => item && item.status !== PANEL_READY_STATUS);
   }
 
   function updateSendUnsentButtonState() {

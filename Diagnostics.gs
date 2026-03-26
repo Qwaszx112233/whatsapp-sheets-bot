@@ -66,7 +66,7 @@ function _ensureSendPanelTechnicalSheet_() {
 
   if (sh.getLastRow() < 2) {
     sh.getRange(2, 1, 1, 7)
-      .setValues([['ПІБ', 'Телефон', 'Код', 'Завдання', 'Статус', 'Дія', 'Відправлено']])
+      .setValues([['FIO', 'Phone', 'Code', 'Tasks', 'Status', 'Sent', 'Action']])
       .setFontWeight('bold')
       .setHorizontalAlignment('center')
       .setBackground('#f0f0f0');
@@ -203,7 +203,7 @@ function healthCheck() {
       details: invalid.length === 0
         ? `Усі ${statuses.length} статусів валідні`
         : `Некоректні статуси: ${[...new Set(invalid)].join(', ')}`,
-      howTo: invalid.length === 0 ? '' : 'Використовуйте тільки ✓ Готово, 🟡 Очікує підтвердження, ↩️ Не відправлено, 📤 Відправлено або ✕ ...'
+      howTo: invalid.length === 0 ? '' : 'Використовуйте тільки ✔ або ✘ у колонці Status'
     };
   });
 

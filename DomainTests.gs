@@ -113,28 +113,27 @@ function runStage6ADomainTests_(options) {
 
   _domainPush_(report, 'sendPanel.sent transition rules', function() {
     const next = SendPanelService_.resolveTransition({ sent: false, status: getSendPanelReadyStatus_() }, 'markSent');
-    _domainAssert_(next.sent === true && next.status === getSendPanelSentStatus_(), 'markSent rule пошкоджений');
+    _domainAssert_(next.sent === true && next.status === getSendPanelReadyStatus_(), 'markSent rule пошкоджений');
     return next.status;
   });
 
   _domainPush_(report, 'sendPanel.pending transition rules', function() {
     const next = SendPanelService_.resolveTransition({ sent: false, status: getSendPanelReadyStatus_() }, 'markPending');
-    _domainAssert_(next.sent === false && next.status === SendPanelConstants_.STATUS_PENDING, 'markPending rule пошкоджений');
+    _domainAssert_(next.sent === false && next.status === getSendPanelReadyStatus_(), 'markPending rule пошкоджений');
     return next.status;
   });
 
   _domainPush_(report, 'sendPanel.unsent transition rules', function() {
-    const next = SendPanelService_.resolveTransition({ sent: true, status: getSendPanelSentStatus_() }, 'markUnsent');
-    _domainAssert_(next.sent === false && next.status === SendPanelConstants_.STATUS_UNSENT, 'markUnsent rule пошкоджений');
+    const next = SendPanelService_.resolveTransition({ sent: true, status: getSendPanelReadyStatus_() }, 'markUnsent');
+    _domainAssert_(next.sent === false && next.status === getSendPanelReadyStatus_(), 'markUnsent rule пошкоджений');
     return next.status;
   });
 
   _domainPush_(report, 'sendPanel.allowed statuses canonical set', function() {
     const statuses = getSendPanelAllAllowedStatuses_();
     _domainAssert_(statuses.indexOf(SendPanelConstants_.STATUS_READY) !== -1, 'Немає STATUS_READY');
-    _domainAssert_(statuses.indexOf(SendPanelConstants_.STATUS_PENDING) !== -1, 'Немає STATUS_PENDING');
-    _domainAssert_(statuses.indexOf(SendPanelConstants_.STATUS_UNSENT) !== -1, 'Немає STATUS_UNSENT');
-    _domainAssert_(statuses.indexOf(SendPanelConstants_.STATUS_SENT) !== -1, 'Немає STATUS_SENT');
+    _domainAssert_(statuses.indexOf(SendPanelConstants_.STATUS_READY) !== -1, 'Немає STATUS_READY');
+    _domainAssert_(statuses.indexOf(SendPanelConstants_.STATUS_BLOCKED) !== -1, 'Немає STATUS_BLOCKED');
     return statuses.join(', ');
   });
 

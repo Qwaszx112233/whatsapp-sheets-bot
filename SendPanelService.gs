@@ -25,10 +25,10 @@ const SendPanelService_ = (function() {
       return shouldTreatRowAsReadyToOpen_(item);
     }).length;
     const sent = items.filter(function(item) {
-      return item.sent === true || item.status === getSendPanelSentStatus_();
+      return item.sent === true;
     }).length;
     const errors = items.filter(function(item) {
-      return String(item.status || '').indexOf(getSendPanelErrorPrefix_()) === 0;
+      return normalizeSendPanelStatus_(item.status) !== getSendPanelReadyStatus_();
     }).length;
 
     return {
@@ -73,17 +73,17 @@ const SendPanelService_ = (function() {
 
     if (normalizedAction === 'markPending' || normalizedAction === 'openChat' || normalizedAction === 'sendPending') {
       item.sent = false;
-      item.status = SendPanelConstants_.STATUS_PENDING;
+      item.status = getSendPanelReadyStatus_();
       return item;
     }
     if (normalizedAction === 'markSent' || normalizedAction === 'confirmSent') {
       item.sent = true;
-      item.status = getSendPanelSentStatus_();
+      item.status = getSendPanelReadyStatus_();
       return item;
     }
     if (normalizedAction === 'markUnsent') {
       item.sent = false;
-      item.status = SendPanelConstants_.STATUS_UNSENT;
+      item.status = getSendPanelReadyStatus_();
       return item;
     }
     return item;

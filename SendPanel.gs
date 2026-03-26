@@ -21,7 +21,11 @@ function getSendPanelReadyStatus_() {
 }
 
 function getSendPanelSentStatus_() {
-  return SendPanelConstants_.STATUS_SENT;
+  return SendPanelConstants_.SENT_MARK;
+}
+
+function getSendPanelBlockedStatus_() {
+  return SendPanelConstants_.STATUS_BLOCKED;
 }
 
 function getSendPanelErrorPrefix_() {
@@ -86,11 +90,11 @@ function readSendPanelSentMap_(panel) {
   ).getValues();
 
   vals.forEach(row => {
-    const [fio, phone, code, tasks, status, action, sent] = row;
+    const [fio, phone, code, tasks, status, sent, action] = row;
     if (!fio || !code) return;
 
     const key = makeSendPanelKey_(fio, phone, code);
-    map[key] = (sent === true || String(sent).toUpperCase() === 'TRUE');
+    map[key] = isSendPanelSentMark_(sent);
   });
 
   return map;
@@ -215,7 +219,7 @@ function ensureSendPanelStructure_(panel, botMonth, panelDate) {
     .setBackground('#fff3cd');
 
   panel.getRange(CONFIG.SEND_PANEL_HEADER_ROW, 1, 1, 7)
-    .setValues([['ПІБ', 'Телефон', 'Код', 'Завдання', 'Статус', 'Дія', 'Відправлено']])
+    .setValues([['FIO', 'Phone', 'Code', 'Tasks', 'Status', 'Sent', 'Action']])
     .setFontWeight('bold')
     .setHorizontalAlignment('center')
     .setBackground('#f0f0f0');
@@ -257,8 +261,7 @@ function readSendPanelStateObjectMap_(panel) {
 
   const rowCount = last - (CONFIG.SEND_PANEL_DATA_START_ROW - 1);
   const values = sheet.getRange(CONFIG.SEND_PANEL_DATA_START_ROW, 1, rowCount, 7).getDisplayValues();
-  const formulas = sheet.getRange(CONFIG.SEND_PANEL_DATA_START_ROW, 6, rowCount, 1).getFormulas().flat();
-  const sentValues = sheet.getRange(CONFIG.SEND_PANEL_DATA_START_ROW, 7, rowCount, 1).getValues().flat();
+  const formulas = sheet.getRange(CONFIG.SEND_PANEL_DATA_START_ROW, 7, rowCount, 1).getFormulas().flat();
 
   values.forEach(function(row, index) {
     const fio = String(row[0] || '').trim();
@@ -267,12 +270,9 @@ function readSendPanelStateObjectMap_(panel) {
     if (!fio || !code) return;
 
     const key = makeSendPanelKey_(fio, phone, code);
-    const normalizedStatus = normalizeSendPanelStatus_(row[4]);
-    const sent = sentValues[index] === true || String(sentValues[index]).toUpperCase() === 'TRUE' || isSendPanelSentStatusValue_(normalizedStatus);
-
     map[key] = {
-      status: normalizedStatus,
-      sent: !!sent,
+      status: normalizeSendPanelStatus_(row[4]),
+      sent: isSendPanelSentMark_(row[5]),
       link: extractHyperlinkUrl_(formulas[index] || '')
     };
   });
@@ -289,41 +289,30 @@ function normalizeSendPanelDailyState_(panel) {
 
   const rowCount = last - (CONFIG.SEND_PANEL_DATA_START_ROW - 1);
   const values = panel.getRange(CONFIG.SEND_PANEL_DATA_START_ROW, 1, rowCount, 7).getDisplayValues();
-  const formulas = panel.getRange(CONFIG.SEND_PANEL_DATA_START_ROW, 6, rowCount, 1).getFormulas().flat();
+  const formulas = panel.getRange(CONFIG.SEND_PANEL_DATA_START_ROW, 7, rowCount, 1).getFormulas().flat();
   const sentMap = readSendPanelStateMap_(getSendPanelToday_());
 
   const statuses = [];
-  const sentFlags = [];
+  const sentMarks = [];
+  const actions = [];
 
   for (let i = 0; i < rowCount; i++) {
     const fio = String(values[i][0] || '').trim();
     const phone = String(values[i][1] || '').replace(/^'/, '').trim();
     const code = String(values[i][2] || '').trim();
-    const currentStatus = String(values[i][4] || '').trim();
-    const link = extractHyperlinkUrl_(formulas[i] || '');
-
-    if (!fio || !code) {
-      statuses.push([currentStatus]);
-      sentFlags.push([false]);
-      continue;
-    }
-
-    if (currentStatus.indexOf(getSendPanelErrorPrefix_()) === 0) {
-      statuses.push([currentStatus]);
-      sentFlags.push([false]);
-      continue;
-    }
-
     const key = makeSendPanelKey_(fio, phone, code);
-    const sentToday = (sentMap[key] === true);
+    const link = extractHyperlinkUrl_(formulas[i] || '');
+    const status = (fio && code && link) ? getSendPanelReadyStatus_() : getSendPanelBlockedStatus_();
+    const sent = !!(sentMap[key] === true || isSendPanelSentMark_(values[i][5]));
 
-    statuses.push([sentToday ? getSendPanelSentStatus_() : getSendPanelReadyStatus_()]);
-    sentFlags.push([sentToday && !!link]);
+    statuses.push([status]);
+    sentMarks.push([sent ? getSendPanelSentMark_() : getSendPanelUnsentMark_()]);
+    actions.push([resolveSendPanelActionCellValue_(link, status, sent)]);
   }
 
-  panel.getRange(CONFIG.SEND_PANEL_DATA_START_ROW, 7, rowCount, 1).insertCheckboxes();
   panel.getRange(CONFIG.SEND_PANEL_DATA_START_ROW, 5, rowCount, 1).setValues(statuses);
-  panel.getRange(CONFIG.SEND_PANEL_DATA_START_ROW, 7, rowCount, 1).setValues(sentFlags);
+  panel.getRange(CONFIG.SEND_PANEL_DATA_START_ROW, 6, rowCount, 1).setValues(sentMarks);
+  panel.getRange(CONFIG.SEND_PANEL_DATA_START_ROW, 7, rowCount, 1).setValues(actions);
 
   return true;
 }
@@ -337,11 +326,11 @@ function rebuildSendPanelCore_() {
   if (!panel) panel = ss.insertSheet(CONFIG.SEND_PANEL_SHEET);
 
   const botMonth = getBotMonthSheetName_();
-  ensureSendPanelStructure_(panel, botMonth);
+  const today = getSendPanelToday_();
+  ensureSendPanelStructure_(panel, botMonth, today);
 
   const phones = loadPhonesIndex_();
   const dict = loadDictMap_();
-  const today = getSendPanelToday_();
   const sentMap = readSendPanelStateMap_(today);
 
   const ref = source.getRange(CONFIG.CODE_RANGE_A1);
@@ -363,10 +352,6 @@ function rebuildSendPanelCore_() {
 
     try {
       const payload = buildPayloadForCell_(source, start + i, col, phones, dict);
-      const linkFormula = payload.link
-        ? `=HYPERLINK("${payload.link}"; "📱 НАДІСЛАТИ")`
-        : '';
-
       const key = makeSendPanelKey_(payload.fio, payload.phone, payload.code);
       const sentToday = sentMap[key] === true;
 
@@ -380,9 +365,9 @@ function rebuildSendPanelCore_() {
         formattedPhone || '—',
         payload.code,
         payload.tasks || '—',
-        sentToday ? getSendPanelSentStatus_() : getSendPanelReadyStatus_(),
-        linkFormula,
-        sentToday
+        getSendPanelReadyStatus_(),
+        sentToday ? getSendPanelSentMark_() : getSendPanelUnsentMark_(),
+        resolveSendPanelActionCellValue_(payload.link, getSendPanelReadyStatus_(), sentToday)
       ]);
     } catch (e) {
       rows.push([
@@ -390,9 +375,9 @@ function rebuildSendPanelCore_() {
         '—',
         code,
         '—',
-        `${getSendPanelErrorPrefix_()} ${e && e.message ? e.message : String(e)}`,
-        '',
-        false
+        getSendPanelBlockedStatus_(),
+        getSendPanelUnsentMark_(),
+        ''
       ]);
     }
   }
@@ -402,32 +387,8 @@ function rebuildSendPanelCore_() {
   }
 
   panel.getRange(CONFIG.SEND_PANEL_DATA_START_ROW, 1, rows.length, 7).setValues(rows);
-  panel.getRange(CONFIG.SEND_PANEL_DATA_START_ROW, 7, rows.length, 1).insertCheckboxes();
   applyColumnWidthsStandardsToSheet_(panel);
-
-  const statusRng = panel.getRange(CONFIG.SEND_PANEL_DATA_START_ROW, 5, rows.length, 1);
-  panel.setConditionalFormatRules([
-    SpreadsheetApp.newConditionalFormatRule()
-      .whenTextContains(getSendPanelReadyStatus_())
-      .setBackground('#e6f4e6')
-      .setRanges([statusRng])
-      .build(),
-
-    SpreadsheetApp.newConditionalFormatRule()
-      .whenTextContains(getSendPanelErrorPrefix_())
-      .setBackground('#ffe6e6')
-      .setRanges([statusRng])
-      .build(),
-
-    SpreadsheetApp.newConditionalFormatRule()
-      .whenTextContains(getSendPanelSentStatus_())
-      .setBackground('#ede9fe')
-      .setRanges([statusRng])
-      .build()
-  ]);
-
   panel.setFrozenRows(CONFIG.SEND_PANEL_HEADER_ROW);
-
   normalizeSendPanelDailyState_(panel);
 
   return {
@@ -449,24 +410,18 @@ function readSendPanelSidebarData_() {
 
   const dataRowCount = lastRow - (CONFIG.SEND_PANEL_DATA_START_ROW - 1);
   const values = panel.getRange(CONFIG.SEND_PANEL_DATA_START_ROW, 1, dataRowCount, 7).getDisplayValues();
-  const formulas = panel.getRange(CONFIG.SEND_PANEL_DATA_START_ROW, 6, dataRowCount, 1).getFormulas().flat();
-  const sentValues = panel.getRange(CONFIG.SEND_PANEL_DATA_START_ROW, 7, dataRowCount, 1).getValues().flat();
+  const formulas = panel.getRange(CONFIG.SEND_PANEL_DATA_START_ROW, 7, dataRowCount, 1).getFormulas().flat();
 
-  return values.map((row, index) => {
-    const status = String(row[4] || '').trim();
-    const sent = sentValues[index] === true || String(sentValues[index]).toUpperCase() === 'TRUE';
-
-    return {
-      fio: String(row[0] || '').trim(),
-      phone: String(row[1] || '').replace(/^'/, '').trim() || '—',
-      code: String(row[2] || '').trim(),
-      tasks: String(row[3] || '').trim() || '—',
-      status: status,
-      link: extractHyperlinkUrl_(formulas[index] || ''),
-      sent: sent,
-      row: CONFIG.SEND_PANEL_DATA_START_ROW + index
-    };
-  }).filter(item => item.fio || item.code || item.phone !== '—');
+  return values.map((row, index) => ({
+    fio: String(row[0] || '').trim(),
+    phone: String(row[1] || '').replace(/^'/, '').trim() || '—',
+    code: String(row[2] || '').trim(),
+    tasks: String(row[3] || '').trim() || '—',
+    status: normalizeSendPanelStatus_(row[4]),
+    sent: isSendPanelSentMark_(row[5]),
+    link: extractHyperlinkUrl_(formulas[index] || ''),
+    row: CONFIG.SEND_PANEL_DATA_START_ROW + index
+  })).filter(item => item.fio || item.code || item.phone !== '—');
 }
 
 function buildSendPanelSidebarResponse_(meta) {
@@ -477,8 +432,8 @@ function buildSendPanelSidebarResponse_(meta) {
     data: data,
     totalCount: data.length,
     readyCount: data.filter(item => item.status === getSendPanelReadyStatus_() && item.link && !item.sent).length,
-    errorCount: data.filter(item => String(item.status || '').indexOf(getSendPanelErrorPrefix_()) === 0).length,
-    sentCount: data.filter(item => item.sent === true || item.status === getSendPanelSentStatus_()).length,
+    errorCount: data.filter(item => normalizeSendPanelStatus_(item.status) !== getSendPanelReadyStatus_()).length,
+    sentCount: data.filter(item => item.sent === true).length,
     month: meta && meta.month ? meta.month : getBotMonthSheetName_(),
     date: meta && meta.date ? meta.date : getSendPanelToday_()
   };
@@ -508,12 +463,12 @@ function sendAllFromSendPanel() {
 
   const countRows = last - (CONFIG.SEND_PANEL_DATA_START_ROW - 1);
   const values = panel.getRange(CONFIG.SEND_PANEL_DATA_START_ROW, 1, countRows, 7).getDisplayValues();
-  const formulas = panel.getRange(CONFIG.SEND_PANEL_DATA_START_ROW, 6, countRows, 1).getFormulas().flat();
-  const sent = panel.getRange(CONFIG.SEND_PANEL_DATA_START_ROW, 7, countRows, 1).getValues().flat();
+  const formulas = panel.getRange(CONFIG.SEND_PANEL_DATA_START_ROW, 7, countRows, 1).getFormulas().flat();
+  const sent = panel.getRange(CONFIG.SEND_PANEL_DATA_START_ROW, 6, countRows, 1).getDisplayValues().flat();
 
   const items = [];
   for (let i = 0; i < countRows; i++) {
-    if (sent[i] === true) continue;
+    if (isSendPanelSentMark_(sent[i])) continue;
 
     const status = String(values[i][4] || '').trim();
     if (status.indexOf(getSendPanelErrorPrefix_()) === 0) continue;
@@ -554,8 +509,8 @@ function markSendPanelSent_(row) {
   map[key] = true;
   writeSendPanelStateMap_(dateStr, map);
 
-  panel.getRange(row, 7).insertCheckboxes().setValue(true);
-  panel.getRange(row, 5).setValue(getSendPanelSentStatus_());
+  panel.getRange(row, 6).setValue(getSendPanelSentMark_());
+  panel.getRange(row, 7).setValue(resolveSendPanelActionCellValue_(extractHyperlinkUrl_(panel.getRange(row, 7).getFormula()), normalizeSendPanelStatus_(panel.getRange(row, 5).getDisplayValue()), true));
 
   return true;
 }
@@ -579,8 +534,8 @@ function markSendPanelUnsent_(row) {
   delete map[key];
   writeSendPanelStateMap_(dateStr, map);
 
-  panel.getRange(row, 7).insertCheckboxes().setValue(false);
-  panel.getRange(row, 5).setValue(getSendPanelReadyStatus_());
+  panel.getRange(row, 6).setValue(getSendPanelUnsentMark_());
+  panel.getRange(row, 7).setValue(resolveSendPanelActionCellValue_(extractHyperlinkUrl_(panel.getRange(row, 7).getFormula()), normalizeSendPanelStatus_(panel.getRange(row, 5).getDisplayValue()), false));
 
   return true;
 }
@@ -684,10 +639,10 @@ function showSendPanelDialog_(items) {
   </style>
 </head>
 <body>
-  <h3>📤 Підтвердження відправки WhatsApp</h3>
+  <h3>📤 Автофіксація відправки WhatsApp</h3>
 
   <div class="stats">
-    <div><b>Схема роботи:</b> спочатку відкриваєш повідомлення у WhatsApp, потім після фактичної відправки повертаєшся сюди і тиснеш <b>Підтверджено</b>.</div>
+    <div><b>Схема роботи:</b> відкриваєш повідомлення у WhatsApp, і рядок одразу автоматично фіксується як відправлений.</div>
     <div class="hint">Використовується одна і та сама вкладка WhatsApp. Нові вкладки на кожне повідомлення не плодяться.</div>
   </div>
 
@@ -699,7 +654,7 @@ function showSendPanelDialog_(items) {
   <div class="buttons">
     <button class="btn-wa" id="btnPrepare">🟢 Підготувати вкладку WhatsApp</button>
     <button class="btn-open" id="btnOpen">📱 Відкрити поточне</button>
-    <button class="btn-ok" id="btnConfirm">✓ Підтверджено</button>
+    <button class="btn-ok" id="btnConfirm" style="display:none;">✓ Підтверджено</button>
     <button class="btn-no" id="btnReject">↩️ Не відправлено</button>
     <button class="btn-skip" id="btnSkip">⏭️ Пропустити</button>
     <button class="btn-close" id="btnClose">✖ Закрити</button>
@@ -750,6 +705,7 @@ function showSendPanelDialog_(items) {
         metaEl.innerHTML = '<div><b>Статус</b></div><div>Більше немає повідомлень у черзі.</div>';
         btnOpen.disabled = true;
         btnConfirm.disabled = true;
+        btnConfirm.style.display = 'none';
         btnReject.disabled = true;
         btnSkip.disabled = true;
         return;
@@ -785,6 +741,17 @@ function showSendPanelDialog_(items) {
       try {
         window.open(item.url, WA_TARGET);
         log('📱 Відкрито у вкладці WhatsApp: ' + (item.fio || 'без імені'));
+
+        google.script.run
+          .withSuccessHandler(function(){
+            log('✅ Автоматично зафіксовано як відправлене: ' + (item.fio || 'без імені'));
+            currentIndex++;
+            renderCurrent();
+          })
+          .withFailureHandler(function(err){
+            log('✕ Помилка автофіксації: ' + (err && err.message ? err.message : err));
+          })
+          .markSendPanelSent_(item.row);
       } catch (e) {
         log('✕ Не вдалося відкрити повідомлення: ' + (e && e.message ? e.message : e));
       }
