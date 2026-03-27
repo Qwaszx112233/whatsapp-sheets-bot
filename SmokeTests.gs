@@ -7,7 +7,7 @@ function _smokeAssert_(condition, message) {
 }
 
 function _smokeBundleHas_(path) {
-  return typeof isProjectBundleFilePresent_ === 'function' ? isProjectBundleFilePresent_(path) : false;
+  return typeof isProjectBundleFilePresent_ === 'function'? isProjectBundleFilePresent_(path) : false;
 }
 
 function _smokeHasRouteApi_(fnName) {
@@ -36,19 +36,19 @@ function _smokeHasRouteApi_(fnName) {
 
 function _smokeResolveKnownSymbol_(name) {
   switch (String(name || '').trim()) {
-    case 'DataAccess_': return typeof DataAccess_ !== 'undefined' ? DataAccess_ : undefined;
-    case 'DictionaryRepository_': return typeof DictionaryRepository_ !== 'undefined' ? DictionaryRepository_ : undefined;
-    case 'PersonsRepository_': return typeof PersonsRepository_ !== 'undefined' ? PersonsRepository_ : undefined;
-    case 'SendPanelRepository_': return typeof SendPanelRepository_ !== 'undefined' ? SendPanelRepository_ : undefined;
-    case 'VacationsRepository_': return typeof VacationsRepository_ !== 'undefined' ? VacationsRepository_ : undefined;
-    case 'SummaryRepository_': return typeof SummaryRepository_ !== 'undefined' ? SummaryRepository_ : undefined;
-    case 'LogsRepository_': return typeof LogsRepository_ !== 'undefined' ? LogsRepository_ : undefined;
-    case 'Stage4UseCases_': return typeof Stage4UseCases_ !== 'undefined' ? Stage4UseCases_ : undefined;
-    case 'WorkflowOrchestrator_': return typeof WorkflowOrchestrator_ !== 'undefined' ? WorkflowOrchestrator_ : undefined;
-    case 'Stage4AuditTrail_': return typeof Stage4AuditTrail_ !== 'undefined' ? Stage4AuditTrail_ : undefined;
-    case 'Reconciliation_': return typeof Reconciliation_ !== 'undefined' ? Reconciliation_ : undefined;
-    case 'Stage4Triggers_': return typeof Stage4Triggers_ !== 'undefined' ? Stage4Triggers_ : undefined;
-    case 'Stage4Templates_': return typeof Stage4Templates_ !== 'undefined' ? Stage4Templates_ : undefined;
+    case 'DataAccess_': return typeof DataAccess_ !== 'undefined'? DataAccess_ : undefined;
+    case 'DictionaryRepository_': return typeof DictionaryRepository_ !== 'undefined'? DictionaryRepository_ : undefined;
+    case 'PersonsRepository_': return typeof PersonsRepository_ !== 'undefined'? PersonsRepository_ : undefined;
+    case 'SendPanelRepository_': return typeof SendPanelRepository_ !== 'undefined'? SendPanelRepository_ : undefined;
+    case 'VacationsRepository_': return typeof VacationsRepository_ !== 'undefined'? VacationsRepository_ : undefined;
+    case 'SummaryRepository_': return typeof SummaryRepository_ !== 'undefined'? SummaryRepository_ : undefined;
+    case 'LogsRepository_': return typeof LogsRepository_ !== 'undefined'? LogsRepository_ : undefined;
+    case 'Stage4UseCases_': return typeof Stage4UseCases_ !== 'undefined'? Stage4UseCases_ : undefined;
+    case 'WorkflowOrchestrator_': return typeof WorkflowOrchestrator_ !== 'undefined'? WorkflowOrchestrator_ : undefined;
+    case 'Stage4AuditTrail_': return typeof Stage4AuditTrail_ !== 'undefined'? Stage4AuditTrail_ : undefined;
+    case 'Reconciliation_': return typeof Reconciliation_ !== 'undefined'? Reconciliation_ : undefined;
+    case 'Stage4Triggers_': return typeof Stage4Triggers_ !== 'undefined'? Stage4Triggers_ : undefined;
+    case 'Stage4Templates_': return typeof Stage4Templates_ !== 'undefined'? Stage4Templates_ : undefined;
     default: return undefined;
   }
 }
@@ -86,7 +86,7 @@ function _smokeResolveFn_(name) {
 function _smokeHasFn_(name) {
   const target = String(name || '').trim();
   if (!target) return false;
-  return typeof _smokeResolveFn_(target) === 'function' || _smokeHasRouteApi_(target);
+  return typeof _smokeResolveFn_(target) === 'function'|| _smokeHasRouteApi_(target);
 }
 
 function _smokePush_(report, name, fn, options) {
@@ -133,8 +133,8 @@ function _pickTestCallsign_() {
 function _assertStage4Meta_(result, functionName) {
   _assertUnifiedContract_(result, functionName);
   _smokeAssert_(result.data && typeof result.data === 'object', `${functionName}() не повернув data object`);
-  _smokeAssert_('result' in result.data, `${functionName}() не повернув data.result`);
-  _smokeAssert_('meta' in result.data, `${functionName}() не повернув data.meta`);
+  _smokeAssert_('result'in result.data, `${functionName}() не повернув data.result`);
+  _smokeAssert_('meta'in result.data, `${functionName}() не повернув data.meta`);
 }
 
 function _runContractTest_(report, name, fn, options) {
@@ -301,14 +301,14 @@ function runStage4SmokeTests(options) {
       apiStage4HealthCheck({ shallow: true }),
       apiRunStage4RegressionTests({ dryRun: true })
     ].forEach(function (result, idx) {
-      _assertStage4Meta_(result, 'maintenance#' + (idx + 1));
+      _assertStage4Meta_(result, 'maintenance#'+ (idx + 1));
     });
     return 'maintenance-contracts-ok';
   }, { skipOnError: true });
 
   _smokePush_(report, 'jobs api contract suite', function () {
     [apiListStage4Jobs(), apiInstallStage4Jobs()].forEach(function (result, idx) {
-      _assertStage4Meta_(result, 'jobs#' + (idx + 1));
+      _assertStage4Meta_(result, 'jobs#'+ (idx + 1));
     });
     _assertUnifiedContract_(apiRunStage4Job(STAGE4_CONFIG.JOBS.SCHEDULED_HEALTHCHECK, { dryRun: true }), 'apiRunStage4Job');
     return 'jobs-contracts-ok';
@@ -335,7 +335,7 @@ function runStage4SmokeTests(options) {
   });
 
   _smokePush_(report, 'canonical helper consistency', function () {
-    _smokeAssert_(typeof HtmlUtils_ === 'object' && typeof HtmlUtils_.escapeHtml === 'function', 'HtmlUtils_.escapeHtml відсутній');
+    _smokeAssert_(typeof HtmlUtils_ === 'object'&& typeof HtmlUtils_.escapeHtml === 'function', 'HtmlUtils_.escapeHtml відсутній');
     _smokeAssert_(escapeHtml_('<x>') === HtmlUtils_.escapeHtml('<x>'), 'escapeHtml_() не узгоджений');
     _smokeAssert_(_escapeHtml_('<x>') === HtmlUtils_.escapeHtml('<x>'), '_escapeHtml_() не узгоджений');
     return 'helper-ok';
@@ -371,7 +371,7 @@ function runStage5ScenarioTests(options) {
   const opts = options || {};
   const report = {
     ok: true,
-    stage: (typeof getProjectBundleMetadata_ === 'function' ? getProjectBundleMetadata_().stageVersion : '7.1.1-final-stabilized-repair'),
+    stage: (typeof getProjectBundleMetadata_ === 'function'? getProjectBundleMetadata_().stageVersion : '7.1.1-final-stabilized-repair'),
     ts: new Date().toISOString(),
     dryRun: opts.dryRun !== false,
     checks: [],
@@ -428,13 +428,13 @@ function runStage5ScenarioTests(options) {
   }, { skipOnError: true });
 
   _runContractTest_(report, 'apiStage5HealthCheck', function () {
-    const result = apiStage5HealthCheck({ mode: 'quick' });
+    const result = apiStage5HealthCheck({ mode: 'quick'});
     _smokeAssert_(Array.isArray(result.data.result.checks), 'checks[] не повернуто');
     return result;
   }, { skipOnError: true });
 
   _runContractTest_(report, 'apiRunStage5Diagnostics', function () {
-    const result = apiRunStage5Diagnostics({ mode: 'structural' });
+    const result = apiRunStage5Diagnostics({ mode: 'structural'});
     _smokeAssert_(Array.isArray(result.data.result.checks), 'checks[] не повернуто');
     return result;
   }, { skipOnError: true });
@@ -450,9 +450,9 @@ function runStage5ScenarioTests(options) {
 
 function runStage5SmokeTests(options) {
   const opts = options || {};
-  const meta = typeof getProjectBundleMetadata_ === 'function' ? getProjectBundleMetadata_() : PROJECT_BUNDLE_METADATA_;
-  const docs = typeof getProjectDocumentationMap_ === 'function' ? getProjectDocumentationMap_() : {};
-  const release = typeof getProjectReleaseNaming_ === 'function' ? getProjectReleaseNaming_() : (meta && meta.release) || {};
+  const meta = typeof getProjectBundleMetadata_ === 'function'? getProjectBundleMetadata_() : PROJECT_BUNDLE_METADATA_;
+  const docs = typeof getProjectDocumentationMap_ === 'function'? getProjectDocumentationMap_() : {};
+  const release = typeof getProjectReleaseNaming_ === 'function'? getProjectReleaseNaming_() : (meta && meta.release) || {};
   const report = {
     ok: true,
     stage: meta && meta.stageVersion ? meta.stageVersion : '7.1.1-final-stabilized-repair',
@@ -552,8 +552,8 @@ function runStage5SmokeTests(options) {
 
   _smokePush_(report, 'sidebar template include path', function () {
     const rawSidebar = include('Sidebar');
-    _smokeAssert_(rawSidebar.indexOf("<?!= includeTemplate('JavaScript'); ?>") !== -1 || rawSidebar.indexOf('<?!= includeTemplate("JavaScript"); ?>') !== -1, 'Sidebar.html має підключати JavaScript через includeTemplate');
-    _smokeAssert_(rawSidebar.indexOf("<?!= include('JavaScript'); ?>") === -1 && rawSidebar.indexOf('<?!= include("JavaScript"); ?>') === -1, 'Sidebar.html не повинен використовувати raw include для JavaScript');
+    _smokeAssert_(rawSidebar.indexOf("<?!= includeTemplate('JavaScript'); ?>") !== -1 || rawSidebar.indexOf('<?!= includeTemplate("JavaScript"); ?>') !== -1, ' Sidebar.html має підключати JavaScript через includeTemplate');
+    _smokeAssert_(rawSidebar.indexOf("<?!= include('JavaScript'); ?>") === -1 && rawSidebar.indexOf('<?!= include("JavaScript"); ?>') === -1, ' Sidebar.html не повинен використовувати raw include для JavaScript');
     return 'sidebar-include-ok';
   });
 
@@ -571,7 +571,7 @@ function runStage5SmokeTests(options) {
     const rawJavaScript = include('JavaScript');
     const rawSidebar = include('Sidebar');
     const runtimeContract = getClientRuntimeContract_();
-    [{ token: 'runtime consolidated in RC2', label: 'legacy-runtime-token-1' }, { token: 'Показує тільки швидку актуальну Stage 5 перевірку без legacy-шуму.', label: 'legacy-runtime-token-2' }, { token: 'stage6a-canonical-runtime', label: 'legacy-runtime-token-3' }].forEach(function (item) {
+    [{ token: 'runtime consolidated in RC2', label: 'legacy-runtime-token-1'}, { token: 'Показує тільки швидку актуальну Stage 5 перевірку без legacy-шуму.', label: 'legacy-runtime-token-2'}, { token: 'stage6a-canonical-runtime', label: 'legacy-runtime-token-3'}].forEach(function (item) {
       _smokeAssert_(rawJavaScript.indexOf(item.token) === -1, `У JavaScript.html залишився legacy runtime marker: ${item.label}`);
     });
     _smokeAssert_(rawSidebar.indexOf('Stage 6A bootstrap contract') === -1, 'У Sidebar.html залишився legacy bootstrap comment marker');
@@ -593,12 +593,12 @@ function runStage5SmokeTests(options) {
   });
 
   _smokePush_(report, 'public diagnostics wording is stage7-1', function () {
-    const quick = runStage5QuickDiagnostics_({ mode: 'quick' });
-    const full = runStage5FullDiagnostics_({ mode: 'full' });
-    const sunset = runStage5SunsetDiagnostics_({ mode: 'compatibility sunset' });
+    const quick = runStage5QuickDiagnostics_({ mode: 'quick'});
+    const full = runStage5FullDiagnostics_({ mode: 'full'});
+    const sunset = runStage5SunsetDiagnostics_({ mode: 'compatibility sunset'});
     const compatHealth = apiStage4HealthCheck({ shallow: true, includeReconciliationPreview: false });
-    const maintHealth = apiStage5HealthCheck({ mode: 'quick' });
-    const maintDiagnostics = apiRunStage5Diagnostics({ mode: 'full' });
+    const maintHealth = apiStage5HealthCheck({ mode: 'quick'});
+    const maintDiagnostics = apiRunStage5Diagnostics({ mode: 'full'});
     const texts = [
       quick.summary || '',
       full.summary || '',
@@ -611,7 +611,7 @@ function runStage5SmokeTests(options) {
     ];
 
     texts.forEach(function (text) {
-      [{ token: 'Stage 4.2', label: 'legacy-diagnostics-token-1' }, { token: 'Stage 5 health bridge', label: 'legacy-diagnostics-token-2' }, { token: 'Stage 5 compatibility diagnostics', label: 'legacy-diagnostics-token-3' }, { token: 'Stage 5 quick compatibility diagnostics', label: 'legacy-diagnostics-token-4' }, { token: 'Stage 5 full compatibility diagnostics', label: 'legacy-diagnostics-token-5' }, { token: 'Stage 5 structural compatibility diagnostics', label: 'legacy-diagnostics-token-6' }].forEach(function (item) {
+      [{ token: 'Stage 4.2', label: 'legacy-diagnostics-token-1'}, { token: 'Stage 5 health bridge', label: 'legacy-diagnostics-token-2'}, { token: 'Stage 5 compatibility diagnostics', label: 'legacy-diagnostics-token-3'}, { token: 'Stage 5 quick compatibility diagnostics', label: 'legacy-diagnostics-token-4'}, { token: 'Stage 5 full compatibility diagnostics', label: 'legacy-diagnostics-token-5'}, { token: 'Stage 5 structural compatibility diagnostics', label: 'legacy-diagnostics-token-6'}].forEach(function (item) {
         _smokeAssert_(String(text).indexOf(item.token) === -1, `У public diagnostics wording залишився legacy marker: ${item.label}`);
       });
     });
@@ -626,8 +626,8 @@ function runStage5SmokeTests(options) {
 
   _smokePush_(report, 'maintenance public wording is release-neutral', function () {
     const responses = [
-      apiStage5HealthCheck({ mode: 'quick' }),
-      apiRunStage5Diagnostics({ mode: 'quick' }),
+      apiStage5HealthCheck({ mode: 'quick'}),
+      apiRunStage5Diagnostics({ mode: 'quick'}),
       apiRunStage5RegressionTests({ dryRun: true }),
       apiListStage5JobRuntime(),
       apiListStage5Jobs()
@@ -638,7 +638,7 @@ function runStage5SmokeTests(options) {
         result && result.data && result.data.result && result.data.result.summary || ''
       ];
       texts.forEach(function (text) {
-        [{ token: 'Stage 4.2', label: 'legacy-maintenance-token-1' }, { token: 'Stage 5 jobs', label: 'legacy-maintenance-token-2' }, { token: 'Stage 5 health check', label: 'legacy-maintenance-token-3' }, { token: 'Stage 5 full health check', label: 'legacy-maintenance-token-4' }, { token: 'Stage 5 diagnostics', label: 'legacy-maintenance-token-5' }, { token: 'Stage 5 regression tests', label: 'legacy-maintenance-token-6' }, { token: 'Stage 5 job runtime', label: 'legacy-maintenance-token-7' }].forEach(function (item) {
+        [{ token: 'Stage 4.2', label: 'legacy-maintenance-token-1'}, { token: 'Stage 5 jobs', label: 'legacy-maintenance-token-2'}, { token: 'Stage 5 health check', label: 'legacy-maintenance-token-3'}, { token: 'Stage 5 full health check', label: 'legacy-maintenance-token-4'}, { token: 'Stage 5 diagnostics', label: 'legacy-maintenance-token-5'}, { token: 'Stage 5 regression tests', label: 'legacy-maintenance-token-6'}, { token: 'Stage 5 job runtime', label: 'legacy-maintenance-token-7'}].forEach(function (item) {
           _smokeAssert_(String(text).indexOf(item.token) === -1, `У maintenance response залишився legacy marker: ${item.label}`);
         });
       });
@@ -667,7 +667,7 @@ function runStage5SmokeTests(options) {
   });
 
   _smokePush_(report, 'diagnostics suite', function () {
-    const diagnostics = runStage5FullDiagnostics_({ mode: 'full' });
+    const diagnostics = runStage5FullDiagnostics_({ mode: 'full'});
     _smokeAssert_(Array.isArray(diagnostics.checks), 'runStage5FullDiagnostics_() не повернув checks[]');
     return `checks=${diagnostics.checks.length}`;
   }, { skipOnError: true });
@@ -681,7 +681,7 @@ function runStage5SmokeTests(options) {
   _smokePush_(report, 'template governance contract', function () {
     const templates = TemplateRegistry_.list();
     _smokeAssert_(Array.isArray(templates), 'TemplateRegistry_.list() не повернув масив');
-    const resolved = TemplateResolver_.resolve('DAY_SUMMARY_HEADER', { date: '01.01.2026' }, { preview: true });
+    const resolved = TemplateResolver_.resolve('DAY_SUMMARY_HEADER', { date: '01.01.2026'}, { preview: true });
     _smokeAssert_(typeof resolved.text === 'string', 'TemplateResolver_.resolve() не повернув text');
     return `templates=${templates.length}`;
   });
@@ -716,7 +716,7 @@ function runStage5SmokeTests(options) {
   });
 
   _smokePush_(report, 'safety-aware response contract', function () {
-    const response = buildStage4Response_(true, 'OK', null, {}, [], { operationId: 'op', scenario: 'x', dryRun: false, affectedSheets: ['SEND_PANEL'], affectedEntities: ['x'], appliedChangesCount: 1, skippedChangesCount: 0, partial: false, retrySafe: true, lockUsed: true }, { lifecycle: [] }, { scenario: 'x' }, []);
+    const response = buildStage4Response_(true, 'OK', null, {}, [], { operationId: 'op', scenario: 'x', dryRun: false, affectedSheets: ['SEND_PANEL'], affectedEntities: ['x'], appliedChangesCount: 1, skippedChangesCount: 0, partial: false, retrySafe: true, lockUsed: true }, { lifecycle: [] }, { scenario: 'x'}, []);
     ['operationId', 'scenario', 'dryRun', 'affectedSheets', 'affectedEntities', 'appliedChangesCount', 'skippedChangesCount', 'partial', 'retrySafe', 'lockUsed'].forEach(function (field) {
       _smokeAssert_(field in response, `Response missing ${field}`);
     });
@@ -729,7 +729,7 @@ function runStage5SmokeTests(options) {
     _smokeAssert_(typeof OperationRepository_.buildFingerprint === 'function', 'buildFingerprint() відсутній');
     _smokeAssert_(typeof OperationRepository_.transitionStatus === 'function', 'transitionStatus() відсутній');
     _smokeAssert_(typeof OperationRepository_.appendNote === 'function', 'appendNote() відсутній');
-    const fp1 = OperationRepository_.buildFingerprint('markPanelRowsAsSent', { rowNumbers: [7, 3, 7, 3], callsigns: [' A ', 'b', 'a'] });
+    const fp1 = OperationRepository_.buildFingerprint('markPanelRowsAsSent', { rowNumbers: [7, 3, 7, 3], callsigns: ['A ', 'b', 'a'] });
     const fp2 = OperationRepository_.buildFingerprint('markPanelRowsAsSent', { rowNumbers: [3, 7], callsigns: ['b', 'a'] });
     _smokeAssert_(fp1 === fp2, 'fingerprint normalization не працює стабільно');
     return 'lifecycle-contract-ok';
@@ -737,7 +737,7 @@ function runStage5SmokeTests(options) {
 
   _smokePush_(report, 'maintenance repair api contract', function () {
     ['apiStage5ListPendingRepairs', 'apiStage5GetOperationDetails', 'apiStage5RunRepair'].forEach(function (name) {
-      _smokeAssert_(_smokeHasFn_(name), name + ' відсутній');
+      _smokeAssert_(_smokeHasFn_(name), name + 'відсутній');
     });
     return 'repair-api-ok';
   });

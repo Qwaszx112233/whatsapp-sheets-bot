@@ -18,7 +18,7 @@ function _unwrapActionResult_(result) {
 }
 
 function _showActionError_(e) {
-  SpreadsheetApp.getUi().alert('(✘) ' + (e && e.message ? e.message : String(e)));
+  SpreadsheetApp.getUi().alert('✘ ' + (e && e.message ? e.message : String(e)));
 }
 
 function waShowForSelection() {
@@ -31,7 +31,7 @@ function waShowForSelection() {
 
 function waLogAndShowForSelection() {
   try {
-    DialogPresenter_.showPrepared(_unwrapActionResult_(apiLogPreparedMessages({ mode: 'selection' })));
+    DialogPresenter_.showPrepared(_unwrapActionResult_(apiLogPreparedMessages({ mode: 'selection'})));
   } catch (e) {
     _showActionError_(e);
   }
@@ -47,7 +47,7 @@ function waShowForMultipleCells() {
 
 function waLogAndShowForMultipleCells() {
   try {
-    DialogPresenter_.showPrepared(_unwrapActionResult_(apiLogPreparedMessages({ mode: 'multiple' })));
+    DialogPresenter_.showPrepared(_unwrapActionResult_(apiLogPreparedMessages({ mode: 'multiple'})));
   } catch (e) {
     _showActionError_(e);
   }
@@ -55,7 +55,7 @@ function waLogAndShowForMultipleCells() {
 
 function waMassByRange() {
   try {
-    DialogPresenter_.showPrepared(_unwrapActionResult_(apiLogPreparedMessages({ mode: 'range' })));
+    DialogPresenter_.showPrepared(_unwrapActionResult_(apiLogPreparedMessages({ mode: 'range'})));
   } catch (e) {
     _showActionError_(e);
   }
@@ -71,7 +71,7 @@ function waShowGroupedByPhone() {
 
 function waLogAndShowGroupedByPhone() {
   try {
-    DialogPresenter_.showPrepared(_unwrapActionResult_(apiLogPreparedMessages({ mode: 'grouped' })));
+    DialogPresenter_.showPrepared(_unwrapActionResult_(apiLogPreparedMessages({ mode: 'grouped'})));
   } catch (e) {
     _showActionError_(e);
   }
@@ -107,7 +107,7 @@ function diagnoseCommanderPhone() {
   try {
     const report = _unwrapActionResult_(apiRunSelectionDiagnostics({}));
     SpreadsheetApp.getUi().alert(
-      '☏ Діагностика',
+      'Діагностика',
       [
         `Аркуш: ${report.sheet}`,
         `Bot sheet: ${report.botSheet}`,
@@ -115,7 +115,7 @@ function diagnoseCommanderPhone() {
         `Діапазонів виділено: ${report.selectedRangesCount}`,
         `Payload: ${report.payloadCount}`,
         `Помилок: ${report.errorCount}`,
-        `Командир (${report.commanderRole}): ${report.commanderPhonePresent ? 'є телефон' : 'немає телефону'}`
+        `Командир (${report.commanderRole}): ${report.commanderPhonePresent ? 'є телефон': 'немає телефону'}`
       ].join('\n'),
       SpreadsheetApp.getUi().ButtonSet.OK
     );

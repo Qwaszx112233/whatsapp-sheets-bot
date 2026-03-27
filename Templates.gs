@@ -18,16 +18,16 @@ function renderTemplate_(tpl, data) {
   return tpl.replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}|\{\s*([a-zA-Z0-9_]+)\s*\}/g, function(m, keyDouble, keySingle) {
     const key = keyDouble || keySingle || '';
     const v = data[key] ?? data[String(key).toLowerCase()] ?? data[String(key).toUpperCase()];
-    return (v === undefined || v === null) ? '' : String(v);
+    return (v === undefined || v === null) ? '': String(v);
   });
 }
 
-/** Нормализация ENABLED: checkbox boolean или "TRUE"/"1"/"YES" */
+/** Нормализация ENABLED: checkbox boolean или "TRUE"/"1"/"YES"*/
 function _isEnabled_(v) {
   if (v === true) return true;
   if (v === false) return false;
   const s = String(v ?? '').trim().toUpperCase();
-  return (s === 'TRUE' || s === '1' || s === 'YES' || s === 'Y' || s === 'ON');
+  return (s === 'TRUE'|| s === '1'|| s === 'YES'|| s === 'Y'|| s === 'ON');
 }
 
 /** Забираем карту шаблонов из листа (и кладём в Cache) */
@@ -68,7 +68,7 @@ function _loadTemplatesMap_() {
   return map;
 }
 
-/** Получить текст шаблона: если ENABLED=false или пусто — вернуть '' */
+/** Получить текст шаблона: если ENABLED=false или пусто — вернуть ''*/
 function getTemplateText_(templateKey) {
   templateKey = String(templateKey ?? '').trim();
   if (!templateKey) return '';
@@ -93,25 +93,25 @@ function notifyWithTemplate_(templateKey, data, targetPhone) {
   const tplText = getTemplateText_(templateKey);
 
   if (!tplText) {
-    console.warn(`[SKIP] Template "${templateKey}" disabled (ENABLED=false / empty / not found).`);
+    console.warn(`[SKIP] Template "${templateKey}"disabled (ENABLED=false / empty / not found).`);
     return null;
   }
 
   const message = renderTemplate_(tplText, data || {});
   if (!String(message).trim()) {
-    console.warn(`[SKIP] Template "${templateKey}" rendered empty message.`);
+    console.warn(`[SKIP] Template "${templateKey}"rendered empty message.`);
     return null;
   }
 
   const phone = String(targetPhone || '').trim();
   const digits = phone.replace(/\D/g, '');
   if (!digits) {
-    console.warn(`[SKIP] Template "${templateKey}" no valid targetPhone: "${phone}"`);
+    console.warn(`[SKIP] Template "${templateKey}"no valid targetPhone: "${phone}"`);
     return null;
   }
 
   const safeMsg =
-    (typeof trimToEncoded_ === 'function' && typeof CONFIG === 'object' && CONFIG && CONFIG.MAX_WA_TEXT)
+    (typeof trimToEncoded_ === 'function'&& typeof CONFIG === 'object'&& CONFIG && CONFIG.MAX_WA_TEXT)
       ? trimToEncoded_(message, CONFIG.MAX_WA_TEXT)
       : message;
 
@@ -144,9 +144,9 @@ function testNotifyWithTemplate_() {
   console.log('LINK:', link);
 
   if (link && link.includes('wa.me/') && link.includes('text=')) {
-    console.log('((✔)) OK: WA link built');
+    console.log('✔ OK: WA link built');
   } else {
-    console.error('(✘) FAIL: WA link not built');
+    console.error('✘ FAIL: WA link not built');
   }
 
   return link;
@@ -184,7 +184,7 @@ const Stage4Templates_ = (function() {
     const rendered = renderTemplate_(tpl, data || {});
     if (!opts.preview) return rendered;
     const max = Number(opts.maxLen) || STAGE4_CONFIG.TEMPLATE_PREVIEW_LIMIT;
-    return rendered.length > max ? rendered.slice(0, max) + '…' : rendered;
+    return rendered.length >max ? rendered.slice(0, max) + '…': rendered;
   }
 
   function preview(key, data, options) {

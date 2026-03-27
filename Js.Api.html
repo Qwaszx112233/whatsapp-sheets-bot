@@ -171,27 +171,27 @@
       };
     },
 
-    runReconciliation: (options = {}) => Api.run('apiRunReconciliation', options)
+    runReconciliation: (options = {}) =>Api.run('apiRunReconciliation', options)
   };
 
   var MaintenanceApi = {
-    clearCache: async () => adaptStage4UtilityResponse(await Api.run('apiStage5ClearCache')),
-    clearLog: async () => adaptStage4UtilityResponse(await Api.run('apiStage5ClearLog')),
-    clearPhoneCache: async () => adaptStage4UtilityResponse(await Api.run('apiStage5ClearPhoneCache')),
-    restartBot: async () => adaptStage4UtilityResponse(await Api.run('apiStage5RestartBot')),
-    setupVacationTriggers: async () => adaptStage4UtilityResponse(await Api.run('apiStage5SetupVacationTriggers')),
-    cleanupDuplicateTriggers: async (functionName) => adaptStage4UtilityResponse(await Api.run('apiStage5CleanupDuplicateTriggers', functionName)),
-    debugPhones: async () => adaptStage4UtilityResponse(await Api.run('apiStage5DebugPhones')),
-    buildBirthdayLink: async (phone, name) => adaptStage4UtilityResponse(await Api.run('apiStage5BuildBirthdayLink', phone, name)),
-    runMaintenance: async (options = {}) => adaptStage4UtilityResponse(await Api.run('apiRunStage5MaintenanceScenario', options)),
-    listJobs: async () => adaptStage4UtilityResponse(await Api.run('apiListStage5Jobs')),
-    installJobs: async () => adaptStage4UtilityResponse(await Api.run('apiInstallStage5Jobs')),
-    runJob: async (jobName, options = {}) => adaptStage4UtilityResponse(await Api.run('apiRunStage5Job', jobName, options)),
-    healthCheck: async (options = {}) => adaptStage4UtilityResponse(await Api.run('apiStage5HealthCheck', options)),
-    runRegressionTests: async (options = {}) => adaptStage4UtilityResponse(await Api.run('apiRunStage5RegressionTests', options)),
-    listPendingRepairs: async (filters = {}) => adaptStage4UtilityResponse(await Api.run('apiStage5ListPendingRepairs', filters)),
-    getOperationDetails: async (operationId) => adaptStage4UtilityResponse(await Api.run('apiStage5GetOperationDetails', operationId || '')),
-    runRepair: async (operationId, options = {}) => adaptStage4UtilityResponse(await Api.run('apiStage5RunRepair', operationId || '', options))
+    clearCache: async () =>adaptStage4UtilityResponse(await Api.run('apiStage5ClearCache')),
+    clearLog: async () =>adaptStage4UtilityResponse(await Api.run('apiStage5ClearLog')),
+    clearPhoneCache: async () =>adaptStage4UtilityResponse(await Api.run('apiStage5ClearPhoneCache')),
+    restartBot: async () =>adaptStage4UtilityResponse(await Api.run('apiStage5RestartBot')),
+    setupVacationTriggers: async () =>adaptStage4UtilityResponse(await Api.run('apiStage5SetupVacationTriggers')),
+    cleanupDuplicateTriggers: async (functionName) =>adaptStage4UtilityResponse(await Api.run('apiStage5CleanupDuplicateTriggers', functionName)),
+    debugPhones: async () =>adaptStage4UtilityResponse(await Api.run('apiStage5DebugPhones')),
+    buildBirthdayLink: async (phone, name) =>adaptStage4UtilityResponse(await Api.run('apiStage5BuildBirthdayLink', phone, name)),
+    runMaintenance: async (options = {}) =>adaptStage4UtilityResponse(await Api.run('apiRunStage5MaintenanceScenario', options)),
+    listJobs: async () =>adaptStage4UtilityResponse(await Api.run('apiListStage5Jobs')),
+    installJobs: async () =>adaptStage4UtilityResponse(await Api.run('apiInstallStage5Jobs')),
+    runJob: async (jobName, options = {}) =>adaptStage4UtilityResponse(await Api.run('apiRunStage5Job', jobName, options)),
+    healthCheck: async (options = {}) =>adaptStage4UtilityResponse(await Api.run('apiStage5HealthCheck', options)),
+    runRegressionTests: async (options = {}) =>adaptStage4UtilityResponse(await Api.run('apiRunStage5RegressionTests', options)),
+    listPendingRepairs: async (filters = {}) =>adaptStage4UtilityResponse(await Api.run('apiStage5ListPendingRepairs', filters)),
+    getOperationDetails: async (operationId) =>adaptStage4UtilityResponse(await Api.run('apiStage5GetOperationDetails', operationId || '')),
+    runRepair: async (operationId, options = {}) =>adaptStage4UtilityResponse(await Api.run('apiStage5RunRepair', operationId || '', options))
   };
 
   var SidebarApi = {
@@ -202,8 +202,8 @@
     markAsPending: Stage4Api.markAsPending,
     markAsSent: Stage4Api.markAsSent,
     markAsUnsent: Stage4Api.markAsUnsent,
-    getVacations: async (dateStr) => Stage4Api.checkVacationsAndBirthdays(dateStr || ''),
-    getBirthdays: async (dateStr) => Stage4Api.checkVacationsAndBirthdays(dateStr || ''),
+    getVacations: async (dateStr) =>Stage4Api.checkVacationsAndBirthdays(dateStr || ''),
+    getBirthdays: async (dateStr) =>Stage4Api.checkVacationsAndBirthdays(dateStr || ''),
     createNextMonth: Stage4Api.createNextMonth,
     switchMonth: Stage4Api.switchMonth,
     clearCache: MaintenanceApi.clearCache,

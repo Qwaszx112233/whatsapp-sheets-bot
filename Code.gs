@@ -133,7 +133,7 @@ function setBotMonthSheetName_(name) {
   if (!name) throw new Error('Порожня назва аркуша');
   const ss = SpreadsheetApp.getActive();
   const sh = ss.getSheetByName(name);
-  if (!sh) throw new Error(`Аркуш "${name}" не знайдено`);
+  if (!sh) throw new Error(`Аркуш "${name}"не знайдено`);
   PropertiesService.getDocumentProperties().setProperty(CONFIG.BOT_MONTH_PROP_KEY, name);
   highlightActiveMonthTab_(name);
 }
@@ -142,14 +142,14 @@ function getBotSheet_() {
   const ss = SpreadsheetApp.getActive();
   const name = getBotMonthSheetName_();
   const sh = ss.getSheetByName(name);
-  if (!sh) throw new Error(`Активний аркуш бота "${name}" не знайдено`);
+  if (!sh) throw new Error(`Активний аркуш бота "${name}"не знайдено`);
   return sh;
 }
 
 function highlightActiveMonthTab_(activeName) {
   const ss = SpreadsheetApp.getActive();
   const sheets = ss.getSheets();
-  sheets.forEach(s => {
+  sheets.forEach(s =>{
     const n = s.getName();
     if (/^\d{2}$/.test(n)) s.setTabColor(null);
   });
@@ -182,8 +182,8 @@ function getClientRuntimeContract_() {
 const RAPORT_SETTINGS_KEY = 'RAPORT_REMINDERS_ENABLED';
 
 function normalizeBoolean_(value, defaultValue = true) {
-  if (value === true || value === 'true' || value === 1 || value === '1') return true;
-  if (value === false || value === 'false' || value === 0 || value === '0') return false;
+  if (value === true || value === 'true'|| value === 1 || value === '1') return true;
+  if (value === false || value === 'false'|| value === 0 || value === '0') return false;
   return defaultValue;
 }
 
@@ -207,8 +207,8 @@ function toggleRaportRemindersFromSidebar(enabled) {
       success: true,
       enabled: normalized,
       message: normalized
-        ? '((✔)) Нагадування про рапорти ввімкнено'
-        : '[MUTE] Нагадування про рапорти вимкнено'
+        ? '✔ Нагадування про рапорти ввімкнено'
+        : 'Нагадування про рапорти вимкнено'
     };
   } catch (e) {
     return {
@@ -237,8 +237,8 @@ function onOpen() {
   try {
     highlightActiveMonthTab_(getBotMonthSheetName_());
     SpreadsheetApp.getUi()
-      .createMenu('B|ПАНЕЛЬ')
-      .addItem('☏ ПАНЕЛЬ', 'showSidebar')
+      .createMenu('ПАНЕЛЬ')
+      .addItem('ПАНЕЛЬ', 'showSidebar')
       .addToUi();
   } catch (err) {
     console.error('onOpen error:', err);
@@ -251,9 +251,9 @@ function setupVacationTrigger() {
     const triggers = ScriptApp.getProjectTriggers();
     let removed = 0;
 
-    triggers.forEach(t => {
+    triggers.forEach(t =>{
       const fn = t.getHandlerFunction();
-      if (fn === 'autoVacationReminder' || fn === 'autoBirthdayReminder') {
+      if (fn === 'autoVacationReminder'|| fn === 'autoBirthdayReminder') {
         ScriptApp.deleteTrigger(t);
         removed++;
       }
@@ -274,7 +274,7 @@ function setupVacationTrigger() {
     return {
       success: true,
       removed: removed,
-      message: `((✔)) Тригери встановлено:\n• Відпустки — щодня о 9:00\n• Дні Народження — щодня о 8:00\nВидалено старих: ${removed}`
+      message: `✔ Тригери встановлено:\n• Відпустки — щодня о 9:00\n• Дні Народження — щодня о 8:00\nВидалено старих: ${removed}`
     };
   } catch (e) {
     return { success: false, error: e.toString() };
@@ -291,11 +291,11 @@ function cleanupDuplicateTriggers(functionName) {
     let found = 0;
     let removed = 0;
 
-    names.forEach(name => {
-      const same = allTriggers.filter(t => t.getHandlerFunction() === name);
+    names.forEach(name =>{
+      const same = allTriggers.filter(t =>t.getHandlerFunction() === name);
       found += same.length;
 
-      same.slice(1).forEach(t => {
+      same.slice(1).forEach(t =>{
         ScriptApp.deleteTrigger(t);
         removed++;
       });
@@ -307,7 +307,7 @@ function cleanupDuplicateTriggers(functionName) {
   }
 }
 
-/** Діагностика аркуша PHONES — кнопка " Діагностика" */
+/** Діагностика аркуша PHONES — кнопка "Діагностика"*/
 function debugPhones() {
   try {
     const ss = SpreadsheetApp.getActive();
@@ -366,17 +366,17 @@ function debugPhones() {
       if (!s) return '';
       if (/^\d{1,2}\.\d{1,2}\.\d{4}$/.test(s)) {
         const parts = s.split('.');
-        return parts[0].padStart(2, '0') + '.' + parts[1].padStart(2, '0') + '.' + parts[2];
+        return parts[0].padStart(2, '0') + '.'+ parts[1].padStart(2, '0') + '.'+ parts[2];
       }
 
       if (/^\d{1,2}\.\d{1,2}$/.test(s)) {
         const parts = s.split('.');
-        return parts[0].padStart(2, '0') + '.' + parts[1].padStart(2, '0');
+        return parts[0].padStart(2, '0') + '.'+ parts[1].padStart(2, '0');
       }
 
       const m = s.match(/(\d{1,2})[.\-/ ](\d{1,2})[.\-/ ](\d{4})/);
       if (m) {
-        return String(m[1]).padStart(2, '0') + '.' + String(m[2]).padStart(2, '0') + '.' + m[3];
+        return String(m[1]).padStart(2, '0') + '.'+ String(m[2]).padStart(2, '0') + '.'+ m[3];
       }
 
       return s;

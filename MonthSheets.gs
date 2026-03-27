@@ -48,17 +48,17 @@ function createNextMonthSheet() {
     const srcName = String(src.getName()).trim();
 
     if (!/^\d{2}$/.test(srcName)) {
-      throw new Error(`Активний лист "${srcName}" не є місячним. Потрібна назва виду "02", "03", "04"...`);
+      throw new Error(`Активний лист "${srcName}"не є місячним. Потрібна назва виду "02", "03", "04"...`);
     }
 
     let nextNum = parseInt(srcName, 10) + 1;
-    if (nextNum > 12) nextNum = 1;
+    if (nextNum >12) nextNum = 1;
     if (nextNum < 1) nextNum = 1;
 
     const nextName = String(nextNum).padStart(2, '0');
 
     if (ss.getSheetByName(nextName)) {
-      throw new Error(`Лист "${nextName}" вже існує. Я його не перезаписую.`);
+      throw new Error(`Лист "${nextName}"вже існує. Я його не перезаписую.`);
     }
 
     const newSheet = src.copyTo(ss).setName(nextName);
@@ -74,9 +74,9 @@ function createNextMonthSheet() {
     newSheet.activate();
     highlightActiveMonthTab_(nextName);
 
-    ui.alert('((✔))', `Створено "${nextName}" на основі "${srcName}"`, ui.ButtonSet.OK);
+    ui.alert('✔', `Створено "${nextName}" на основі "${srcName}"`, ui.ButtonSet.OK);
   } catch (error) {
-    ui.alert('(✘) Помилка', String(error), ui.ButtonSet.OK);
+    ui.alert('✘ Помилка', String(error), ui.ButtonSet.OK);
     console.error(error);
   }
 }
@@ -84,15 +84,15 @@ function createNextMonthSheet() {
 /************ ПЕРЕМИКАННЯ БОТА НА ІНШИЙ МІСЯЦЬ ************/
 function switchBotToSheet() {
   const ss = SpreadsheetApp.getActive();
-  const months = ss.getSheets().map(s => s.getName()).filter(n => /^\d{2}$/.test(n)).sort();
-  if (!months.length) return SpreadsheetApp.getUi().alert('(✘) Немає аркушів місяців (01..12)');
+  const months = ss.getSheets().map(s =>s.getName()).filter(n =>/^\d{2}$/.test(n)).sort();
+  if (!months.length) return SpreadsheetApp.getUi().alert('✘ Немає аркушів місяців (01..12)');
 
   const current = getBotMonthSheetName_();
-  const options = months.map(n => `<option value="${n}" ${n === current ? 'selected' : ''}>${n}</option>`).join('');
+  const options = months.map(n =>`<option value="${n}"${n === current ? 'selected' : ''}>${n}</option>`).join('');
 
   const html = HtmlService.createHtmlOutput(`
     <div style="font-family:Arial;padding:16px">
-      <h3 style="margin:0 0 12px;color:#075e54">↻ Перемкнути бота на місяць</h3>
+      <h3 style="margin:0 0 12px;color:#075e54">Перемкнути бота на місяць</h3>
       <div style="margin:10px 0">
         <div style="font-size:12px;color:#666;margin-bottom:6px">Поточний: <b>${HtmlUtils_.escapeHtml(current)}</b></div>
         <select id="m" style="padding:10px;width:100%;border:1px solid #ddd;border-radius:10px;font-size:16px">
@@ -101,7 +101,7 @@ function switchBotToSheet() {
       </div>
       <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px">
         <button onclick="google.script.host.close()" style="padding:10px 14px;border:1px solid #ddd;border-radius:10px;background:#f8f9fa;cursor:pointer">Скасувати</button>
-        <button onclick="go()" style="padding:10px 16px;border:0;border-radius:10px;background:#25D366;color:#fff;font-weight:bold;cursor:pointer">((✔)) Перемкнути</button>
+        <button onclick="go()" style="padding:10px 16px;border:0;border-radius:10px;background:#25D366;color:#fff;font-weight:bold;cursor:pointer">✔ Перемкнути</button>
       </div>
       <script>
         function go(){
@@ -112,7 +112,7 @@ function switchBotToSheet() {
     </div>
   `).setWidth(420).setHeight(240);
 
-  SpreadsheetApp.getUi().showModalDialog(html, '↻ Перемикання');
+  SpreadsheetApp.getUi().showModalDialog(html, 'Перемикання');
 }
 
 function switchBotToMonth_(monthSheetName) {
@@ -120,5 +120,5 @@ function switchBotToMonth_(monthSheetName) {
   const ss = SpreadsheetApp.getActive();
   const sh = ss.getSheetByName(monthSheetName);
   if (sh) sh.activate();
-  SpreadsheetApp.getUi().toast(`Бот активний: ${monthSheetName}`, ' WhatsApp-Sheets-Bot', 3);
+  SpreadsheetApp.getUi().toast(`Бот активний: ${monthSheetName}`, 'WhatsApp-Sheets-Bot', 3);
 }

@@ -13,7 +13,7 @@
 
     consoleSection.classList.toggle('open');
     toggle.classList.toggle('open');
-    arrow.textContent = consoleSection.classList.contains('open') ? '▲' : '▼';
+    arrow.textContent = consoleSection.classList.contains('open') ? '▲': '▼';
 
     localStorage.setItem('consoleOpen', consoleSection.classList.contains('open'));
   }
@@ -30,7 +30,7 @@
 
     const logEntry = document.createElement('div');
     logEntry.className = `log-entry log-${type}`;
-    logEntry.innerHTML = `<span class="log-time">[${timestamp}]</span> ${escapeHtml(message)}`;
+    logEntry.innerHTML = `<span class="log-time">[${timestamp}]</span>${escapeHtml(message)}`;
 
     consoleEl.appendChild(logEntry);
     consoleEl.scrollTop = consoleEl.scrollHeight;
@@ -41,14 +41,14 @@
     if (!consoleEl) return;
 
     consoleEl.innerHTML = '';
-    logToConsole(' Консоль очищено', 'info');
+    logToConsole('✔ Консоль очищено', 'info');
   }
 
   function scrollConsole(direction) {
     const consoleEl = $id('consoleOutput');
     if (!consoleEl) return;
 
-    consoleEl.scrollTop = direction === 'top' ? 0 : consoleEl.scrollHeight;
+    consoleEl.scrollTop = direction === 'top'? 0 : consoleEl.scrollHeight;
   }
 
   // =========================
@@ -63,7 +63,7 @@
 
       resultContent.insertAdjacentHTML('afterbegin', `
         <div class="result-item" id="sendingProgress">
-          <div class="result-label">[OUT] Прогрес відправки</div>
+          <div class="result-label">✔ Прогрес відправки</div>
           <div class="progress-bar">
             <div id="progressFill" class="progress-fill"></div>
           </div>
@@ -114,9 +114,9 @@
         updateMonthBadge(STATE.currentMonth);
       }
 
-      logToConsole('((✔)) Панель готова до роботи', 'success');
+      logToConsole('✔ Панель готова до роботи', 'success');
     } catch (error) {
-      logToConsole(`(✘) Помилка ініціалізації: ${normalizeError(error)}`, 'error');
+      logToConsole(`✘ Помилка ініціалізації: ${normalizeError(error)}`, 'error');
     } finally {
       hideLoading();
     }
@@ -200,13 +200,13 @@
     const month = STATE.currentMonth || '—';
     const dateText = new Date().toLocaleString('uk-UA');
     const body = output
-      ? Array.from(output.querySelectorAll('.log-entry')).map(el => (el.innerText || '').trim()).filter(Boolean).join('\n')
+      ? Array.from(output.querySelectorAll('.log-entry')).map(el =>(el.innerText || '').trim()).filter(Boolean).join('\n')
       : '';
     const text = [
       'WAPB EXECUTION LOG',
       '=================',
-      'Час: ' + dateText,
-      'Активний місяць: ' + month,
+      'Час: '+ dateText,
+      'Активний місяць: '+ month,
       '',
       body || 'Лог порожній'
     ].join('\n');
@@ -239,7 +239,7 @@
     hideProgressBar();
     stopSending();
 
-    logToConsole(`(✘) Помилка: ${message}`, 'error');
+    logToConsole(`✘ Помилка: ${message}`, 'error');
     displayInResult('error', { error: message });
   }
 
@@ -250,7 +250,7 @@
       switch (action) {
         case 'generatePanel': {
           primeWhatsAppSenderTab();
-          const result = await ActionDispatcher.run('generatePanel', () => Stage4Api.generatePanelForDate({ date: _todayStr_() }));
+          const result = await ActionDispatcher.run('generatePanel', () =>Stage4Api.generatePanelForDate({ date: _todayStr_() }));
           await displayPanelResult(result);
           break;
         }
@@ -267,7 +267,7 @@
                 reason: 'sendUnsent.open'
               });
             } catch (error) {
-              logToConsole(`(✘) Не вдалося перечитати SEND_PANEL: ${normalizeError(error)}`, 'error');
+              logToConsole(`✘ Не вдалося перечитати SEND_PANEL: ${normalizeError(error)}`, 'error');
               showSendPanel();
               return;
             }
@@ -285,37 +285,37 @@
           break;
 
         case 'createNextMonth': {
-          const result = await ActionDispatcher.run('createNextMonth', () => Stage4Api.createNextMonth({ switchToNewMonth: true }));
+          const result = await ActionDispatcher.run('createNextMonth', () =>Stage4Api.createNextMonth({ switchToNewMonth: true }));
           if (result?.success) {
-            logToConsole(`((✔)) ${result.message}`, 'success');
+            logToConsole(`✔ ${result.message}`, 'success');
             showStandardResult('Створення місяця');
             displayInResult('createMonth', result);
           } else {
-            displayInResult('error', { error: result?.error || 'Невідома помилка' });
+            displayInResult('error', { error: result?.error || 'Невідома помилка'});
           }
           break;
         }
 
         case 'vacationReminder': {
-          const result = await ActionDispatcher.run('checkVacationsAndBirthdays', () => Stage4Api.checkVacationsAndBirthdays(_todayStr_()));
+          const result = await ActionDispatcher.run('checkVacationsAndBirthdays', () =>Stage4Api.checkVacationsAndBirthdays(_todayStr_()));
           if (result?.success) {
             showStandardResult('Нагадування про відпустки');
-            displayInResult('vacationResult', Object.assign({}, result.vacations || {}, { message: result.message || '' }));
-            logToConsole('[VAC] Нагадування про відпустки перевірено', 'success');
+            displayInResult('vacationResult', Object.assign({}, result.vacations || {}, { message: result.message || ''}));
+            logToConsole('Нагадування про відпустки перевірено', 'success');
           } else {
-            displayInResult('error', { error: result?.error || 'Невідома помилка' });
+            displayInResult('error', { error: result?.error || 'Невідома помилка'});
           }
           break;
         }
 
         case 'birthdayCheck': {
-          const result = await ActionDispatcher.run('checkBirthdays', () => Stage4Api.checkVacationsAndBirthdays(_todayStr_()));
+          const result = await ActionDispatcher.run('checkBirthdays', () =>Stage4Api.checkVacationsAndBirthdays(_todayStr_()));
           if (result?.success) {
-            showStandardResult(' Дні Народження');
+            showStandardResult('Дні Народження');
             displayBirthdayResult(result.birthdays || {});
-            logToConsole(' Перевірка ДН виконана', 'success');
+            logToConsole('Перевірка ДН виконана', 'success');
           } else {
-            displayInResult('error', { error: result?.error || 'Невідома помилка' });
+            displayInResult('error', { error: result?.error || 'Невідома помилка'});
           }
           break;
         }
@@ -325,12 +325,12 @@
           break;
 
         case 'clearCache': {
-          const result = await ActionDispatcher.run('clearCache', () => MaintenanceApi.clearCache());
+          const result = await ActionDispatcher.run('clearCache', () =>MaintenanceApi.clearCache());
           displayInResult(
-            result?.success ? 'success' : 'error',
+            result?.success ? 'success': 'error',
             result?.success
               ? { message: result.message }
-              : { error: result?.error || 'Невідома помилка' }
+              : { error: result?.error || 'Невідома помилка'}
           );
           break;
         }
@@ -348,13 +348,13 @@
           break;
 
         case 'clearLog': {
-          const result = await ActionDispatcher.run('clearLog', () => MaintenanceApi.clearLog());
+          const result = await ActionDispatcher.run('clearLog', () =>MaintenanceApi.clearLog());
           if (result?.success) clearConsole();
           displayInResult(
-            result?.success ? 'success' : 'error',
+            result?.success ? 'success': 'error',
             result?.success
               ? { message: result.message }
-              : { error: result?.error || 'Невідома помилка' }
+              : { error: result?.error || 'Невідома помилка'}
           );
           break;
         }

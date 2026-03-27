@@ -124,7 +124,7 @@ function apiBuildCommanderSummaryLink(options) {
       const prepared = SelectionActionService_.prepareCommanderSummaryPreview(input || {});
       return {
         success: true,
-        message: prepared.link ? 'Посилання на зведення командиру підготовлено' : 'Телефон командира не знайдено',
+        message: prepared.link ? 'Посилання на зведення командиру підготовлено': 'Телефон командира не знайдено',
         result: PreviewLinkService_.buildSummaryPreview(prepared, {
           title: prepared.title || 'Зведення командиру'
         }),
@@ -161,7 +161,7 @@ function apiLogPreparedMessages(options) {
         SelectionActionService_.logPayloads(prepared.payloads);
       }
 
-      const preview = prepared.selectionType === 'single' && prepared.payloads.length === 1
+      const preview = prepared.selectionType === 'single'&& prepared.payloads.length === 1
         ? PreviewLinkService_.buildSinglePreview(prepared.payloads[0], {
             title: 'Записано в LOG',
             logged: true

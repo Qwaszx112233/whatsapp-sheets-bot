@@ -49,7 +49,7 @@ function normalizeFIO_(str) {
     .toLowerCase()
     .trim()
     .replace(/['’ʼ`"]/g, '')
-    .replace(/\s+/g, ' ');
+    .replace(/\s+/g, '');
 }
 
 function _normCallsignKey_(callsign) {
@@ -60,7 +60,7 @@ function _normFio_(s) {
   if (!s) return '';
   return String(s)
     .trim()
-    .replace(/\s+/g, ' ')
+    .replace(/\s+/g, '')
     .toUpperCase()
     .replace(/[’'`"ʼ]/g, "'");
 }
@@ -75,15 +75,15 @@ function _normFioVac_(str) {
     .toLowerCase()
     .trim()
     .replace(/[’'`"]/g, '')
-    .replace(/\s+/g, ' ');
+    .replace(/\s+/g, '');
 }
 
 function normalizePhone_(v) {
-  let s = String(v == null ? '' : v).replace(/\D/g, '');
+  let s = String(v == null ? '': v).replace(/\D/g, '');
   if (!s) return '';
-  if (s.length === 10 && s[0] === '0') s = '38' + s;
-  if (s.length === 12 && s.startsWith('380')) return '+' + s;
-  return s ? ('+' + s.replace(/^\+/, '')) : '';
+  if (s.length === 10 && s[0] === '0') s = '38'+ s;
+  if (s.length === 12 && s.startsWith('380')) return '+'+ s;
+  return s ? ('+'+ s.replace(/^\+/, '')) : '';
 }
 
 function loadPhonesProfiles_() {
@@ -147,7 +147,7 @@ function trimToEncoded_(text, maxLen) {
   let result = '';
   for (const ch of source) {
     const candidate = result + ch;
-    if (encodeURIComponent(candidate).length > maxLen) break;
+    if (encodeURIComponent(candidate).length >maxLen) break;
     result = candidate;
   }
   return result;
@@ -160,7 +160,7 @@ function unique_(arr) {
 function a1FromRowCol_(row, col) {
   let letters = '';
   let c = col;
-  while (c > 0) {
+  while (c >0) {
     const rem = (c - 1) % 26;
     letters = String.fromCharCode(65 + rem) + letters;
     c = Math.floor((c - 1) / 26);
@@ -183,7 +183,7 @@ function ensureSheet_(name) {
 }
 
 function ensureLogHeader_(sheet) {
-  if (sheet.getLastRow() > 0) return;
+  if (sheet.getLastRow() >0) return;
   sheet.appendRow(['Час', 'Дата звіту', 'Аркуш', 'Клітинка', 'ПІБ', 'Телефон', 'Код', 'Послуга', 'Місце', 'Завдання', 'Повідомлення', 'Посилання']);
   sheet.getRange(1, 1, 1, 12).setFontWeight('bold').setBackground('#f0f0f0');
 }
@@ -240,7 +240,7 @@ function _getCallsignByFio_(fio) {
 
 function clearCacheCore_() {
   CacheService.getScriptCache().removeAll([
-    'PHONES_' + SpreadsheetApp.getActive().getId(),
+    'PHONES_'+ SpreadsheetApp.getActive().getId(),
     cacheKeyPhones_(),
     cacheKeyPhonesIndex_(),
     cacheKeyPhonesProfiles_(),
@@ -253,7 +253,7 @@ function clearCacheCore_() {
 
 function waClearCache() {
   clearCacheCore_();
-  SpreadsheetApp.getUi().alert('((✔)) Кеш очищено');
+  SpreadsheetApp.getUi().alert('✔ Кеш очищено');
 }
 
 function clearLogCore_() {
@@ -261,16 +261,16 @@ function clearLogCore_() {
   if (!sh) return false;
   const lastRow = sh.getLastRow();
   const lastCol = Math.max(sh.getLastColumn(), 1);
-  if (lastRow > 1) sh.getRange(2, 1, lastRow - 1, lastCol).clearContent();
+  if (lastRow >1) sh.getRange(2, 1, lastRow - 1, lastCol).clearContent();
   ensureLogHeader_(sh);
   return true;
 }
 
 function clearLogSheet() {
   const ui = SpreadsheetApp.getUi();
-  if (ui.alert(' Очистити LOG?', ui.ButtonSet.YES_NO) !== ui.Button.YES) return;
-  if (clearLogCore_()) ui.alert('((✔)) Лог очищено');
-  else ui.alert('(✘) LOG не знайдено');
+  if (ui.alert('Очистити LOG?', ui.ButtonSet.YES_NO) !== ui.Button.YES) return;
+  if (clearLogCore_()) ui.alert('✔ Лог очищено');
+  else ui.alert('✘ LOG не знайдено');
 }
 
 function clearPhoneCache() {
@@ -281,7 +281,7 @@ function clearPhoneCache() {
       cacheKeyPhonesProfiles_(),
       'PHONES_PROFILES_v4'
     ]);
-    return { success: true, message: 'Кеш телефонів очищено' };
+    return { success: true, message: 'Кеш телефонів очищено'};
   } catch (e) {
     return { success: false, error: e && e.message ? e.message : String(e) };
   }
@@ -290,7 +290,7 @@ function clearPhoneCache() {
 function clearCacheSidebar() {
   try {
     clearCacheCore_();
-    return { success: true, message: 'Кеш очищено' };
+    return { success: true, message: 'Кеш очищено'};
   } catch (e) {
     return { success: false, error: e.toString() };
   }
@@ -299,7 +299,7 @@ function clearCacheSidebar() {
 function clearLogSidebar() {
   try {
     if (!clearLogCore_()) throw new Error('LOG не знайдено');
-    return { success: true, message: 'Лог очищено' };
+    return { success: true, message: 'Лог очищено'};
   } catch (e) {
     return { success: false, error: e.toString() };
   }

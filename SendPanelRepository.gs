@@ -1,5 +1,5 @@
 /**
- * SendPanelRepository.gs — canonical синхронізація monthly sheet -> SEND_PANEL.
+ * SendPanelRepository.gs — canonical синхронізація monthly sheet ->SEND_PANEL.
  */
 
 const SendPanelRepository_ = (function() {
@@ -90,7 +90,7 @@ const SendPanelRepository_ = (function() {
         const payload = buildPayloadForCell_(source, start + i, ctx.col, phones, dict);
         let formattedPhone = String(payload.phone || '').trim();
         if (formattedPhone.startsWith('+')) {
-          formattedPhone = "'" + formattedPhone;
+          formattedPhone = "'"+ formattedPhone;
         }
 
         const effectiveStatus = deriveSendPanelStatusFromInputs_(payload.fio, formattedPhone, payload.code, payload.tasks);

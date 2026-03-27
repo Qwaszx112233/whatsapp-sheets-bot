@@ -35,7 +35,7 @@ function _monthlyMatrix_() {
 }
 
 function _vacationSheetName_() {
-  return (typeof VACATION_ENGINE_CONFIG !== 'undefined' && VACATION_ENGINE_CONFIG && VACATION_ENGINE_CONFIG.VACATIONS_SHEET)
+  return (typeof VACATION_ENGINE_CONFIG !== 'undefined'&& VACATION_ENGINE_CONFIG && VACATION_ENGINE_CONFIG.VACATIONS_SHEET)
     ? VACATION_ENGINE_CONFIG.VACATIONS_SHEET
     : 'VACATIONS';
 }
@@ -66,13 +66,13 @@ const SHEET_SCHEMAS = Object.freeze({
       fio: 7
     }),
     fields: Object.freeze({
-      phone:    { col: 1, type: 'string', required: false, allowBlank: true, label: 'Телефон' },
-      callsign: { col: 2, type: 'string', required: true,  allowBlank: false, label: 'Позивний' },
-      position: { col: 3, type: 'string', required: false, allowBlank: true, label: 'Посада' },
-      oshs:     { col: 4, type: 'string', required: false, allowBlank: true, label: 'ОШС' },
-      rank:     { col: 5, type: 'string', required: false, allowBlank: true, label: 'Звання' },
-      brDays:   { col: 6, type: 'number|string', required: false, allowBlank: true, label: 'Дні БР' },
-      fio:      { col: 7, type: 'string', required: true,  allowBlank: false, label: 'ПІБ' }
+      phone:    { col: 1, type: 'string', required: false, allowBlank: true, label: 'Телефон'},
+      callsign: { col: 2, type: 'string', required: true,  allowBlank: false, label: 'Позивний'},
+      position: { col: 3, type: 'string', required: false, allowBlank: true, label: 'Посада'},
+      oshs:     { col: 4, type: 'string', required: false, allowBlank: true, label: 'ОШС'},
+      rank:     { col: 5, type: 'string', required: false, allowBlank: true, label: 'Звання'},
+      brDays:   { col: 6, type: 'number|string', required: false, allowBlank: true, label: 'Дні БР'},
+      fio:      { col: 7, type: 'string', required: true,  allowBlank: false, label: 'ПІБ'}
     }),
     keyFields: ['callsign', 'fio'],
     requiredFields: ['callsign', 'fio'],
@@ -92,10 +92,10 @@ const SHEET_SCHEMAS = Object.freeze({
     required: true,
     columns: Object.freeze({ fio: 1, phone: 2, role: 3, birthday: 4 }),
     fields: Object.freeze({
-      fio:      { col: 1, type: 'string', required: true,  allowBlank: false, label: 'ПІБ' },
-      phone:    { col: 2, type: 'string', required: false, allowBlank: true,  label: 'Телефон' },
-      role:     { col: 3, type: 'string', required: false, allowBlank: true,  label: 'Роль' },
-      birthday: { col: 4, type: 'date|string', required: false, allowBlank: true, label: 'День народження' }
+      fio:      { col: 1, type: 'string', required: true,  allowBlank: false, label: 'ПІБ'},
+      phone:    { col: 2, type: 'string', required: false, allowBlank: true,  label: 'Телефон'},
+      role:     { col: 3, type: 'string', required: false, allowBlank: true,  label: 'Роль'},
+      birthday: { col: 4, type: 'date|string', required: false, allowBlank: true, label: 'День народження'}
     }),
     headerAliases: Object.freeze({
       fio: ['ПІБ', 'ПІБ/ФІО', 'ФІО', 'FIO'],
@@ -120,10 +120,10 @@ const SHEET_SCHEMAS = Object.freeze({
     required: true,
     columns: Object.freeze({ code: 1, service: 2, place: 3, tasks: 4 }),
     fields: Object.freeze({
-      code:    { col: 1, type: 'string', required: true,  allowBlank: false, label: 'Код' },
-      service: { col: 2, type: 'string', required: false, allowBlank: true,  label: 'Служба' },
-      place:   { col: 3, type: 'string', required: false, allowBlank: true,  label: 'Місце' },
-      tasks:   { col: 4, type: 'string', required: false, allowBlank: true,  label: 'Завдання' }
+      code:    { col: 1, type: 'string', required: true,  allowBlank: false, label: 'Код'},
+      service: { col: 2, type: 'string', required: false, allowBlank: true,  label: 'Служба'},
+      place:   { col: 3, type: 'string', required: false, allowBlank: true,  label: 'Місце'},
+      tasks:   { col: 4, type: 'string', required: false, allowBlank: true,  label: 'Завдання'}
     }),
     headerAliases: Object.freeze({
       code: ['Код', 'Code'],
@@ -148,10 +148,10 @@ const SHEET_SCHEMAS = Object.freeze({
     required: true,
     columns: Object.freeze({ code: 1, label: 2, order: 3, showZero: 4 }),
     fields: Object.freeze({
-      code:     { col: 1, type: 'string', required: true,  allowBlank: false, label: 'Код' },
-      label:    { col: 2, type: 'string', required: false, allowBlank: true,  label: 'Назва' },
-      order:    { col: 3, type: 'number|string', required: true, allowBlank: false, label: 'Порядок' },
-      showZero: { col: 4, type: 'boolean|string', required: false, allowBlank: true, label: 'Показувати 0' }
+      code:     { col: 1, type: 'string', required: true,  allowBlank: false, label: 'Код'},
+      label:    { col: 2, type: 'string', required: false, allowBlank: true,  label: 'Назва'},
+      order:    { col: 3, type: 'number|string', required: true, allowBlank: false, label: 'Порядок'},
+      showZero: { col: 4, type: 'boolean|string', required: false, allowBlank: true, label: 'Показувати 0'}
     }),
     headerAliases: Object.freeze({
       code: ['Код', 'Code'],
@@ -177,13 +177,13 @@ const SHEET_SCHEMAS = Object.freeze({
     required: false,
     columns: Object.freeze({ fio: 1, phone: 2, code: 3, tasks: 4, status: 5, sent: 6, action: 7 }),
     fields: Object.freeze({
-      fio:    { col: 1, type: 'string', required: true,  allowBlank: false, label: 'FIO' },
-      phone:  { col: 2, type: 'string', required: false, allowBlank: true,  label: 'Phone' },
-      code:   { col: 3, type: 'string', required: true,  allowBlank: false, label: 'Code' },
-      tasks:  { col: 4, type: 'string', required: false, allowBlank: true,  label: 'Tasks' },
-      status: { col: 5, type: 'string', required: false, allowBlank: true,  label: 'Status' },
-      sent:   { col: 6, type: 'string', required: false, allowBlank: true,  label: 'Sent' },
-      action: { col: 7, type: 'string', required: false, allowBlank: true,  label: 'Action' }
+      fio:    { col: 1, type: 'string', required: true,  allowBlank: false, label: 'FIO'},
+      phone:  { col: 2, type: 'string', required: false, allowBlank: true,  label: 'Phone'},
+      code:   { col: 3, type: 'string', required: true,  allowBlank: false, label: 'Code'},
+      tasks:  { col: 4, type: 'string', required: false, allowBlank: true,  label: 'Tasks'},
+      status: { col: 5, type: 'string', required: false, allowBlank: true,  label: 'Status'},
+      sent:   { col: 6, type: 'string', required: false, allowBlank: true,  label: 'Sent'},
+      action: { col: 7, type: 'string', required: false, allowBlank: true,  label: 'Action'}
     }),
     headerAliases: Object.freeze({
       fio: ['ПІБ', 'ФІО', 'FIO'],
@@ -210,20 +210,20 @@ const SHEET_SCHEMAS = Object.freeze({
     dataStartRow: 2,
     required: false,
     columns: Object.freeze({
-      fio: ((typeof VACATION_ENGINE_CONFIG !== 'undefined' && VACATION_ENGINE_CONFIG && VACATION_ENGINE_CONFIG.NAME_COL) || 1),
-      startDate: ((typeof VACATION_ENGINE_CONFIG !== 'undefined' && VACATION_ENGINE_CONFIG && VACATION_ENGINE_CONFIG.START_COL) || 2),
-      endDate: ((typeof VACATION_ENGINE_CONFIG !== 'undefined' && VACATION_ENGINE_CONFIG && VACATION_ENGINE_CONFIG.END_COL) || 3),
-      vacationNo: ((typeof VACATION_ENGINE_CONFIG !== 'undefined' && VACATION_ENGINE_CONFIG && VACATION_ENGINE_CONFIG.NUM_COL) || 4),
-      active: ((typeof VACATION_ENGINE_CONFIG !== 'undefined' && VACATION_ENGINE_CONFIG && VACATION_ENGINE_CONFIG.ACTIVE_COL) || 5),
-      notify: ((typeof VACATION_ENGINE_CONFIG !== 'undefined' && VACATION_ENGINE_CONFIG && VACATION_ENGINE_CONFIG.NOTIFY_COL) || 6)
+      fio: ((typeof VACATION_ENGINE_CONFIG !== 'undefined'&& VACATION_ENGINE_CONFIG && VACATION_ENGINE_CONFIG.NAME_COL) || 1),
+      startDate: ((typeof VACATION_ENGINE_CONFIG !== 'undefined'&& VACATION_ENGINE_CONFIG && VACATION_ENGINE_CONFIG.START_COL) || 2),
+      endDate: ((typeof VACATION_ENGINE_CONFIG !== 'undefined'&& VACATION_ENGINE_CONFIG && VACATION_ENGINE_CONFIG.END_COL) || 3),
+      vacationNo: ((typeof VACATION_ENGINE_CONFIG !== 'undefined'&& VACATION_ENGINE_CONFIG && VACATION_ENGINE_CONFIG.NUM_COL) || 4),
+      active: ((typeof VACATION_ENGINE_CONFIG !== 'undefined'&& VACATION_ENGINE_CONFIG && VACATION_ENGINE_CONFIG.ACTIVE_COL) || 5),
+      notify: ((typeof VACATION_ENGINE_CONFIG !== 'undefined'&& VACATION_ENGINE_CONFIG && VACATION_ENGINE_CONFIG.NOTIFY_COL) || 6)
     }),
     fields: Object.freeze({
-      fio:        { col: ((typeof VACATION_ENGINE_CONFIG !== 'undefined' && VACATION_ENGINE_CONFIG && VACATION_ENGINE_CONFIG.NAME_COL) || 1), type: 'string', required: true,  allowBlank: false, label: 'ПІБ' },
-      startDate:  { col: ((typeof VACATION_ENGINE_CONFIG !== 'undefined' && VACATION_ENGINE_CONFIG && VACATION_ENGINE_CONFIG.START_COL) || 2), type: 'date|string', required: true, allowBlank: false, label: 'Початок' },
-      endDate:    { col: ((typeof VACATION_ENGINE_CONFIG !== 'undefined' && VACATION_ENGINE_CONFIG && VACATION_ENGINE_CONFIG.END_COL) || 3), type: 'date|string', required: true, allowBlank: false, label: 'Кінець' },
-      vacationNo: { col: ((typeof VACATION_ENGINE_CONFIG !== 'undefined' && VACATION_ENGINE_CONFIG && VACATION_ENGINE_CONFIG.NUM_COL) || 4), type: 'string', required: false, allowBlank: true, label: 'Номер' },
-      active:     { col: ((typeof VACATION_ENGINE_CONFIG !== 'undefined' && VACATION_ENGINE_CONFIG && VACATION_ENGINE_CONFIG.ACTIVE_COL) || 5), type: 'boolean|string', required: false, allowBlank: true, label: 'Активна' },
-      notify:     { col: ((typeof VACATION_ENGINE_CONFIG !== 'undefined' && VACATION_ENGINE_CONFIG && VACATION_ENGINE_CONFIG.NOTIFY_COL) || 6), type: 'boolean|string', required: false, allowBlank: true, label: 'Notify' }
+      fio:        { col: ((typeof VACATION_ENGINE_CONFIG !== 'undefined'&& VACATION_ENGINE_CONFIG && VACATION_ENGINE_CONFIG.NAME_COL) || 1), type: 'string', required: true,  allowBlank: false, label: 'ПІБ'},
+      startDate:  { col: ((typeof VACATION_ENGINE_CONFIG !== 'undefined'&& VACATION_ENGINE_CONFIG && VACATION_ENGINE_CONFIG.START_COL) || 2), type: 'date|string', required: true, allowBlank: false, label: 'Початок'},
+      endDate:    { col: ((typeof VACATION_ENGINE_CONFIG !== 'undefined'&& VACATION_ENGINE_CONFIG && VACATION_ENGINE_CONFIG.END_COL) || 3), type: 'date|string', required: true, allowBlank: false, label: 'Кінець'},
+      vacationNo: { col: ((typeof VACATION_ENGINE_CONFIG !== 'undefined'&& VACATION_ENGINE_CONFIG && VACATION_ENGINE_CONFIG.NUM_COL) || 4), type: 'string', required: false, allowBlank: true, label: 'Номер'},
+      active:     { col: ((typeof VACATION_ENGINE_CONFIG !== 'undefined'&& VACATION_ENGINE_CONFIG && VACATION_ENGINE_CONFIG.ACTIVE_COL) || 5), type: 'boolean|string', required: false, allowBlank: true, label: 'Активна'},
+      notify:     { col: ((typeof VACATION_ENGINE_CONFIG !== 'undefined'&& VACATION_ENGINE_CONFIG && VACATION_ENGINE_CONFIG.NOTIFY_COL) || 6), type: 'boolean|string', required: false, allowBlank: true, label: 'Notify'}
     }),
     keyFields: ['fio', 'startDate', 'endDate'],
     requiredFields: ['fio', 'startDate', 'endDate'],
@@ -255,18 +255,18 @@ const SHEET_SCHEMAS = Object.freeze({
       link: 12
     }),
     fields: Object.freeze({
-      timestamp:     { col: 1, type: 'date|string', required: true,  allowBlank: false, label: 'Timestamp' },
-      reportDateStr: { col: 2, type: 'string', required: false, allowBlank: true, label: 'ReportDate' },
-      sheet:         { col: 3, type: 'string', required: false, allowBlank: true, label: 'Sheet' },
-      cell:          { col: 4, type: 'string', required: false, allowBlank: true, label: 'Cell' },
-      fio:           { col: 5, type: 'string', required: false, allowBlank: true, label: 'FIO' },
-      phone:         { col: 6, type: 'string', required: false, allowBlank: true, label: 'Phone' },
-      code:          { col: 7, type: 'string', required: false, allowBlank: true, label: 'Code' },
-      service:       { col: 8, type: 'string', required: false, allowBlank: true, label: 'Service' },
-      place:         { col: 9, type: 'string', required: false, allowBlank: true, label: 'Place' },
-      tasks:         { col: 10, type: 'string', required: false, allowBlank: true, label: 'Tasks' },
-      message:       { col: 11, type: 'string', required: false, allowBlank: true, label: 'Message' },
-      link:          { col: 12, type: 'string', required: false, allowBlank: true, label: 'Link' }
+      timestamp:     { col: 1, type: 'date|string', required: true,  allowBlank: false, label: 'Timestamp'},
+      reportDateStr: { col: 2, type: 'string', required: false, allowBlank: true, label: 'ReportDate'},
+      sheet:         { col: 3, type: 'string', required: false, allowBlank: true, label: 'Sheet'},
+      cell:          { col: 4, type: 'string', required: false, allowBlank: true, label: 'Cell'},
+      fio:           { col: 5, type: 'string', required: false, allowBlank: true, label: 'FIO'},
+      phone:         { col: 6, type: 'string', required: false, allowBlank: true, label: 'Phone'},
+      code:          { col: 7, type: 'string', required: false, allowBlank: true, label: 'Code'},
+      service:       { col: 8, type: 'string', required: false, allowBlank: true, label: 'Service'},
+      place:         { col: 9, type: 'string', required: false, allowBlank: true, label: 'Place'},
+      tasks:         { col: 10, type: 'string', required: false, allowBlank: true, label: 'Tasks'},
+      message:       { col: 11, type: 'string', required: false, allowBlank: true, label: 'Message'},
+      link:          { col: 12, type: 'string', required: false, allowBlank: true, label: 'Link'}
     }),
     keyFields: ['timestamp', 'fio', 'code'],
     requiredFields: ['timestamp'],
@@ -323,7 +323,7 @@ const SheetSchemas_ = (function() {
     if (!key) throw new Error('Не передано ключ схеми листа');
     if (/^\d{2}$/.test(key)) return getMonthlySheetSchema_(key);
     const schema = _canonicalSchemaMap_()[key] || _canonicalSchemaMap_()[key.toUpperCase()];
-    if (!schema) throw new Error(`Схема "${schemaKeyOrSheetName}" не знайдена`);
+    if (!schema) throw new Error(`Схема "${schemaKeyOrSheetName}"не знайдена`);
     if (schema === SHEET_SCHEMAS.monthly) return getMonthlySheetSchema_(getBotMonthSheetName_());
     return _toLegacySchema_(schema);
   }
@@ -358,28 +358,28 @@ function getSheetSchema_(schemaKeyOrSheetName) {
 }
 
 function getSchemaFieldNames_(schemaOrKey) {
-  const schema = typeof schemaOrKey === 'string' ? getSheetSchema_(schemaOrKey) : schemaOrKey;
+  const schema = typeof schemaOrKey === 'string'? getSheetSchema_(schemaOrKey) : schemaOrKey;
   return Object.keys((schema && schema.fields) || (schema && schema.columns) || {});
 }
 
 function getSchemaFieldColumn_(schemaOrKey, fieldName) {
-  const schema = typeof schemaOrKey === 'string' ? getSheetSchema_(schemaOrKey) : schemaOrKey;
+  const schema = typeof schemaOrKey === 'string'? getSheetSchema_(schemaOrKey) : schemaOrKey;
   if (!schema) throw new Error('Schema not found');
   if (schema.fields && schema.fields[fieldName]) return Number(schema.fields[fieldName].col);
   if (schema.columns && fieldName in schema.columns) return Number(schema.columns[fieldName]);
-  throw new Error(`Поле "${fieldName}" не описане у схемі ${schema.key || ''}`);
+  throw new Error(`Поле "${fieldName}"не описане у схемі ${schema.key || ''}`);
 }
 
 function getSchemaLastColumn_(schemaOrKey) {
-  const schema = typeof schemaOrKey === 'string' ? getSheetSchema_(schemaOrKey) : schemaOrKey;
+  const schema = typeof schemaOrKey === 'string'? getSheetSchema_(schemaOrKey) : schemaOrKey;
   return Math.max.apply(null, getSchemaFieldNames_(schema).map(function(name) {
     return getSchemaFieldColumn_(schema, name);
   }).concat([1]));
 }
 
 function getSchemaSheetName_(schemaOrKey, options) {
-  const schema = typeof schemaOrKey === 'string' ? getSheetSchema_(schemaOrKey) : schemaOrKey;
-  if (schema.type === 'monthly' || schema.dynamicName) {
+  const schema = typeof schemaOrKey === 'string'? getSheetSchema_(schemaOrKey) : schemaOrKey;
+  if (schema.type === 'monthly'|| schema.dynamicName) {
     if (options && options.sheetName) return String(options.sheetName).trim();
     return String(schema.name || getBotMonthSheetName_()).trim();
   }
@@ -387,7 +387,7 @@ function getSchemaSheetName_(schemaOrKey, options) {
 }
 
 function validateSheetHeadersBySchema_(sheet, schemaOrKey) {
-  const schema = typeof schemaOrKey === 'string' ? getSheetSchema_(schemaOrKey) : schemaOrKey;
+  const schema = typeof schemaOrKey === 'string'? getSheetSchema_(schemaOrKey) : schemaOrKey;
   const report = {
     ok: true,
     schema: schema.key,
@@ -403,7 +403,7 @@ function validateSheetHeadersBySchema_(sheet, schemaOrKey) {
     return report;
   }
 
-  if (schema.type === 'monthly' || schema.dynamicName) {
+  if (schema.type === 'monthly'|| schema.dynamicName) {
     try {
       const codeRange = sheet.getRange(schema.codeRangeA1 || CONFIG.CODE_RANGE_A1);
       if (codeRange.getNumRows() <= 0 || codeRange.getNumColumns() <= 0) {
@@ -419,7 +419,7 @@ function validateSheetHeadersBySchema_(sheet, schemaOrKey) {
 
   const headerRow = Number(schema.headerRow) || 1;
   const lastCol = Math.max(sheet.getLastColumn(), getSchemaLastColumn_(schema));
-  const headers = lastCol > 0 ? sheet.getRange(headerRow, 1, 1, lastCol).getDisplayValues()[0] : [];
+  const headers = lastCol >0 ? sheet.getRange(headerRow, 1, 1, lastCol).getDisplayValues()[0] : [];
 
   getSchemaFieldNames_(schema).forEach(function(fieldName) {
     const field = (schema.fields && schema.fields[fieldName]) || { col: getSchemaFieldColumn_(schema, fieldName), label: fieldName };

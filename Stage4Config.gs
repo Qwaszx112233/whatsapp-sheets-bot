@@ -109,7 +109,7 @@ function buildAppConfig_() {
 
 function ensureAppConfig_() {
   var config = APP_CONFIG;
-  if (!config || typeof config !== 'object' || !config.CORE || !config.FLAGS || !config.JOBS) {
+  if (!config || typeof config !== 'object'|| !config.CORE || !config.FLAGS || !config.JOBS) {
     APP_CONFIG = buildAppConfig_();
     config = APP_CONFIG;
   }
@@ -244,21 +244,21 @@ function buildStage6AConfig_() {
 }
 
 function getStage4Config_() {
-  if (!STAGE4_CONFIG || typeof STAGE4_CONFIG !== 'object' || !STAGE4_CONFIG.JOBS || !STAGE4_CONFIG.FEATURE_FLAGS) {
+  if (!STAGE4_CONFIG || typeof STAGE4_CONFIG !== 'object'|| !STAGE4_CONFIG.JOBS || !STAGE4_CONFIG.FEATURE_FLAGS) {
     STAGE4_CONFIG = buildStage4Config_();
   }
   return STAGE4_CONFIG;
 }
 
 function getStage5Config_() {
-  if (!STAGE5_CONFIG || typeof STAGE5_CONFIG !== 'object' || !STAGE5_CONFIG.FEATURE_FLAGS) {
+  if (!STAGE5_CONFIG || typeof STAGE5_CONFIG !== 'object'|| !STAGE5_CONFIG.FEATURE_FLAGS) {
     STAGE5_CONFIG = buildStage5Config_();
   }
   return STAGE5_CONFIG;
 }
 
 function getStage6AConfig_() {
-  if (!STAGE6A_CONFIG || typeof STAGE6A_CONFIG !== 'object' || !STAGE6A_CONFIG.FEATURE_FLAGS) {
+  if (!STAGE6A_CONFIG || typeof STAGE6A_CONFIG !== 'object'|| !STAGE6A_CONFIG.FEATURE_FLAGS) {
     STAGE6A_CONFIG = buildStage6AConfig_();
   }
   return STAGE6A_CONFIG;
@@ -308,7 +308,7 @@ function stage4UniqueId_(prefix) {
     Utilities.getUuid().slice(0, 8),
     Utilities.formatDate(
       new Date(),
-      (typeof getTimeZone_ === 'function' ? getTimeZone_() : Session.getScriptTimeZone()),
+      (typeof getTimeZone_ === 'function'? getTimeZone_() : Session.getScriptTimeZone()),
       'yyyyMMdd_HHmmss'
     )
   ].join('_');
@@ -326,12 +326,12 @@ function stage4SafeStringify_(value, maxLen) {
 
   try {
     const text = JSON.stringify(value === undefined ? null : value);
-    return limit > 0 && text.length > limit
+    return limit >0 && text.length >limit
       ? text.slice(0, limit) + '…'
       : text;
   } catch (e) {
     const fallback = String(value);
-    return limit > 0 && fallback.length > limit
+    return limit >0 && fallback.length >limit
       ? fallback.slice(0, limit) + '…'
       : fallback;
   }
@@ -360,7 +360,7 @@ function stage4MergeWarnings_() {
 // КАНОНІЧНІ УТИЛІТИ
 // ==========================================================
 
-var AppUtils = (typeof AppUtils !== 'undefined' && AppUtils) ? AppUtils : Object.freeze({
+var AppUtils = (typeof AppUtils !== 'undefined'&& AppUtils) ? AppUtils : Object.freeze({
   nowIso: function() {
     return new Date().toISOString();
   },
@@ -387,7 +387,7 @@ var AppUtils = (typeof AppUtils !== 'undefined' && AppUtils) ? AppUtils : Object
 // ==========================================================
 
 /** Префікс для ключів marker-lock у кеші/сховищі. */
-var LOCK_KEY_PREFIX = (typeof LOCK_KEY_PREFIX !== 'undefined' && LOCK_KEY_PREFIX) ? LOCK_KEY_PREFIX : 'app_lock_';
+var LOCK_KEY_PREFIX = (typeof LOCK_KEY_PREFIX !== 'undefined'&& LOCK_KEY_PREFIX) ? LOCK_KEY_PREFIX : 'app_lock_';
 
 /**
  * Нормалізує повний ключ marker-lock.
@@ -434,7 +434,7 @@ function checkLockStore_(store, fullKey, label) {
     const parsed = JSON.parse(value);
     const expiresAt = Number(parsed && parsed.expiresAt) || 0;
 
-    if (expiresAt > Date.now()) {
+    if (expiresAt >Date.now()) {
       return true;
     }
 
@@ -442,7 +442,7 @@ function checkLockStore_(store, fullKey, label) {
     return false;
   } catch (parseError) {
     store.deleteProperty(fullKey);
-    Logger.log('isLocked: видалено битий marker з ' + label + ' ' + fullKey);
+    Logger.log('isLocked: видалено битий marker з '+ label + '' + fullKey);
     return false;
   }
 }
@@ -472,7 +472,7 @@ function setLock(lockKey, ttlSec) {
 
     return true;
   } catch (e) {
-    Logger.log('Помилка при встановленні блокування ' + lockKey + ': ' + e.message);
+    Logger.log('Помилка при встановленні блокування '+ lockKey + ': '+ e.message);
     return false;
   }
 }
@@ -499,10 +499,10 @@ function releaseLock(lockKey) {
     scriptProps.deleteProperty(fullKey);
     docProps.deleteProperty(fullKey);
 
-    Logger.log('Блокування ' + lockKey + ' очищено');
+    Logger.log('Блокування '+ lockKey + 'очищено');
     return existed;
   } catch (e) {
-    Logger.log('Помилка при очищенні блокування ' + lockKey + ': ' + e.message);
+    Logger.log('Помилка при очищенні блокування '+ lockKey + ': '+ e.message);
     return false;
   }
 }
@@ -531,7 +531,7 @@ function isLocked(lockKey) {
 
     return false;
   } catch (e) {
-    Logger.log('Помилка при перевірці блокування ' + lockKey + ': ' + e.message);
+    Logger.log('Помилка при перевірці блокування '+ lockKey + ': '+ e.message);
     return false;
   }
 }
@@ -549,7 +549,7 @@ function tryAcquireLock(lockKey, ttlSec) {
     if (isLocked(lockKey)) return false;
     return setLock(lockKey, ttlSec);
   } catch (e) {
-    Logger.log('Помилка при спробі отримати блокування ' + lockKey + ': ' + e.message);
+    Logger.log('Помилка при спробі отримати блокування '+ lockKey + ': '+ e.message);
     return false;
   }
 }
@@ -567,7 +567,7 @@ function withScriptLock_(callback, timeoutMs) {
   const waitMs = Math.max(Number(timeoutMs) || appGetCore('LOCK_TIMEOUT_MS', 15000), 1);
 
   if (!lock.tryLock(waitMs)) {
-    throw new Error('Не вдалося отримати script lock за ' + waitMs + ' мс');
+    throw new Error('Не вдалося отримати script lock за '+ waitMs + 'мс');
   }
 
   try {
@@ -628,9 +628,9 @@ function inspectKnownBlockingKeysNow() {
   Logger.log(lines.join('\n'));
 
   safeAlert_(
-    'Знайдено ключів:\n' +
-    'ScriptProperties: ' + scriptKeys.length + '\n' +
-    'DocumentProperties: ' + docKeys.length + '\n\n' +
+    'Знайдено ключів:\n'+
+    'ScriptProperties: '+ scriptKeys.length + '\n'+
+    'DocumentProperties: '+ docKeys.length + '\n\n'+
     'Деталі — у Logger.'
   );
 
@@ -678,20 +678,20 @@ function clearCreateNextMonthLocksNow() {
   Logger.log(
     [
       '=== clearCreateNextMonthLocksNow ===',
-      'Removed from ScriptProperties: ' + removedScript.length,
+      'Removed from ScriptProperties: '+ removedScript.length,
       removedScript.join('\n') || '(none)',
       '',
-      'Removed from DocumentProperties: ' + removedDoc.length,
+      'Removed from DocumentProperties: '+ removedDoc.length,
       removedDoc.join('\n') || '(none)',
       '',
-      'Total removed: ' + total
+      'Total removed: '+ total
     ].join('\n')
   );
 
   safeAlert_(
-    'Очищено ключів блокування: ' + total +
-    '\nScriptProperties: ' + removedScript.length +
-    '\nDocumentProperties: ' + removedDoc.length +
+    'Очищено ключів блокування: '+ total +
+    '\nScriptProperties: '+ removedScript.length +
+    '\nDocumentProperties: '+ removedDoc.length +
     '\n\nДеталі — у Logger.'
   );
 
@@ -715,8 +715,8 @@ function clearKnownBlockingCacheLocksNow() {
   });
 
   safeAlert_(
-    'Очищено cache-lock ключі: ' + knownKeys.length +
-    '\n' + knownKeys.join('\n')
+    'Очищено cache-lock ключі: '+ knownKeys.length +
+    '\n'+ knownKeys.join('\n')
   );
 
   return {

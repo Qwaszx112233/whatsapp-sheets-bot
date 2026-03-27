@@ -36,9 +36,9 @@ function sendFromSidebar(personData) {
     };
 
     writeLogsBatch_([logEntry]);
-    return okResponse_({ link: personData.link }, 'Посилання підготовлено', { function: 'sendFromSidebar' });
+    return okResponse_({ link: personData.link }, 'Посилання підготовлено', { function: 'sendFromSidebar'});
   } catch (e) {
-    return errorResponse_(e, { function: 'sendFromSidebar' });
+    return errorResponse_(e, { function: 'sendFromSidebar'});
   }
 }
 
@@ -50,7 +50,7 @@ function sendAllFromSidebar(personnelList) {
 
     const readyItems = personnelList.filter(function(item) {
       const status = String(item && item.status || '').toLowerCase();
-      return ((status === 'ready') || status === 'ok' || status.indexOf('((✔))') === 0) && !!(item && item.link);
+      return ((status === 'ready') || status === 'ok'|| status.indexOf('✔') === 0) && !!(item && item.link);
     });
 
     if (!readyItems.length) {
@@ -77,9 +77,9 @@ function sendAllFromSidebar(personnelList) {
     return okResponse_({
       count: readyItems.length,
       links: readyItems.map(function(item) { return item.link; })
-    }, 'Пакет посилань підготовлено', { function: 'sendAllFromSidebar' });
+    }, 'Пакет посилань підготовлено', { function: 'sendAllFromSidebar'});
   } catch (e) {
-    return errorResponse_(e, { function: 'sendAllFromSidebar' });
+    return errorResponse_(e, { function: 'sendAllFromSidebar'});
   }
 }
 
@@ -91,7 +91,7 @@ function sendDaySummaryToCommanderSidebar(dateStr, summaryText) {
 
     const phone = findPhone_({ role: CONFIG.COMMANDER_ROLE });
     if (!phone) {
-      throw new Error(`Телефон для ролі "${CONFIG.COMMANDER_ROLE}" не знайдено в PHONES`);
+      throw new Error(`Телефон для ролі "${CONFIG.COMMANDER_ROLE}"не знайдено в PHONES`);
     }
 
     const safe = trimToEncoded_(summaryText, CONFIG.MAX_WA_TEXT);
@@ -109,9 +109,9 @@ function sendDaySummaryToCommanderSidebar(dateStr, summaryText) {
       link: link
     }]);
 
-    return okResponse_({ link: link }, 'Зведення для командира підготовлено', { function: 'sendDaySummaryToCommanderSidebar' });
+    return okResponse_({ link: link }, 'Зведення для командира підготовлено', { function: 'sendDaySummaryToCommanderSidebar'});
   } catch (e) {
-    return errorResponse_(e, { function: 'sendDaySummaryToCommanderSidebar' });
+    return errorResponse_(e, { function: 'sendDaySummaryToCommanderSidebar'});
   }
 }
 
@@ -123,7 +123,7 @@ function sendDetailedToCommanderSidebar(dateStr, detailedText) {
 
     const phone = findPhone_({ role: CONFIG.COMMANDER_ROLE });
     if (!phone) {
-      throw new Error(`Телефон для ролі "${CONFIG.COMMANDER_ROLE}" не знайдено в PHONES`);
+      throw new Error(`Телефон для ролі "${CONFIG.COMMANDER_ROLE}"не знайдено в PHONES`);
     }
 
     const safe = trimToEncoded_(detailedText, CONFIG.MAX_WA_TEXT);
@@ -141,18 +141,18 @@ function sendDetailedToCommanderSidebar(dateStr, detailedText) {
       link: link
     }]);
 
-    return okResponse_({ link: link }, 'Детальне зведення для командира підготовлено', { function: 'sendDetailedToCommanderSidebar' });
+    return okResponse_({ link: link }, 'Детальне зведення для командира підготовлено', { function: 'sendDetailedToCommanderSidebar'});
   } catch (e) {
-    return errorResponse_(e, { function: 'sendDetailedToCommanderSidebar' });
+    return errorResponse_(e, { function: 'sendDetailedToCommanderSidebar'});
   }
 }
 
 function testCommanderPhone() {
   const ui = SpreadsheetApp.getUi();
   try {
-    const phoneIndex = typeof loadPhonesIndex_ === 'function' ? loadPhonesIndex_() : null;
+    const phoneIndex = typeof loadPhonesIndex_ === 'function'? loadPhonesIndex_() : null;
     const role = CONFIG.COMMANDER_ROLE;
-    let result = `⌕ ПОШУК ТЕЛЕФОНУ КОМАНДИРА
+    let result = `ПОШУК ТЕЛЕФОНУ КОМАНДИРА
 `;
     result += `============================
 
@@ -160,37 +160,37 @@ function testCommanderPhone() {
     result += `Роль в конфігу: "${role}"
 
 `;
-    result += ` Canonical lookup: ${findPhone_({ role: role }) || '(✘)'}
+    result += `Canonical lookup: ${findPhone_({ role: role }) || '✘'}
 `;
-    result += ` byRole[${role}]: ${phoneIndex && phoneIndex.byRole ? (phoneIndex.byRole[role] || phoneIndex.byRole[_normCallsignKey_(role)] || '(✘)') : '(✘)'}
+    result += `byRole[${role}]: ${phoneIndex && phoneIndex.byRole ? (phoneIndex.byRole[role] || phoneIndex.byRole[_normCallsignKey_(role)] || '✘') : '✘'}
 `;
-    result += ` byCallsign[${role}]: ${phoneIndex && phoneIndex.byCallsign ? (phoneIndex.byCallsign[role] || phoneIndex.byCallsign[_normCallsignKey_(role)] || '(✘)') : '(✘)'}
+    result += `byCallsign[${role}]: ${phoneIndex && phoneIndex.byCallsign ? (phoneIndex.byCallsign[role] || phoneIndex.byCallsign[_normCallsignKey_(role)] || '✘') : '✘'}
 
 `;
-    result += `[LIST] Можливі кандидати:
+    result += `Можливі кандидати:
 `;
 
     let found = 0;
     (phoneIndex && Array.isArray(phoneIndex.items) ? phoneIndex.items : []).forEach(function(item) {
-      const probe = [item.role, item.callsign, item.fio].filter(Boolean).join(' | ');
+      const probe = [item.role, item.callsign, item.fio].filter(Boolean).join('| ');
       const upperProbe = probe.toUpperCase();
       if (upperProbe.indexOf('КОМАНДИР') !== -1 || upperProbe.indexOf('КВ') !== -1 || upperProbe.indexOf('ГРАФ') !== -1 || upperProbe.indexOf(String(role || '').toUpperCase()) !== -1) {
-        result += `  ${probe} → ${item.phone || '—'}
+        result += `${probe} → ${item.phone || '—'}
 `;
         found++;
       }
     });
 
     if (!found) {
-      result += `  (нічого не знайдено)
+      result += `(нічого не знайдено)
 
 `;
-      result += `(✘) В листі PHONES немає запису для командира. Додайте роль або позивний "${role}".`;
+      result += `✘ В листі PHONES немає запису для командира. Додайте роль або позивний "${role}".`;
     }
 
-    ui.alert('☏ Діагностика командира', result, ui.ButtonSet.OK);
+    ui.alert('Діагностика командира', result, ui.ButtonSet.OK);
   } catch (e) {
-    ui.alert('(✘) Помилка', String(e && e.message ? e.message : e), ui.ButtonSet.OK);
+    ui.alert('✘ Помилка', String(e && e.message ? e.message : e), ui.ButtonSet.OK);
   }
 }
 

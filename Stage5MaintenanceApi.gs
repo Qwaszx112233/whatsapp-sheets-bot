@@ -7,7 +7,7 @@
 
 function _stage5BuildMaintenanceResponse_(success, message, report, scenario, warnings, extraMeta) {
   const meta = Object.assign({
-    stage: (typeof getProjectBundleMetadata_ === 'function' ? getProjectBundleMetadata_().stageVersion : '6.0.0-final'),
+    stage: (typeof getProjectBundleMetadata_ === 'function'? getProjectBundleMetadata_().stageVersion : '6.0.0-final'),
     scenario: scenario,
     operationId: stage4UniqueId_(scenario),
     affectedSheets: [],
@@ -25,29 +25,29 @@ function _stage5BuildMaintenanceResponse_(success, message, report, scenario, wa
     [],
     meta,
     { stage: meta.stage, scenario: scenario, lifecycle: ['report.built'] },
-    { stage: meta.stage, scenario: scenario, layer: 'maintenance' },
+    { stage: meta.stage, scenario: scenario, layer: 'maintenance'},
     warnings || []
   );
 }
 
 function apiStage5ClearCache() {
-  return Stage4UseCases_.runMaintenanceScenario({ type: 'cleanupCaches' });
+  return Stage4UseCases_.runMaintenanceScenario({ type: 'cleanupCaches'});
 }
 
 function apiStage5ClearLog() {
-  return Stage4UseCases_.runMaintenanceScenario({ type: 'clearLog' });
+  return Stage4UseCases_.runMaintenanceScenario({ type: 'clearLog'});
 }
 
 function apiStage5ClearPhoneCache() {
-  return Stage4UseCases_.runMaintenanceScenario({ type: 'clearPhoneCache' });
+  return Stage4UseCases_.runMaintenanceScenario({ type: 'clearPhoneCache'});
 }
 
 function apiStage5RestartBot() {
-  return Stage4UseCases_.runMaintenanceScenario({ type: 'restartBot' });
+  return Stage4UseCases_.runMaintenanceScenario({ type: 'restartBot'});
 }
 
 function apiStage5SetupVacationTriggers() {
-  return Stage4UseCases_.runMaintenanceScenario({ type: 'setupVacationTriggers' });
+  return Stage4UseCases_.runMaintenanceScenario({ type: 'setupVacationTriggers'});
 }
 
 function apiStage5CleanupDuplicateTriggers(functionName) {
@@ -58,7 +58,7 @@ function apiStage5CleanupDuplicateTriggers(functionName) {
 }
 
 function apiStage5DebugPhones() {
-  return Stage4UseCases_.runMaintenanceScenario({ type: 'debugPhones' });
+  return Stage4UseCases_.runMaintenanceScenario({ type: 'debugPhones'});
 }
 
 function apiStage5BuildBirthdayLink(phone, name) {
@@ -85,7 +85,7 @@ function apiStage5BuildBirthdayLink(phone, name) {
 
       return {
         success: legacy.success !== false,
-        message: legacy.message || (legacy.success ? 'Посилання на привітання підготовлено' : 'Не вдалося підготувати посилання'),
+        message: legacy.message || (legacy.success ? 'Посилання на привітання підготовлено': 'Не вдалося підготувати посилання'),
         result: result,
         changes: [],
         affectedSheets: [],
@@ -147,8 +147,8 @@ function runStage5DiagnosticsByMode_(options) {
   if (mode === 'quick') return runStage5QuickDiagnostics_(opts);
   if (mode === 'structural') return runStage5StructuralDiagnostics_(opts);
   if (mode === 'operational') return runStage5OperationalDiagnostics_(opts);
-  if (mode === 'compatibility' || mode === 'compatibility sunset' || mode === 'sunset') return runStage5SunsetDiagnostics_(opts);
-  if (mode === 'full-verbose' || mode === 'verbose') return runStage5FullVerboseDiagnostics_(opts);
+  if (mode === 'compatibility'|| mode === 'compatibility sunset'|| mode === 'sunset') return runStage5SunsetDiagnostics_(opts);
+  if (mode === 'full-verbose'|| mode === 'verbose') return runStage5FullVerboseDiagnostics_(opts);
   if (mode === 'stage6a-hardening') return runStage6AHardeningDiagnostics_(opts);
   return runStage5FullDiagnostics_(opts);
 }
@@ -164,7 +164,7 @@ function apiStage5HealthCheck(options) {
   const report = runStage5DiagnosticsByMode_(Object.assign({}, opts, { mode: resolvedMode }));
   return _stage5BuildMaintenanceResponse_(
     report.ok,
-    report.summary || ('full' === resolvedMode ? 'Повну перевірку системи завершено' : 'Перевірку системи завершено'),
+    report.summary || ('full'=== resolvedMode ? 'Повну перевірку системи завершено': 'Перевірку системи завершено'),
     report,
     'stage5HealthCheck',
     report.warnings || []
@@ -186,7 +186,7 @@ function apiRunStage5RegressionTests(options) {
   const report = runStage5SmokeTests(options || {});
   return _stage5BuildMaintenanceResponse_(
     report.ok,
-    report.ok ? 'Регресійні тести пройдено' : 'У регресійних тестах є збої',
+    report.ok ? 'Регресійні тести пройдено': 'У регресійних тестах є збої',
     report,
     'stage5RegressionTests',
     report.warnings || []
@@ -210,7 +210,7 @@ function apiStage5ListPendingRepairs(filters) {
   return _stage5BuildMaintenanceResponse_(
     true,
     'Pending repairs перелічено',
-    typeof OperationRepository_ === 'object' ? OperationRepository_.listPendingRepairs(filters || {}) : { operations: [], total: 0 },
+    typeof OperationRepository_ === 'object'? OperationRepository_.listPendingRepairs(filters || {}) : { operations: [], total: 0 },
     'stage5ListPendingRepairs',
     [],
     { affectedSheets: ['OPS_LOG', 'CHECKPOINTS'] }
@@ -229,13 +229,13 @@ function apiStage5GetOperationDetails(operationId) {
       { affectedSheets: ['OPS_LOG', 'CHECKPOINTS'] }
     );
   }
-  const details = typeof OperationRepository_ === 'object' ? OperationRepository_.getOperationDetails(normalizedId) : null;
+  const details = typeof OperationRepository_ === 'object'? OperationRepository_.getOperationDetails(normalizedId) : null;
   return _stage5BuildMaintenanceResponse_(
     !!details,
-    details ? 'Деталі операції отримано' : ('Операцію не знайдено: ' + normalizedId),
+    details ? 'Деталі операції отримано': ('Операцію не знайдено: '+ normalizedId),
     details || { operation: null, checkpoints: [] },
     'stage5GetOperationDetails',
-    details ? [] : [('Операцію не знайдено: ' + normalizedId)],
+    details ? [] : [('Операцію не знайдено: '+ normalizedId)],
     { affectedSheets: ['OPS_LOG', 'CHECKPOINTS'] }
   );
 }
@@ -249,7 +249,7 @@ function apiStage5RunRepair(operationId, options) {
     return _stage5BuildMaintenanceResponse_(
       false,
       'Не передано operationId для repair',
-      { success: false, operationId: '' },
+      { success: false, operationId: ''},
       'stage5RunRepair',
       ['Не передано operationId для repair'],
       { affectedSheets: ['OPS_LOG', 'CHECKPOINTS'] }
@@ -260,7 +260,7 @@ function apiStage5RunRepair(operationId, options) {
     if (result && result.result) return result.result;
     return _stage5BuildMaintenanceResponse_(
       !!(result && result.success),
-      result && result.message ? result.message : (result && result.success ? 'Виправлення виконано' : 'Виправлення завершилося з помилкою'),
+      result && result.message ? result.message : (result && result.success ? 'Виправлення виконано': 'Виправлення завершилося з помилкою'),
       result || {},
       'stage5RunRepair',
       result && result.success ? [] : [result && result.message ? result.message : 'Виправлення завершилося з помилкою'],
@@ -280,5 +280,5 @@ function apiStage5RunRepair(operationId, options) {
 
 
 function apiStage5RunLifecycleRetentionCleanup() {
-  return Stage4UseCases_.runMaintenanceScenario({ type: 'cleanupLifecycleRetention' });
+  return Stage4UseCases_.runMaintenanceScenario({ type: 'cleanupLifecycleRetention'});
 }

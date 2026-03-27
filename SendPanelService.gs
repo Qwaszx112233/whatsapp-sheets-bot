@@ -71,12 +71,12 @@ const SendPanelService_ = (function() {
     const item = Object.assign({}, row || {});
     const normalizedAction = String(action || '').trim();
 
-    if (normalizedAction === 'markPending' || normalizedAction === 'openChat' || normalizedAction === 'sendPending') {
+    if (normalizedAction === 'markPending'|| normalizedAction === 'openChat'|| normalizedAction === 'sendPending') {
       item.sent = false;
       item.status = getSendPanelReadyStatus_();
       return item;
     }
-    if (normalizedAction === 'markSent' || normalizedAction === 'confirmSent') {
+    if (normalizedAction === 'markSent'|| normalizedAction === 'confirmSent') {
       item.sent = true;
       item.status = getSendPanelReadyStatus_();
       return item;

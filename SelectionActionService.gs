@@ -101,7 +101,7 @@ const SelectionActionService_ = (function() {
 
   function _resolvePayloadBundle(mode) {
     const kind = String(mode || 'selection').trim();
-    if (kind === 'selection' || kind === 'single') {
+    if (kind === 'selection'|| kind === 'single') {
       const one = prepareSingleSelection();
       return {
         selectionType: one.selectionType,
@@ -120,7 +120,7 @@ const SelectionActionService_ = (function() {
     const opts = options || {};
     const ctx = _getContext();
     const col = opts.col || (ctx.range ? ctx.range.getColumn() : ctx.codeRange.getColumn());
-    if (col < ctx.codeRange.getColumn() || col > ctx.codeRange.getLastColumn()) {
+    if (col < ctx.codeRange.getColumn() || col >ctx.codeRange.getLastColumn()) {
       throw new Error(`Стовпець поза ${CONFIG.CODE_RANGE_A1}`);
     }
 

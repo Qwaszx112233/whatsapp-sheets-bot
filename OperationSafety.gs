@@ -91,7 +91,7 @@ const Stage6ASafety_ = (function() {
     const current = _readJson(key);
     if (!current) return null;
     const age = Date.now() - Number(current.ts || 0);
-    if (age > ttlMs) {
+    if (age >ttlMs) {
       _props().deleteProperty(key);
       return null;
     }

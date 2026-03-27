@@ -389,7 +389,7 @@ function _stage5EnrichCompatibilityRecord_(item) {
   else if (status.indexOf('deprecated') !== -1) sunsetStatus = 'deprecated';
 
   return Object.assign(record, {
-    migrationStatus: record.migrationStatus || (sunsetStatus === 'canonical' ? 'migrated' : 'pending'),
+    migrationStatus: record.migrationStatus || (sunsetStatus === 'canonical'? 'migrated': 'pending'),
     usageScope: record.usageScope || usageScope,
     sunsetStatus: record.sunsetStatus || sunsetStatus,
     removalCondition: record.removalCondition || record.sunset || '',

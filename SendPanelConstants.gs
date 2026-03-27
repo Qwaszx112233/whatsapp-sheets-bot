@@ -3,18 +3,18 @@
  */
 
 const SendPanelConstants_ = Object.freeze({
-  STATUS_READY: '(✔)',
+  STATUS_READY: '✔',
   STATUS_BLOCKED: '✘',
-  SENT_MARK: '(✔)',
+  SENT_MARK: '✔',
   UNSENT_MARK: '✘',
-  STATUS_ERROR_PREFIX: '(✘)',
-  LEGACY_STATUS_READY: '((✔))',
-  LEGACY_STATUS_OPENED: '■ Відкрито',
-  LEGACY_STATUS_PENDING: '● Очікує підтвердження',
-  LEGACY_STATUS_UNSENT: '↩ Не відправлено',
-  LEGACY_STATUS_SENT: '[OUT] Відправлено',
-  ACTION_READY_LABEL: '☏ НАДІСЛАТИ',
-  ACTION_SENT_LABEL: '((✔)) ВІДПРАВЛЕНО',
+  STATUS_ERROR_PREFIX: '✘',
+  LEGACY_STATUS_READY: '✔',
+  LEGACY_STATUS_OPENED: '⚠︎ Відкрито',
+  LEGACY_STATUS_PENDING: '⚠︎ Очікує підтвердження',
+  LEGACY_STATUS_UNSENT: '✘ Не відправлено',
+  LEGACY_STATUS_SENT: '✔ Відправлено',
+  ACTION_READY_LABEL: 'НАДІСЛАТИ',
+  ACTION_SENT_LABEL: '✔ ВІДПРАВЛЕНО',
   ACTION_BLOCKED_LABEL: '',
   WA_SENDER_TARGET: 'WAPB_WHATSAPP_SENDER_TAB',
   METADATA_MONTH_CELL: 'H1',
@@ -38,12 +38,12 @@ function normalizeSendPanelStatus_(status) {
   if (value === SendPanelConstants_.LEGACY_STATUS_UNSENT) return SendPanelConstants_.STATUS_READY;
   if (value === SendPanelConstants_.LEGACY_STATUS_SENT) return SendPanelConstants_.STATUS_READY;
   if (value.indexOf(SendPanelConstants_.STATUS_ERROR_PREFIX) === 0) return SendPanelConstants_.STATUS_BLOCKED;
-  return value === 'TRUE' ? SendPanelConstants_.STATUS_READY : SendPanelConstants_.STATUS_BLOCKED;
+  return value === 'TRUE'? SendPanelConstants_.STATUS_READY : SendPanelConstants_.STATUS_BLOCKED;
 }
 
 function normalizeSendPanelSentMark_(mark) {
-  const value = String(mark == null ? '' : mark).trim().toUpperCase();
-  if (mark === true || value === 'TRUE' || value === SendPanelConstants_.SENT_MARK) return SendPanelConstants_.SENT_MARK;
+  const value = String(mark == null ? '': mark).trim().toUpperCase();
+  if (mark === true || value === 'TRUE'|| value === SendPanelConstants_.SENT_MARK) return SendPanelConstants_.SENT_MARK;
   if (value === SendPanelConstants_.LEGACY_STATUS_SENT.toUpperCase()) return SendPanelConstants_.SENT_MARK;
   return SendPanelConstants_.UNSENT_MARK;
 }

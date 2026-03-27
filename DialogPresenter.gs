@@ -9,7 +9,7 @@ const DialogPresenter_ = (function() {
   }
 
   function showLinkDialog(data) {
-    const payload = Object.assign({ title: 'Посилання' }, data || {});
+    const payload = Object.assign({ title: 'Посилання'}, data || {});
     _show(DialogTemplates_.linkDialog(payload), payload.title);
   }
 

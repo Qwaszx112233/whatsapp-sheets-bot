@@ -11,7 +11,7 @@ const DataAccess_ = (function() {
     const name = SheetSchemas_.resolveSheetName(schemaKey, explicitSheetName);
     const sheet = getSpreadsheet().getSheetByName(name);
     if (!sheet && required !== false) {
-      throw new Error(`Аркуш "${name}" (${schemaKey}) не знайдено`);
+      throw new Error(`Аркуш "${name}"(${schemaKey}) не знайдено`);
     }
     return sheet || null;
   }
@@ -97,7 +97,7 @@ const DataAccess_ = (function() {
     const sheet = getSheet(schemaKey, opts.sheetName, true);
     Object.keys(valuesByField || {}).forEach(function(field) {
       if (!(field in schema.columns)) {
-        throw new Error(`Поле "${field}" відсутнє у схемі ${schemaKey}`);
+        throw new Error(`Поле "${field}"відсутнє у схемі ${schemaKey}`);
       }
       sheet.getRange(Number(rowNumber), schema.columns[field]).setValue(valuesByField[field]);
     });
@@ -115,7 +115,7 @@ const DataAccess_ = (function() {
     const rows = list.map(function(item) {
       const out = new Array(width).fill('');
       Object.keys(schema.columns || {}).forEach(function(field) {
-        out[schema.columns[field] - 1] = item[field] === undefined ? '' : item[field];
+        out[schema.columns[field] - 1] = item[field] === undefined ? '': item[field];
       });
       return out;
     });
@@ -233,7 +233,7 @@ function loadPhonesIndex_() {
       function(h) { return h.includes('день народ'); },
       function(h) { return h.includes('дата народ'); },
       function(h) { return h.includes('birthday'); },
-      function(h) { return h === 'дн' || h === 'д.н'; }
+      function(h) { return h === 'дн'|| h === 'д.н'; }
     ], 3);
 
     for (let r = 1; r < values.length; r++) {
@@ -307,7 +307,7 @@ function loadPhonesMap_() {
   });
   Object.keys(index.byRole || {}).forEach(function(keyName) {
     map[keyName] = index.byRole[keyName];
-    map['role:' + keyName] = index.byRole[keyName];
+    map['role:'+ keyName] = index.byRole[keyName];
   });
   Object.keys(index.byCallsign || {}).forEach(function(keyName) {
     map[keyName] = index.byCallsign[keyName];
@@ -322,7 +322,7 @@ function loadPhonesMap_() {
 }
 
 function _normalizePhonesLookupSource_(source) {
-  if (source && typeof source === 'object' && source.byFio && source.byNorm && source.byRole && source.byCallsign) {
+  if (source && typeof source === 'object'&& source.byFio && source.byNorm && source.byRole && source.byCallsign) {
     return source;
   }
 
@@ -355,9 +355,9 @@ function _legacyPhoneLookup_(legacyMap, criteria) {
     callsign,
     callsignNorm,
     role,
-    'role:' + role,
+    'role:'+ role,
     roleNorm,
-    'role:' + roleNorm
+    'role:'+ roleNorm
   ].filter(Boolean);
 
   for (let i = 0; i < candidates.length; i++) {
@@ -399,7 +399,7 @@ function findPhone_(criteria, options) {
     const fuzzy = items.find(function(item) {
       const probe = [item.roleNorm, item.callsignNorm, _normCallsignKey_(item.role), _normCallsignKey_(item.callsign)]
         .filter(Boolean)
-        .join(' ');
+        .join('');
       return fuzzyKeywords.some(function(keyword) {
         return keyword && probe.indexOf(keyword) !== -1;
       });
@@ -478,8 +478,8 @@ function readDictSum_() {
       const showZero = String(row[3] || '').trim().toUpperCase() === 'TRUE';
 
       // нормализация от мусора типа пробелов/табов/двойных пробелов
-      code = code.replace(/\s+/g, ' ').trim();
-      label = label.replace(/\s+/g, ' ').trim();
+      code = code.replace(/\s+/g, '').trim();
+      label = label.replace(/\s+/g, '').trim();
 
       if (!code) continue;
       if (!label) label = code;
@@ -489,7 +489,7 @@ function readDictSum_() {
     }
   }
 
-  raw.sort((a, b) => a.order - b.order);
+  raw.sort((a, b) =>a.order - b.order);
 
   const seenCode = new Set();
   const rules = [];
@@ -521,7 +521,7 @@ function buildPayloadForCell_(sheet, row, col, phonesMap, dictMap) {
     a1: a1
   };
 
-  if (row < codeRef.getRow() || row > codeRef.getLastRow() || col < codeRef.getColumn() || col > codeRef.getLastColumn()) {
+  if (row < codeRef.getRow() || row >codeRef.getLastRow() || col < codeRef.getColumn() || col >codeRef.getLastColumn()) {
     throw buildContextError_('buildPayloadForCell_', baseContext, `Клітинка поза межами матриці ${CONFIG.CODE_RANGE_A1}`);
   }
 
@@ -543,7 +543,7 @@ function buildPayloadForCell_(sheet, row, col, phonesMap, dictMap) {
   const phoneSource = phonesMap || loadPhonesIndex_();
   let phone = findPhone_({ fio: fioRaw, fioNorm: fioNorm }, { index: phoneSource }) || '';
   const phoneDigits = phone ? String(phone).replace(/[^\d+]/g, '') : '';
-  const waPhone = phoneDigits ? (phoneDigits.startsWith('+') ? phoneDigits : '+' + phoneDigits) : '';
+  const waPhone = phoneDigits ? (phoneDigits.startsWith('+') ? phoneDigits : '+'+ phoneDigits) : '';
 
   let service = '';
   let place = '';
@@ -600,7 +600,7 @@ function buildPayloadForCell_(sheet, row, col, phonesMap, dictMap) {
 function getSelectedRanges_(sheet) {
   const ss = SpreadsheetApp.getActive();
   const rl = ss.getActiveRangeList();
-  if (rl && rl.getRanges().length > 0) return rl.getRanges().filter(r => r.getSheet().getName() === sheet.getName());
+  if (rl && rl.getRanges().length >0) return rl.getRanges().filter(r =>r.getSheet().getName() === sheet.getName());
   const ar = sheet.getActiveRange();
   return ar ? [ar] : [];
 }
@@ -616,8 +616,8 @@ function collectPayloads_(sheet, ranges) {
   const payloads = [], errors = [], seen = new Set();
   let limited = false;
 
-  const processCell = (row, col, value) => {
-    if (row < rMin || row > rMax || col < cMin || col > cMax) return false;
+  const processCell = (row, col, value) =>{
+    if (row < rMin || row >rMax || col < cMin || col >cMax) return false;
     const code = String(value || '').trim();
     if (!code) return false;
     const a1 = a1FromRowCol_(row, col);
@@ -656,22 +656,22 @@ function groupPayloadsByPhone_(payloads) {
     if (!groups[p.phone]) groups[p.phone] = [];
     groups[p.phone].push(p);
   }
-  return Object.entries(groups).map(([phone, items]) => ({ phone, items }));
+  return Object.entries(groups).map(([phone, items]) =>({ phone, items }));
 }
 
 function splitTextIntoParts_(header, blocks, footer, maxLen) {
   const parts = [];
   let current = header;
-  const encLen = t => encodeURIComponent(String(t)).length;
+  const encLen = t =>encodeURIComponent(String(t)).length;
 
-  const pushCurrent = () => {
+  const pushCurrent = () =>{
     const msg = (current + footer).trim();
     if (msg) parts.push(msg);
     current = header;
   };
 
   for (const block of blocks) {
-    let candidate = current + (current.endsWith('\n') ? '' : '\n') + block + '\n\n';
+    let candidate = current + (current.endsWith('\n') ? '': '\n') + block + '\n\n';
     if (encLen(candidate + footer) <= maxLen) {
       current = candidate;
       continue;
@@ -682,7 +682,7 @@ function splitTextIntoParts_(header, blocks, footer, maxLen) {
     let temp = header;
     const lines = block.split('\n');
     for (const line of lines) {
-      const testLine = temp + (temp.endsWith('\n') ? '' : '\n') + line + '\n';
+      const testLine = temp + (temp.endsWith('\n') ? '': '\n') + line + '\n';
       if (encLen(testLine + footer) <= maxLen) temp = testLine;
       else {
         if (temp.trim() !== header.trim()) parts.push((temp + footer).trim());
@@ -699,25 +699,25 @@ function splitTextIntoParts_(header, blocks, footer, maxLen) {
 function buildAggregatedPayloadsForPhone_(phone, items) {
   if (!items || items.length === 0) return [];
 
-  items.sort((a, b) => (a.row - b.row) || (a.col - b.col));
-  const dates = unique_(items.map(x => x.reportDateStr));
+  items.sort((a, b) =>(a.row - b.row) || (a.col - b.col));
+  const dates = unique_(items.map(x =>x.reportDateStr));
   const dateLine = dates.length === 1 ? dates[0] : `Дати: ${dates.join(', ')}`;
 
-  const header = [dateLine, '', `[LIST] Зведення по ${items.length} записах:`, ''].join('\n');
+  const header = [dateLine, '', `Зведення по ${items.length} записах:`, ''].join('\n');
   const footer = ['', '*(´ ｡_ ｡｀)*   *⨥*   *(´｡ _｡ ｀)*'].join('\n');
 
-  const blocks = items.map(item => {
+  const blocks = items.map(item =>{
     const lines = [`• ${item.fio}`];
-    if (item.service) lines.push(`  Вид служби: ${item.service}`);
-    if (item.place) lines.push(`  Місце: ${item.place}`);
-    if (item.tasks) lines.push(`  Завдання: ${item.tasks}`);
+    if (item.service) lines.push(`Вид служби: ${item.service}`);
+    if (item.place) lines.push(`Місце: ${item.place}`);
+    if (item.tasks) lines.push(`Завдання: ${item.tasks}`);
     return lines.join('\n');
   });
 
   const parts = splitTextIntoParts_(header, blocks, footer, CONFIG.MAX_WA_TEXT);
 
-  return parts.map((msg, idx) => {
-    const partNo = parts.length > 1 ? ` (частина ${idx + 1}/${parts.length})` : '';
+  return parts.map((msg, idx) =>{
+    const partNo = parts.length >1 ? `(частина ${idx + 1}/${parts.length})`: '';
     const safeMsg = trimToEncoded_(msg, CONFIG.MAX_WA_TEXT);
     return {
       timestamp: new Date(),

@@ -12,7 +12,7 @@ const Reconciliation_ = (function () {
       if (!key || key === '||') return;
       if (!map[key]) map[key] = [];
       map[key].push(row);
-      if (map[key].length > 1) duplicates.push(key);
+      if (map[key].length >1) duplicates.push(key);
     });
     return {
       map: map,
@@ -188,7 +188,7 @@ const Reconciliation_ = (function () {
     return {
       selectedCount: selected.length,
       repairableCount: selected.filter(function (item) { return item.repairable; }).length,
-      canRebuild: selected.length > 0,
+      canRebuild: selected.length >0,
       plannedOperations: selected.map(function (item) {
         return {
           type: item.type,
@@ -235,7 +235,7 @@ const Reconciliation_ = (function () {
     const panel = DataAccess_.getSheet('SEND_PANEL', null, true);
     const nextRow = Math.max(panel.getLastRow() + 1, Number(CONFIG.SEND_PANEL_DATA_START_ROW) || 3);
     const formattedPhone = String(expectedRow.phone || '').trim().startsWith('+')
-      ? "'" + String(expectedRow.phone || '').trim()
+      ? "'"+ String(expectedRow.phone || '').trim()
       : String(expectedRow.phone || '').trim();
     const status = deriveSendPanelStatusFromInputs_(expectedRow.fio || '', formattedPhone || '', expectedRow.code || '', expectedRow.tasks || '');
 
@@ -250,7 +250,7 @@ const Reconciliation_ = (function () {
       resolveSendPanelActionCellValue_(expectedRow.link || '', status, expectedRow.sent === true)
     ]]);
 
-    if (nextRow <= (((typeof MONTHLY_CONFIG !== 'undefined' && Number(MONTHLY_CONFIG.LAST_DATA_ROW)) || 40))) {
+    if (nextRow <= (((typeof MONTHLY_CONFIG !== 'undefined'&& Number(MONTHLY_CONFIG.LAST_DATA_ROW)) || 40))) {
       ensureSendPanelStatusFormula_(panel);
       normalizeSendPanelDailyState_(panel);
     } else {
@@ -395,7 +395,7 @@ const Reconciliation_ = (function () {
 
     checks.push({
       name: 'monthly ↔ SEND_PANEL',
-      status: (check.issues || []).length ? 'WARN' : 'OK',
+      status: (check.issues || []).length ? 'WARN': 'OK',
       details: check.summary
     });
 
@@ -403,7 +403,7 @@ const Reconciliation_ = (function () {
       const sidebar = PersonsRepository_.getSidebarPersonnel(dateStr);
       checks.push({
         name: 'monthly ↔ sidebar-view data',
-        status: (sidebar.personnel || []).filter(function (item) { return item.status === 'error'; }).length ? 'WARN' : 'OK',
+        status: (sidebar.personnel || []).filter(function (item) { return item.status === 'error'; }).length ? 'WARN': 'OK',
         details: {
           month: sidebar.month,
           count: (sidebar.personnel || []).length
@@ -422,7 +422,7 @@ const Reconciliation_ = (function () {
       const detailed = SummaryService_.buildDetailed(dateStr);
       checks.push({
         name: 'monthly ↔ summaries',
-        status: summary && detailed ? 'OK' : 'WARN',
+        status: summary && detailed ? 'OK': 'WARN',
         details: {
           daySummaryLength: String(summary.summary || '').length,
           detailedSummaryLength: String(detailed.summary || '').length
@@ -438,14 +438,14 @@ const Reconciliation_ = (function () {
 
     checks.push({
       name: 'monthly ↔ vacations',
-      status: DataAccess_.getSheet('VACATIONS', null, false) ? 'OK' : 'WARN',
-      details: DataAccess_.getSheet('VACATIONS', null, false) ? 'VACATIONS доступний' : 'VACATIONS відсутній'
+      status: DataAccess_.getSheet('VACATIONS', null, false) ? 'OK': 'WARN',
+      details: DataAccess_.getSheet('VACATIONS', null, false) ? 'VACATIONS доступний': 'VACATIONS відсутній'
     });
 
     checks.push({
       name: 'LOG ↔ critical write-operations',
-      status: DataAccess_.getSheet('LOG', null, false) ? 'OK' : 'WARN',
-      details: DataAccess_.getSheet('LOG', null, false) ? 'LOG доступний' : 'LOG відсутній'
+      status: DataAccess_.getSheet('LOG', null, false) ? 'OK': 'WARN',
+      details: DataAccess_.getSheet('LOG', null, false) ? 'LOG доступний': 'LOG відсутній'
     });
 
     return checks;
@@ -486,7 +486,7 @@ const Reconciliation_ = (function () {
       };
     }
 
-    if (mode === 'repairSelectedIssues' || mode === 'repair') {
+    if (mode === 'repairSelectedIssues'|| mode === 'repair') {
       const repaired = opts.dryRun === true ? repairSelectedIssues(opts) : repairWithVerification(opts);
       return {
         date: dateStr,
@@ -513,7 +513,7 @@ const Reconciliation_ = (function () {
         },
         message: repaired.dryRun
           ? `Dry-run repair: ${(repaired.repairs || []).length}`
-          : (repaired.postCheck ? `Repair виконано: ${(repaired.repairs || []).length}. Залишилось проблем: ${repaired.postCheck.remainingIssues}` : `Repair виконано: ${(repaired.repairs || []).length}`)
+          : (repaired.postCheck ? `Repair виконано: ${(repaired.repairs || []).length}. Залишилось проблем: ${repaired.postCheck.remainingIssues}`: `Repair виконано: ${(repaired.repairs || []).length}`)
       };
     }
 

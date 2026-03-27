@@ -21,7 +21,7 @@
   }
 
   function getHealthCheckModeLabel_() {
-    return STATE.healthCheckMode === 'full' ? 'Повна' : 'Швидка';
+    return STATE.healthCheckMode === 'full'? 'Повна': 'Швидка';
   }
 
   function renderHealthCheckModeSwitcher_() {
@@ -32,7 +32,7 @@
             <button
               id="healthModeQuick"
               type="button"
-              class="mode-toggle-btn ${STATE.healthCheckMode === 'quick' ? 'active' : ''}"
+              class="mode-toggle-btn ${STATE.healthCheckMode === 'quick'? 'active': ''}"
               onclick="SidebarApp.setHealthCheckMode('quick')"
             >
               Швидка
@@ -40,7 +40,7 @@
             <button
               id="healthModeFull"
               type="button"
-              class="mode-toggle-btn ${STATE.healthCheckMode === 'full' ? 'active' : ''}"
+              class="mode-toggle-btn ${STATE.healthCheckMode === 'full'? 'active': ''}"
               onclick="SidebarApp.setHealthCheckMode('full')"
             >
               Повна
@@ -66,8 +66,8 @@
       <div class="result-item">
         <div class="result-label">Запуск перевірки</div>
         <div class="result-value" style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button class="btn btn-primary" onclick="SidebarApp.runHealthCheck()"> Перевірити</button>
-          <button class="btn" onclick="SidebarApp.copyHealthReport()">[LIST] Копіювати звіт</button>
+          <button class="btn btn-primary" onclick="SidebarApp.runHealthCheck()">⚠︎ Перевірити</button>
+          <button class="btn" onclick="SidebarApp.copyHealthReport()">↦ Копіювати звіт</button>
         </div>
       </div>
 
@@ -79,7 +79,7 @@
   }
 
   function setHealthCheckMode(mode) {
-    const nextMode = mode === 'full' ? 'full' : 'quick';
+    const nextMode = mode === 'full'? 'full': 'quick';
     STATE.healthCheckMode = nextMode;
 
     const quickBtn = $id('healthModeQuick');
@@ -88,7 +88,7 @@
     if (fullBtn) fullBtn.classList.toggle('active', nextMode === 'full');
 
     logToConsole(
-      `Режим: ${nextMode === 'full' ? 'повна діагностика' : 'швидка перевірка'}`,
+      `Режим: ${nextMode === 'full'? 'повна діагностика': 'швидка перевірка'}`,
       'info'
     );
 
@@ -103,13 +103,13 @@
 
       <div class="result-item">
         <div class="result-label">Перевірка системи</div>
-        <div class="result-value">⌛︎ Виконую перевірку (${escapeHtml(getHealthCheckModeLabel_())})...</div>
+        <div class="result-value">⚠︎ Виконую перевірку (${escapeHtml(getHealthCheckModeLabel_())})...</div>
       </div>
     `);
 
     let slowModeShown = false;
 
-    const slowTimerId = setTimeout(() => {
+    const slowTimerId = setTimeout(() =>{
       slowModeShown = true;
 
       setHtml('resultContent', `
@@ -117,7 +117,7 @@
 
         <div class="health-wrap">
           <div class="health-item warn sev-medium">
-            <div class="health-title">⌛︎ Перевірка ще виконується</div>
+            <div class="health-title">⚠︎ Перевірка ще виконується</div>
             <div class="health-details">
               Сервер відповідає довше звичайного. Це не помилка — просто діагностика важка.
             </div>
@@ -125,14 +125,14 @@
         </div>
       `);
 
-      logToConsole('⌛︎ Health Check виконується довше звичайного...', 'warning');
+      logToConsole('⚠︎ Health Check виконується довше звичайного...', 'warning');
     }, 15000);
 
     try {
       const reportResponse = await ActionDispatcher.run(
         'stage4HealthCheck',
-        () => DiagnosticsApi.healthCheck(getHealthCheckOptions_()),
-        { successMessage: '' } 
+        () =>DiagnosticsApi.healthCheck(getHealthCheckOptions_()),
+        { successMessage: ''} 
       );
 
       clearTimeout(slowTimerId);
@@ -145,13 +145,13 @@
       const grouped = splitHealthChecksByGroup(Array.isArray(report?.checks) ? report.checks : []);
       const overallOk = grouped.critical.length === 0 && grouped.warnings.length === 0;
 
-      showToast(overallOk ? '((✔)) Система в нормі' : '⚠︎ Є проблеми — див. звіт');
+      showToast(overallOk ? '✔ Система в нормі': '⚠︎ Є проблеми — див. звіт');
 
       logToConsole(
         slowModeShown
           ? 'Перевірка системи завершена після тривалого очікування'
           : 'Перевірка системи завершена',
-        overallOk ? 'success' : 'warning'
+        overallOk ? 'success': 'warning'
       );
     } catch (error) {
       clearTimeout(slowTimerId);
@@ -161,14 +161,14 @@
 
         <div class="health-wrap">
           <div class="health-item bad sev-critical">
-            <div class="health-title">(✘) Помилка перевірки</div>
+            <div class="health-title">✘ Помилка перевірки</div>
             <div class="health-details">${escapeHtml(normalizeError(error))}</div>
           </div>
         </div>
       `);
 
-      showToast('(✘) Помилка Health Check');
-      logToConsole(`(✘) Health Check: ${normalizeError(error)}`, 'error');
+      showToast('✘ Помилка Health Check');
+      logToConsole(`✘ Health Check: ${normalizeError(error)}`, 'error');
     }
   }
   function splitHealthChecksByGroup(checks) {
@@ -181,15 +181,15 @@
 
     (checks || []).forEach(function(check) {
       const status = String(check?.status || '').toUpperCase();
-      const ok = typeof check?.ok === 'boolean' ? check.ok : status === 'OK';
+      const ok = typeof check?.ok === 'boolean'? check.ok : status === 'OK';
       const uiGroup = String(check?.uiGroup || '').toLowerCase();
 
-      if (uiGroup === 'critical' || uiGroup === 'warnings' || uiGroup === 'pseudo' || uiGroup === 'ok') {
+      if (uiGroup === 'critical'|| uiGroup === 'warnings'|| uiGroup === 'pseudo'|| uiGroup === 'ok') {
         groups[uiGroup].push(check);
         return;
       }
 
-      if (uiGroup === 'compatibility' || status === 'PSEUDO') {
+      if (uiGroup === 'compatibility'|| status === 'PSEUDO') {
         groups.pseudo.push(check);
         return;
       }
@@ -256,14 +256,14 @@
   }
   function renderCheckItemCompact(check) {
     const status = String(check?.status || '').toUpperCase();
-    const ok = typeof check?.ok === 'boolean' ? check.ok : status === 'OK';
+    const ok = typeof check?.ok === 'boolean'? check.ok : status === 'OK';
     const isPseudo = status === 'PSEUDO';
-    const icon = isPseudo ? '' : (ok ? '((✔))' : (status === 'WARN' ? '⚠︎' : '(✘)'));
+    const icon = isPseudo ? '': (ok ? '✔': (status === 'WARN'? '⚠︎': '✘'));
     const title = check?.title || check?.name || 'Перевірка';
     const details = check?.details || check?.message || '';
     const recommendation = check?.howTo || check?.recommendation || '';
-    const cssClass = isPseudo ? 'pseudo' : (ok ? 'ok' : (status === 'FAIL' ? 'bad' : 'warn'));
-    const noteLabel = isPseudo ? 'Примітка' : 'Як виправити';
+    const cssClass = isPseudo ? 'pseudo': (ok ? 'ok': (status === 'FAIL'? 'bad': 'warn'));
+    const noteLabel = isPseudo ? 'Примітка': 'Як виправити';
 
     return `
       <div class="health-item ${cssClass}" style="margin:4px 0; padding:6px;">
@@ -271,8 +271,8 @@
           ${icon} ${escapeHtml(title)}
           <span class="health-badges">[${escapeHtml(status || '?')}]</span>
         </div>
-        ${details ? `<div class="health-details">${escapeHtml(details)}</div>` : ''}
-        ${recommendation ? `<div class="how-to-box" style="${isPseudo ? 'border-left-color: var(--google-blue);' : ''}"><strong>${noteLabel}:</strong> ${escapeHtml(recommendation)}</div>` : ''}
+        ${details ? `<div class="health-details">${escapeHtml(details)}</div>`: ''}
+        ${recommendation ? `<div class="how-to-box" style="${isPseudo ? ' border-left-color: var(--google-blue);' : ''}"><strong>${noteLabel}:</strong>${escapeHtml(recommendation)}</div>`: ''}
       </div>
     `;
   }
@@ -284,7 +284,7 @@
     if (!report || !report.checks) {
       return `
         ${renderHealthCheckModeSwitcher_()}
-        <div class="health-item warn">(✘) Порожній звіт</div>
+        <div class="health-item warn">✘ Порожній звіт</div>
       `;
     }
 
@@ -296,9 +296,9 @@
     const pseudoCount = groups.pseudo.length;
     const okCount = groups.ok.length;
 
-    const hasRealProblems = criticalCount > 0 || warningCount > 0;
-    const statusIcon = hasRealProblems ? '⚠︎' : '((✔))';
-    const statusColor = hasRealProblems ? 'var(--warning-color)' : 'var(--success-color)';
+    const hasRealProblems = criticalCount >0 || warningCount >0;
+    const statusIcon = hasRealProblems ? '⚠︎': '✔';
+    const statusColor = hasRealProblems ? 'var(--warning-color)': 'var(--success-color)';
 
     return `
       ${renderHealthCheckModeSwitcher_()}
@@ -306,7 +306,7 @@
       <div class="compact-health-report">
         <div style="font-weight:600; margin-bottom:6px; padding:6px 8px; background:${statusColor}20; border-radius:6px;">
           <span style="color:${statusColor};">${statusIcon}</span>
-          ${hasRealProblems ? 'Є проблеми' : 'Все добре'}
+          ${hasRealProblems ? 'Є проблеми': 'Все добре'}
           <span style="float:right; font-size:0.65rem;">${checks.length} перевірок</span>
         </div>
 
@@ -316,10 +316,10 @@
 
         <div style="font-size:0.68rem; margin-bottom:8px; display:flex; gap:8px; flex-wrap:wrap;">
           <span style="padding:2px 8px; border-radius:999px; background:rgba(34,197,94,.12); color:var(--success-color);">
-            ((✔)) OK: ${okCount}
+            ✔ OK: ${okCount}
           </span>
           <span style="padding:2px 8px; border-radius:999px; background:rgba(239,68,68,.12); color:var(--error-color);">
-            (✘) Критичні: ${criticalCount}
+            ✘ Критичні: ${criticalCount}
           </span>
           <span style="padding:2px 8px; border-radius:999px; background:rgba(245,158,11,.12); color:var(--warning-color);">
             ⚠︎ Попередження: ${warningCount}
@@ -330,15 +330,15 @@
         </div>
 
         <div class="result-item" style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button class="btn btn-primary" onclick="SidebarApp.runHealthCheck()">↻ Перевірити ще раз</button>
-          <button class="btn" onclick="SidebarApp.copyHealthReport()">[LIST] Копіювати звіт</button>
+          <button class="btn btn-primary" onclick="SidebarApp.runHealthCheck()">Перевірити ще раз</button>
+          <button class="btn" onclick="SidebarApp.copyHealthReport()">↦ Копіювати звіт</button>
         </div>
 
         <div class="health-scroll-container" style="max-height:320px;">
-          ${renderHealthGroup('Критичні проблеми', '(✘)', groups.critical, 'Критичних проблем не знайдено')}
+          ${renderHealthGroup('Критичні проблеми', '✘', groups.critical, 'Критичних проблем не знайдено')}
           ${renderHealthGroup('Попередження', '⚠︎', groups.warnings, 'Попереджень немає')}
           ${renderHealthGroup('PSEUDO / compatibility layer', '', groups.pseudo, 'Нейтральний compatibility layer не виявлено')}
-          ${renderHealthGroup('Успішні перевірки', '((✔))', groups.ok, 'Успішних перевірок немає')}
+          ${renderHealthGroup('Успішні перевірки', '✔', groups.ok, 'Успішних перевірок немає')}
         </div>
       </div>
     `;
@@ -366,16 +366,16 @@
 
       items.forEach(function(check) {
         const status = String(check?.status || '').toUpperCase();
-        const ok = typeof check?.ok === 'boolean' ? check.ok : status === 'OK';
+        const ok = typeof check?.ok === 'boolean'? check.ok : status === 'OK';
         const isPseudo = status === 'PSEUDO';
-        const icon = isPseudo ? '' : (ok ? '((✔))' : (status === 'WARN' ? '⚠︎' : '(✘)'));
+        const icon = isPseudo ? '': (ok ? '✔': (status === 'WARN'? '⚠︎': '✘'));
         const name = check?.title || check?.name || 'Перевірка';
         const details = check?.details || check?.message || '';
         const recommendation = check?.howTo || check?.recommendation || '';
 
         text += `${icon} [${status || '?'}] ${name}\n`;
-        if (details) text += `   Деталі: ${details}\n`;
-        if (recommendation) text += `   ${isPseudo ? 'Примітка' : 'Як виправити'}: ${String(recommendation).replace(/\n/g, ' ')}\n`;
+        if (details) text += `Деталі: ${details}\n`;
+        if (recommendation) text += `${isPseudo ? 'Примітка': 'Як виправити'}: ${String(recommendation).replace(/\n/g, '')}\n`;
         text += `\n`;
       });
 
@@ -385,7 +385,7 @@
     let text = 'HEALTH CHECK ЗВІТ\n==================\n';
     text += `Час: ${report.ts ? new Date(report.ts).toLocaleString('uk-UA') : new Date().toLocaleString('uk-UA')}\n`;
     text += `Режим: ${getHealthCheckModeLabel_()}\n`;
-    text += `Статус: ${overallOk ? '((✔)) ОК' : '⚠︎ Є ПРОБЛЕМИ'}\n`;
+    text += `Статус: ${overallOk ? '✔ ОК': '⚠︎ Є ПРОБЛЕМИ'}\n`;
     text += `OK: ${groups.ok.length} | Критичні: ${groups.critical.length} | Попередження: ${groups.warnings.length} | PSEUDO: ${groups.pseudo.length}\n\n`;
 
     text = appendGroup(text, 'КРИТИЧНІ ПРОБЛЕМИ', groups.critical);

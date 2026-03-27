@@ -62,7 +62,7 @@ const JobRuntimeRepository_ = (function() {
         item.error || ''
       ]);
       const overflow = Math.max(sh.getLastRow() - 1 - (Number(STAGE5_CONFIG.MAX_RUNTIME_LOG_ROWS) || 500), 0);
-      if (overflow > 0) {
+      if (overflow >0) {
         sh.deleteRows(2, overflow);
       }
     } catch (_) {}

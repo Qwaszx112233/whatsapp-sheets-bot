@@ -122,7 +122,7 @@ const Stage4Triggers_ = (function() {
   }
 
   function _executeJob(registryItem, options) {
-    const opts = Object.assign({ trigger: true, initiator: 'trigger', source: 'trigger' }, options || {});
+    const opts = Object.assign({ trigger: true, initiator: 'trigger', source: 'trigger'}, options || {});
     switch (registryItem.jobName) {
       case _cfg().JOBS.DAILY_VACATIONS_AND_BIRTHDAYS:
         return Stage4UseCases_.checkVacationsAndBirthdays(Object.assign({}, opts, { date: _todayStr_() }));
@@ -131,7 +131,7 @@ const Stage4Triggers_ = (function() {
       case _cfg().JOBS.SCHEDULED_HEALTHCHECK:
         return Stage4UseCases_.runMaintenanceScenario(Object.assign({}, opts, { type: 'healthCheck', shallow: true }));
       case _cfg().JOBS.CLEANUP_CACHES:
-        return Stage4UseCases_.runMaintenanceScenario(Object.assign({}, opts, { type: 'cleanupCaches' }));
+        return Stage4UseCases_.runMaintenanceScenario(Object.assign({}, opts, { type: 'cleanupCaches'}));
       case _cfg().JOBS.STALE_OPERATION_DETECTOR:
         return (typeof OperationRepository_ === 'object')
           ? { success: true, message: 'Stale detector виконано', result: OperationRepository_.detectStaleOperations() }
@@ -141,7 +141,7 @@ const Stage4Triggers_ = (function() {
           ? { success: true, message: 'Lifecycle retention cleanup виконано', result: OperationRepository_.runRetentionCleanup() }
           : { success: false, message: 'OperationRepository_ недоступний', result: { archived: 0, removedActiveStale: 0, archivedCheckpoints: 0 } };
       default:
-        throw new Error(`Stage4 job "${registryItem.jobName}" не підтримується`);
+        throw new Error(`Stage4 job "${registryItem.jobName}"не підтримується`);
     }
   }
 
@@ -153,17 +153,17 @@ const Stage4Triggers_ = (function() {
       .find(function(item) { return item.jobName === name || item.handler === name; });
 
     if (!registryItem) {
-      throw new Error(`Stage4 job "${jobName}" не знайдено`);
+      throw new Error(`Stage4 job "${jobName}"не знайдено`);
     }
 
-    const opts = Object.assign({ trigger: true, initiator: 'trigger', source: 'trigger' }, options || {});
+    const opts = Object.assign({ trigger: true, initiator: 'trigger', source: 'trigger'}, options || {});
 
     if (!stage5GetFeatureFlag_('jobRuntime', true)) {
       return _executeJob(registryItem, opts);
     }
 
     return JobRuntime_.observe(registryItem.jobName, {
-      source: opts.source || (opts.trigger ? 'trigger' : 'manual'),
+      source: opts.source || (opts.trigger ? 'trigger': 'manual'),
       dryRun: !!opts.dryRun,
       operationId: opts.operationId || stage4UniqueId_(registryItem.jobName)
     }, function() {
@@ -180,27 +180,27 @@ const Stage4Triggers_ = (function() {
 })();
 
 function stage4JobDailyVacationsAndBirthdays() {
-  return Stage4Triggers_.runJob(getStage4Config_().JOBS.DAILY_VACATIONS_AND_BIRTHDAYS, { trigger: true, initiator: 'trigger', source: 'trigger' });
+  return Stage4Triggers_.runJob(getStage4Config_().JOBS.DAILY_VACATIONS_AND_BIRTHDAYS, { trigger: true, initiator: 'trigger', source: 'trigger'});
 }
 
 function stage4JobScheduledReconciliation() {
-  return Stage4Triggers_.runJob(getStage4Config_().JOBS.SCHEDULED_RECONCILIATION, { trigger: true, initiator: 'trigger', source: 'trigger' });
+  return Stage4Triggers_.runJob(getStage4Config_().JOBS.SCHEDULED_RECONCILIATION, { trigger: true, initiator: 'trigger', source: 'trigger'});
 }
 
 function stage4JobScheduledHealthCheck() {
-  return Stage4Triggers_.runJob(getStage4Config_().JOBS.SCHEDULED_HEALTHCHECK, { trigger: true, initiator: 'trigger', source: 'trigger' });
+  return Stage4Triggers_.runJob(getStage4Config_().JOBS.SCHEDULED_HEALTHCHECK, { trigger: true, initiator: 'trigger', source: 'trigger'});
 }
 
 function stage4JobCleanupCaches() {
-  return Stage4Triggers_.runJob(getStage4Config_().JOBS.CLEANUP_CACHES, { trigger: true, initiator: 'trigger', source: 'trigger' });
+  return Stage4Triggers_.runJob(getStage4Config_().JOBS.CLEANUP_CACHES, { trigger: true, initiator: 'trigger', source: 'trigger'});
 }
 
 
 function stage7JobDetectStaleOperations() {
-  return Stage4Triggers_.runJob(getStage4Config_().JOBS.STALE_OPERATION_DETECTOR, { trigger: true, initiator: 'trigger', source: 'trigger' });
+  return Stage4Triggers_.runJob(getStage4Config_().JOBS.STALE_OPERATION_DETECTOR, { trigger: true, initiator: 'trigger', source: 'trigger'});
 }
 
 
 function stage7JobLifecycleRetentionCleanup() {
-  return Stage4Triggers_.runJob(getStage4Config_().JOBS.LIFECYCLE_RETENTION_CLEANUP, { trigger: true, initiator: 'trigger', source: 'trigger' });
+  return Stage4Triggers_.runJob(getStage4Config_().JOBS.LIFECYCLE_RETENTION_CLEANUP, { trigger: true, initiator: 'trigger', source: 'trigger'});
 }

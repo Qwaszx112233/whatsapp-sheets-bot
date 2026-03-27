@@ -53,7 +53,7 @@ const OperationRepository_ = (function() {
   });
 
   function _ss() { return SpreadsheetApp.getActive(); }
-  function _tz() { return (typeof getTimeZone_ === 'function' ? getTimeZone_() : Session.getScriptTimeZone()) || Session.getScriptTimeZone(); }
+  function _tz() { return (typeof getTimeZone_ === 'function'? getTimeZone_() : Session.getScriptTimeZone()) || Session.getScriptTimeZone(); }
   function _now() { return new Date(); }
   function _fmt(date, pattern) { return Utilities.formatDate(date instanceof Date ? date : new Date(date), _tz(), pattern); }
   function _iso(date) { return _fmt(date || _now(), "yyyy-MM-dd'T'HH:mm:ss"); }
@@ -62,7 +62,7 @@ const OperationRepository_ = (function() {
   function _parseJson(value, fallback) {
     try { return value ? JSON.parse(value) : (fallback === undefined ? null : fallback); } catch (_) { return fallback === undefined ? null : fallback; }
   }
-  function _string(value) { return value === null || value === undefined ? '' : String(value); }
+  function _string(value) { return value === null || value === undefined ? '': String(value); }
   function _bool(value) { return value === true || String(value).toLowerCase() === 'true'; }
   function _uniqueStrings(list) {
     return Array.from(new Set(stage4AsArray_(list).filter(function(item) { return item !== null && item !== undefined && item !== ''; }).map(function(item) { return String(item); })));
@@ -111,7 +111,7 @@ const OperationRepository_ = (function() {
   }
 
   function _normalizeOperationId(value) {
-    return String(value == null ? '' : value).trim();
+    return String(value == null ? '': value).trim();
   }
 
   function _sameOperationId(left, right) {
@@ -158,7 +158,7 @@ const OperationRepository_ = (function() {
     if (raw === 'markPanelRowsAsSent') return 'mark_sent';
     if (raw === 'markPanelRowsAsUnsent') return 'mark_unsent';
     if (raw === 'createNextMonth') return 'create_next_month';
-    if (raw === 'generateSendPanelForDate' || raw === 'generateSendPanelForRange') return 'panel_regenerate';
+    if (raw === 'generateSendPanelForDate'|| raw === 'generateSendPanelForRange') return 'panel_regenerate';
     if (raw === 'sendPendingRows') return 'panel_sync';
     if (raw === 'switchBotToMonth') return 'switch_bot_month';
     if (raw === 'runMaintenanceScenario') {
@@ -173,7 +173,7 @@ const OperationRepository_ = (function() {
     var explicit = String(preferred || '').trim();
     if (/^op_[a-z0-9_]+_\d{8}_\d{6}_[a-z0-9]{4}$/i.test(explicit)) return explicit;
     var scenario = canonicalScenario(rawScenario, payload || {});
-    return 'op_' + scenario + '_' + _fmt(_now(), 'yyyyMMdd_HHmmss') + '_' + _rand4();
+    return 'op_'+ scenario + '_'+ _fmt(_now(), 'yyyyMMdd_HHmmss') + '_'+ _rand4();
   }
 
   function _parseDateish(value) {
@@ -181,7 +181,7 @@ const OperationRepository_ = (function() {
     if (!text) return null;
     if (/^\d{4}-\d{2}-\d{2}$/.test(text)) return text;
     var m = text.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
-    if (m) return m[3] + '-' + m[2] + '-' + m[1];
+    if (m) return m[3] + '-'+ m[2] + '-'+ m[1];
     return null;
   }
 
@@ -191,7 +191,7 @@ const OperationRepository_ = (function() {
     if (Array.isArray(value)) {
       var normalizedItems = value.map(function(item) { return _normalizeValue(item, key); }).filter(function(item) { return item !== null && item !== undefined; });
       if (!normalizedItems.length) return [];
-      if (normalizedItems.every(function(item) { return typeof item === 'number' && isFinite(item); })) {
+      if (normalizedItems.every(function(item) { return typeof item === 'number'&& isFinite(item); })) {
         return Array.from(new Set(normalizedItems)).sort(function(a, b) { return a - b; });
       }
       if (normalizedItems.every(function(item) { return typeof item === 'string'; })) {
@@ -218,8 +218,8 @@ const OperationRepository_ = (function() {
   function _stableStringify(value) {
     if (value === null || value === undefined) return 'null';
     if (typeof value !== 'object') return JSON.stringify(value);
-    if (Array.isArray(value)) return '[' + value.map(_stableStringify).join(',') + ']';
-    return '{' + Object.keys(value).sort().map(function(k) { return JSON.stringify(k) + ':' + _stableStringify(value[k]); }).join(',') + '}';
+    if (Array.isArray(value)) return '['+ value.map(_stableStringify).join(',') + ']';
+    return '{'+ Object.keys(value).sort().map(function(k) { return JSON.stringify(k) + ':'+ _stableStringify(value[k]); }).join(',') + '}';
   }
 
   function buildFingerprint(rawScenario, payload) {
@@ -249,7 +249,7 @@ const OperationRepository_ = (function() {
       var expiresAt = String(item.ExpiresAt || '').trim();
       if (!expiresAt) return true;
       var ms = new Date(expiresAt).getTime();
-      return isFinite(ms) ? ms > nowMs : true;
+      return isFinite(ms) ? ms >nowMs : true;
     })[0] || null;
   }
 
@@ -365,15 +365,15 @@ const OperationRepository_ = (function() {
   }
 
   function _appendNoteText(existing, text, source) {
-    var prefix = '[' + _noteStamp() + '][' + String(source || 'system') + '] ';
+    var prefix = '['+ _noteStamp() + ']['+ String(source || 'system') + '] ';
     var base = String(existing || '').trim();
     var next = prefix + String(text || '').trim();
-    return base ? (base + '\n' + next) : next;
+    return base ? (base + '\n'+ next) : next;
   }
 
   function appendNote(operationId, text, source) {
     var current = _getOperationRow(operationId);
-    if (!current) throw new Error('Операцію не знайдено: ' + operationId);
+    if (!current) throw new Error('Операцію не знайдено: '+ operationId);
     var noteText = String(text || '').trim();
     if (!noteText) return current;
     var notes = _appendNoteText(current.Notes, noteText, source || 'system');
@@ -391,15 +391,15 @@ const OperationRepository_ = (function() {
 
   function transitionStatus(operationId, newStatus, reason, extra) {
     var current = _getOperationRow(operationId);
-    if (!current) throw new Error('Операцію не знайдено: ' + operationId);
+    if (!current) throw new Error('Операцію не знайдено: '+ operationId);
     var fromStatus = String(current.Status || '');
     var toStatus = String(newStatus || '').trim();
     var allowed = _allowedTransition(fromStatus, toStatus);
     if (FINAL_STATUSES[fromStatus] && !allowed) {
-      throw new Error('Фінальний запис заморожено і не може змінювати статус: ' + fromStatus);
+      throw new Error('Фінальний запис заморожено і не може змінювати статус: '+ fromStatus);
     }
     if (!allowed) {
-      throw new Error('Недозволений перехід статусу: ' + fromStatus + ' -> ' + toStatus);
+      throw new Error('Недозволений перехід статусу: '+ fromStatus + '->'+ toStatus);
     }
 
     var updates = Object.assign({}, extra || {}, {
@@ -462,14 +462,14 @@ const OperationRepository_ = (function() {
     var cfg = spec || {};
     if (cfg.dryRun) return null;
     var verificationResult = _classifyVerification(cfg.verification);
-    var status = cfg.success === false ? 'FAILED' : (verificationResult === 'FAILED' ? 'FAILED' : 'COMMITTED');
-    var repairNeeded = !!cfg.repairNeeded || status === 'FAILED' || verificationResult === 'PARTIAL';
-    return transitionStatus(cfg.operationId, status, cfg.transitionReason || (status === 'COMMITTED' ? 'write-verified' : 'write-or-verify-failed'), {
+    var status = cfg.success === false ? 'FAILED': (verificationResult === 'FAILED'? 'FAILED': 'COMMITTED');
+    var repairNeeded = !!cfg.repairNeeded || status === 'FAILED'|| verificationResult === 'PARTIAL';
+    return transitionStatus(cfg.operationId, status, cfg.transitionReason || (status === 'COMMITTED'? 'write-verified': 'write-or-verify-failed'), {
       AffectedRows: _extractAffectedRows(cfg.payload || {}, cfg.result || {}),
       AffectedEntities: _extractAffectedEntities(cfg.payload || {}, cfg.execution || {}),
       VerificationResult: verificationResult,
       RepairNeeded: repairNeeded,
-      ErrorMessage: status === 'FAILED' ? String(cfg.errorMessage || cfg.message || 'Verification failed') : '',
+      ErrorMessage: status === 'FAILED'? String(cfg.errorMessage || cfg.message || 'Verification failed') : '',
       ResultJson: _safeJson(cfg.result || null),
       TimestampFinished: _iso(_now())
     });
@@ -510,7 +510,7 @@ const OperationRepository_ = (function() {
     var payload = current ? _parseJson(current.PayloadJson, {}) : {};
     var expiresAt = _expiresAtText(current && (current.RawScenario || current.Scenario || ''), payload, _now());
     _updateOpsRow(cfg.operationId, { CheckpointCount: nextCount, LastHeartbeat: checkpointTimestamp, ExpiresAt: expiresAt });
-    _updateActiveRow(cfg.operationId, { LastHeartbeat: checkpointTimestamp, ExpiresAt: expiresAt, Status: current && current.Status ? String(current.Status) : 'STARTED' });
+    _updateActiveRow(cfg.operationId, { LastHeartbeat: checkpointTimestamp, ExpiresAt: expiresAt, Status: current && current.Status ? String(current.Status) : 'STARTED'});
     return { checkpointCount: nextCount };
   }
 
@@ -581,10 +581,10 @@ const OperationRepository_ = (function() {
   function markNeedsRepair(operationId, reason) {
     var normalizedId = _normalizeOperationId(operationId);
     var current = _getOperationRow(normalizedId);
-    if (!current) throw new Error('Операцію не знайдено: ' + normalizedId);
+    if (!current) throw new Error('Операцію не знайдено: '+ normalizedId);
     var status = String(current.Status || '');
     if (status === 'NEEDS_REPAIR') return current;
-    if (status === 'FAILED' || status === 'FAILED_STALE') {
+    if (status === 'FAILED'|| status === 'FAILED_STALE') {
       return transitionStatus(normalizedId, 'NEEDS_REPAIR', reason || 'queued-for-repair', { RepairNeeded: true });
     }
     return current;
@@ -594,14 +594,14 @@ const OperationRepository_ = (function() {
     var normalizedId = _normalizeOperationId(operationId);
     var normalizedResolvedById = _normalizeOperationId(resolvedByOperationId);
     var current = _getOperationRow(normalizedId);
-    if (!current) throw new Error('Операцію не знайдено: ' + normalizedId);
+    if (!current) throw new Error('Операцію не знайдено: '+ normalizedId);
     var status = String(current.Status || '');
     if (['FAILED', 'FAILED_STALE', 'NEEDS_REPAIR'].indexOf(status) === -1) {
       throw new Error('Resolve дозволений тільки для FAILED / FAILED_STALE / NEEDS_REPAIR');
     }
     var resolution = String(resolutionStatus || '').trim();
     if (!ALLOWED_RESOLUTION_STATUSES[resolution]) {
-      throw new Error('Недопустимий ResolutionStatus: ' + resolution);
+      throw new Error('Недопустимий ResolutionStatus: '+ resolution);
     }
     _updateOpsRow(normalizedId, {
       ResolvedByOperationId: normalizedResolvedById,
@@ -623,7 +623,7 @@ const OperationRepository_ = (function() {
       var ttlMs = ttlMinutesFor(item.Scenario || '', payload) * 60 * 1000;
       var lastHeartbeatMs = new Date(String(item.LastHeartbeat || item.StartedAt || '')).getTime();
       var expiresAtMs = new Date(String(item.ExpiresAt || '')).getTime();
-      var heartbeatExpired = isFinite(lastHeartbeatMs) ? (nowMs - lastHeartbeatMs > ttlMs) : false;
+      var heartbeatExpired = isFinite(lastHeartbeatMs) ? (nowMs - lastHeartbeatMs >ttlMs) : false;
       var expiresExpired = isFinite(expiresAtMs) ? expiresAtMs < nowMs : false;
       if (!(heartbeatExpired || expiresExpired)) return;
       var current = _getOperationRow(item.OperationId);
@@ -642,7 +642,7 @@ const OperationRepository_ = (function() {
 
   function abandonAllActive(reason, options) {
     ensureServiceSheets();
-    var opts = options && typeof options === 'object' ? options : {};
+    var opts = options && typeof options === 'object'? options : {};
     var excluded = {};
     stage4AsArray_(opts.excludeOperationIds).forEach(function(id) {
       var key = String(id || '').trim();
@@ -690,14 +690,14 @@ const OperationRepository_ = (function() {
       var startedMs = new Date(String(item.TimestampStarted || '')).getTime();
       if (!isFinite(startedMs) || startedMs >= cutoffMs) return;
       var suffix = _fmt(new Date(startedMs), 'yyyy_MM');
-      var archiveName = 'OPS_LOG_' + suffix;
+      var archiveName = 'OPS_LOG_'+ suffix;
       var archiveSheet = _sheet(archiveName, OPS_HEADERS);
       var rowValues = OPS_HEADERS.map(function(header) { return item[header]; });
       _appendRow(archiveSheet, rowValues);
 
       _rowsAsObjects(checkpointsSheet).slice().reverse().forEach(function(checkpoint) {
         if (!_sameOperationId(checkpoint.OperationId, item.OperationId)) return;
-        var checkpointArchiveName = 'CHECKPOINTS_' + suffix;
+        var checkpointArchiveName = 'CHECKPOINTS_'+ suffix;
         var checkpointArchiveSheet = _sheet(checkpointArchiveName, CHECKPOINT_HEADERS);
         var checkpointRow = CHECKPOINT_HEADERS.map(function(header) { return checkpoint[header]; });
         _appendRow(checkpointArchiveSheet, checkpointRow);
@@ -741,7 +741,7 @@ const OperationRepository_ = (function() {
     var normalizedId = _normalizeOperationId(operationId);
     if (!normalizedId) throw new Error('Не передано operationId для repair');
     var details = getOperationDetails(normalizedId);
-    if (!details || !details.operation) throw new Error('Операцію для repair не знайдено: ' + normalizedId);
+    if (!details || !details.operation) throw new Error('Операцію для repair не знайдено: '+ normalizedId);
     var op = details.operation;
     var targetOperationId = _normalizeOperationId(op.OperationId) || normalizedId;
     markNeedsRepair(targetOperationId, 'repair-requested');
@@ -785,12 +785,12 @@ const OperationRepository_ = (function() {
         result = Stage4UseCases_.switchBotToMonth(replayPayload);
         break;
       default:
-        throw new Error('Repair для сценарію "' + rawScenario + '" ще не реалізовано');
+        throw new Error('Repair для сценарію "'+ rawScenario + '"ще не реалізовано');
     }
 
     var newOperationId = _normalizeOperationId(result && result.operationId ? result.operationId : (result && result.data && result.data.meta && result.data.meta.operationId || ''));
     if (result && result.success) {
-      resolveIncident(targetOperationId, newOperationId, result.partial ? 'RESOLVED_PARTIAL' : 'RESOLVED_SUCCESS');
+      resolveIncident(targetOperationId, newOperationId, result.partial ? 'RESOLVED_PARTIAL': 'RESOLVED_SUCCESS');
     } else if (newOperationId) {
       resolveIncident(targetOperationId, newOperationId, 'RESOLVED_FAILED');
     }
