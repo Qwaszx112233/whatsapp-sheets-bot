@@ -220,15 +220,15 @@ const Reconciliation_ = (function () {
     };
   }
 
-  function _setPanelFormula(row, link) {
+  function _setPanelFormula(row, link, status, sent) {
     const panel = DataAccess_.getSheet('SEND_PANEL', null, true);
-    const formula = link ? `=HYPERLINK("${link}"; "📱 НАДІСЛАТИ")` : '';
-    panel.getRange(row, 6).setFormula(formula);
+    panel.getRange(row, 7).setValue(resolveSendPanelActionCellValue_(link || '', status || getSendPanelReadyStatus_(), !!sent));
   }
 
   function _setPanelStatus(row, value) {
     const panel = DataAccess_.getSheet('SEND_PANEL', null, true);
-    panel.getRange(row, 5).setValue(value);
+    ensureSendPanelStatusFormula_(panel);
+    normalizeSendPanelDailyState_(panel);
   }
 
   function _appendPanelRow(expectedRow) {
@@ -236,18 +236,27 @@ const Reconciliation_ = (function () {
     const nextRow = Math.max(panel.getLastRow() + 1, Number(CONFIG.SEND_PANEL_DATA_START_ROW) || 3);
     const formattedPhone = String(expectedRow.phone || '').trim().startsWith('+')
       ? "'" + String(expectedRow.phone || '').trim()
-      : String(expectedRow.phone || '').trim() || '—';
-    const formula = expectedRow.link ? `=HYPERLINK("${expectedRow.link}"; "📱 НАДІСЛАТИ")` : '';
-    panel.getRange(nextRow, 1, 1, 7).setValues([[
+      : String(expectedRow.phone || '').trim();
+    const status = deriveSendPanelStatusFromInputs_(expectedRow.fio || '', formattedPhone || '', expectedRow.code || '', expectedRow.tasks || '');
+
+    panel.getRange(nextRow, 1, 1, 4).setValues([[
       expectedRow.fio || '',
-      formattedPhone,
+      formattedPhone || '',
       expectedRow.code || '',
-      expectedRow.tasks || '—',
-      expectedRow.sent === true ? getSendPanelSentStatus_() : getSendPanelReadyStatus_(),
-      formula,
-      expectedRow.sent === true
+      expectedRow.tasks || ''
     ]]);
-    panel.getRange(nextRow, 7).insertCheckboxes();
+    panel.getRange(nextRow, 6, 1, 2).setValues([[
+      expectedRow.sent === true ? getSendPanelSentMark_() : getSendPanelUnsentMark_(),
+      resolveSendPanelActionCellValue_(expectedRow.link || '', status, expectedRow.sent === true)
+    ]]);
+
+    if (nextRow <= (((typeof MONTHLY_CONFIG !== 'undefined' && Number(MONTHLY_CONFIG.LAST_DATA_ROW)) || 40))) {
+      ensureSendPanelStatusFormula_(panel);
+      normalizeSendPanelDailyState_(panel);
+    } else {
+      panel.getRange(nextRow, 5).setValue(status);
+    }
+
     return nextRow;
   }
 
@@ -296,7 +305,7 @@ const Reconciliation_ = (function () {
         if (opts.dryRun) {
           repairs.push({ type: issue.type, key: issue.key, row: issue.actualRow, dryRun: true });
         } else {
-          _setPanelFormula(issue.actualRow, expected.link || '');
+          _setPanelFormula(issue.actualRow, expected.link || '', expected.status || getSendPanelReadyStatus_(), expected.sent === true);
           repairs.push({ type: issue.type, key: issue.key, row: issue.actualRow });
         }
         return;
@@ -304,7 +313,7 @@ const Reconciliation_ = (function () {
 
       if (issue.type === 'staleStatus') {
         const expected = expectedMap[issue.key];
-        const status = expected && expected.sent === true ? getSendPanelSentStatus_() : getSendPanelReadyStatus_();
+        const status = expected && expected.status ? expected.status : getSendPanelReadyStatus_();
         if (!issue.actualRow) return;
         if (opts.dryRun) {
           repairs.push({ type: issue.type, key: issue.key, row: issue.actualRow, dryRun: true, status: status });

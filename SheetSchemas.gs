@@ -175,28 +175,28 @@ const SHEET_SCHEMAS = Object.freeze({
     headerRow: Number(CONFIG.SEND_PANEL_HEADER_ROW) || 2,
     dataStartRow: Number(CONFIG.SEND_PANEL_DATA_START_ROW) || 3,
     required: false,
-    columns: Object.freeze({ fio: 1, phone: 2, code: 3, tasks: 4, status: 5, action: 6, sent: 7 }),
+    columns: Object.freeze({ fio: 1, phone: 2, code: 3, tasks: 4, status: 5, sent: 6, action: 7 }),
     fields: Object.freeze({
-      fio:    { col: 1, type: 'string', required: true,  allowBlank: false, label: 'ПІБ' },
-      phone:  { col: 2, type: 'string', required: false, allowBlank: true,  label: 'Телефон' },
-      code:   { col: 3, type: 'string', required: true,  allowBlank: false, label: 'Код' },
-      tasks:  { col: 4, type: 'string', required: false, allowBlank: true,  label: 'Завдання' },
-      status: { col: 5, type: 'string', required: false, allowBlank: true,  label: 'Статус' },
-      action: { col: 6, type: 'string', required: false, allowBlank: true,  label: 'Дія' },
-      sent:   { col: 7, type: 'boolean|string', required: false, allowBlank: true, label: 'Відправлено' }
+      fio:    { col: 1, type: 'string', required: true,  allowBlank: false, label: 'FIO' },
+      phone:  { col: 2, type: 'string', required: false, allowBlank: true,  label: 'Phone' },
+      code:   { col: 3, type: 'string', required: true,  allowBlank: false, label: 'Code' },
+      tasks:  { col: 4, type: 'string', required: false, allowBlank: true,  label: 'Tasks' },
+      status: { col: 5, type: 'string', required: false, allowBlank: true,  label: 'Status' },
+      sent:   { col: 6, type: 'string', required: false, allowBlank: true,  label: 'Sent' },
+      action: { col: 7, type: 'string', required: false, allowBlank: true,  label: 'Action' }
     }),
     headerAliases: Object.freeze({
-      fio: ['ПІБ', 'ФІО'],
-      phone: ['Телефон'],
-      code: ['Код'],
-      tasks: ['Завдання'],
-      status: ['Статус'],
-      action: ['Дія'],
-      sent: ['Відправлено']
+      fio: ['ПІБ', 'ФІО', 'FIO'],
+      phone: ['Телефон', 'Phone'],
+      code: ['Код', 'Code'],
+      tasks: ['Завдання', 'Tasks'],
+      status: ['Статус', 'Status'],
+      sent: ['Відправлено', 'Sent'],
+      action: ['Дія', 'Action']
     }),
     keyFields: ['fio', 'phone', 'code'],
     requiredFields: ['fio', 'code'],
-    nullableFields: ['phone', 'tasks', 'status', 'action', 'sent'],
+    nullableFields: ['phone', 'tasks', 'status', 'sent', 'action'],
     searchableFields: ['fio', 'phone', 'code', 'status']
   }),
 

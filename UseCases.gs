@@ -36,10 +36,15 @@ function _stage4ApplyPanelState_(rowNumbers, sentValue, statusText) {
 
   groups.forEach(function(group) {
     const count = group.rows.length;
-    panel.getRange(group.start, schema.columns.status, count, 1)
-      .setValues(group.rows.map(function() { return [statusText]; }));
-    panel.getRange(group.start, schema.columns.sent, count, 1)
-      .setValues(group.rows.map(function() { return [!!sentValue]; }));
+    if (statusText !== null && statusText !== undefined) {
+      panel.getRange(group.start, schema.columns.status, count, 1)
+        .setValues(group.rows.map(function() { return [statusText]; }));
+    }
+    if (sentValue !== null && sentValue !== undefined) {
+      const mark = sentValue ? getSendPanelSentMark_() : getSendPanelUnsentMark_();
+      panel.getRange(group.start, schema.columns.sent, count, 1)
+        .setValues(group.rows.map(function() { return [mark]; }));
+    }
   });
 
   return SendPanelRepository_.readRows();
@@ -55,8 +60,12 @@ function _stage6AVerifyPanelStatuses_(rows, expectedStatus, expectedSent) {
   const selected = SendPanelRepository_.readRows().filter(function(item) {
     return stage4AsArray_(rows).map(Number).indexOf(Number(item.row)) !== -1;
   });
+  const expectStatus = expectedStatus !== null && expectedStatus !== undefined && expectedStatus !== '';
+  const expectSent = expectedSent !== null && expectedSent !== undefined;
   const mismatches = selected.filter(function(item) {
-    return String(item.status || '') !== String(expectedStatus || '') || !!item.sent !== !!expectedSent;
+    if (expectStatus && String(item.status || '') !== String(expectedStatus || '')) return true;
+    if (expectSent && !!item.sent !== !!expectedSent) return true;
+    return false;
   });
   return {
     ok: mismatches.length === 0,
@@ -152,7 +161,7 @@ const Stage4UseCases_ = (function() {
             affectedEntities: [],
             plannedRows: stats.totalCount || 0
           },
-          warnings: stats.errorCount > 0 ? [`У SEND_PANEL є рядки з помилками: ${stats.errorCount}`] : []
+          warnings: (stats.blockedCount || stats.errorCount || 0) > 0 ? [`У SEND_PANEL є заблоковані рядки: ${stats.blockedCount || stats.errorCount || 0}`] : []
         };
       },
       execute: function(input, beforeState, plan) {
@@ -176,7 +185,7 @@ const Stage4UseCases_ = (function() {
           meta: {
             stats: stats
           },
-          warnings: stats.errorCount > 0 ? [`У SEND_PANEL є рядки з помилками: ${stats.errorCount}`] : []
+          warnings: (stats.blockedCount || stats.errorCount || 0) > 0 ? [`У SEND_PANEL є заблоковані рядки: ${stats.blockedCount || stats.errorCount || 0}`] : []
         };
       },
       sync: function(input, beforeState, plan, execution) {
@@ -293,7 +302,7 @@ const Stage4UseCases_ = (function() {
         if (input.dryRun) {
           return {
             success: true,
-            message: `Dry-run: буде позначено ${targetRows.length} рядків як такі, що очікують підтвердження`,
+            message: `Dry-run: сумісний маршрут pending більше не змінює рядки`,
             result: {
               rows: beforeState.allRows,
               updatedRows: input.rowNumbers,
@@ -311,7 +320,7 @@ const Stage4UseCases_ = (function() {
         const result = SendPanelRepository_.markRowsAsPending(input.rowNumbers, {});
         return {
           success: true,
-          message: `Позначено ${result.updatedRows.length} рядків як такі, що очікують підтвердження`,
+          message: `Сумісний маршрут pending виконано без зміни стану рядків`,
           result: result,
           changes: _stage4RowsToChangeList_(targetRows, 'markPending'),
           affectedSheets: [CONFIG.SEND_PANEL_SHEET],
@@ -328,7 +337,7 @@ const Stage4UseCases_ = (function() {
         };
       },
       verify: function(input) {
-        return input.dryRun ? { ok: true, verifiedRows: 0, mismatchCount: 0 } : _stage6AVerifyPanelStatuses_(input.rowNumbers, SendPanelConstants_.STATUS_PENDING, false);
+        return input.dryRun ? { ok: true, verifiedRows: 0, mismatchCount: 0 } : _stage6AVerifyPanelStatuses_(input.rowNumbers, null, false);
       }
     });
   }
@@ -357,7 +366,7 @@ const Stage4UseCases_ = (function() {
       },
       execute: function(input, beforeState) {
         const targetRows = beforeState.selectedRows || [];
-        const alreadySent = targetRows.filter(function(item) { return item.sent || item.status === getSendPanelSentStatus_(); });
+        const alreadySent = targetRows.filter(function(item) { return item.sent === true; });
         const warnings = alreadySent.length ? [`Уже відправлені рядки: ${alreadySent.length}`] : [];
 
         if (input.dryRun) {
@@ -400,7 +409,7 @@ const Stage4UseCases_ = (function() {
         };
       },
       verify: function(input) {
-        return input.dryRun ? { ok: true, verifiedRows: 0, mismatchCount: 0 } : _stage6AVerifyPanelStatuses_(input.rowNumbers, getSendPanelSentStatus_(), true);
+        return input.dryRun ? { ok: true, verifiedRows: 0, mismatchCount: 0 } : _stage6AVerifyPanelStatuses_(input.rowNumbers, null, true);
       }
     });
   }
@@ -467,7 +476,7 @@ const Stage4UseCases_ = (function() {
         };
       },
       verify: function(input) {
-        return input.dryRun ? { ok: true, verifiedRows: 0, mismatchCount: 0 } : _stage6AVerifyPanelStatuses_(input.rowNumbers, SendPanelConstants_.STATUS_UNSENT, false);
+        return input.dryRun ? { ok: true, verifiedRows: 0, mismatchCount: 0 } : _stage6AVerifyPanelStatuses_(input.rowNumbers, null, false);
       }
     });
   }
@@ -517,7 +526,7 @@ const Stage4UseCases_ = (function() {
         if (input.dryRun) {
           return {
             success: true,
-            message: `Dry-run: підготовлено ${queue.length} чатів без фіксації відправки`,
+            message: `Dry-run: буде автоматично зафіксовано ${queue.length} рядків після відкриття чатів`,
             result: {
               queue: queue,
               rows: beforeState.allRows,
@@ -532,17 +541,17 @@ const Stage4UseCases_ = (function() {
           };
         }
 
-        const result = SendPanelRepository_.markRowsAsPending(queue.map(function(item) { return item.row; }), {});
+        const result = SendPanelRepository_.markRowsAsSent(queue.map(function(item) { return item.row; }), {});
         return {
           success: true,
-          message: `Позначено ${queue.length} рядків як такі, що очікують підтвердження`,
+          message: `Автоматично зафіксовано ${queue.length} рядків як відправлені`,
           result: {
             queue: queue,
             rows: result.rows,
             updatedRows: result.updatedRows,
             stats: result.stats
           },
-          changes: _stage4RowsToChangeList_(queue, 'markPending'),
+          changes: _stage4RowsToChangeList_(queue, 'markSentAuto'),
           affectedSheets: [CONFIG.SEND_PANEL_SHEET],
           affectedEntities: queue.map(function(item) { return item.fio; }),
           appliedChangesCount: queue.length,
@@ -559,7 +568,7 @@ const Stage4UseCases_ = (function() {
       verify: function(input, beforeState, plan, execution) {
         if (input.dryRun) return { ok: true, verifiedRows: 0, mismatchCount: 0 };
         const updatedRows = stage4AsArray_(execution && execution.result && execution.result.updatedRows);
-        return _stage6AVerifyPanelStatuses_(updatedRows, SendPanelConstants_.STATUS_PENDING, false);
+        return _stage6AVerifyPanelStatuses_(updatedRows, null, true);
       }
     });
   }
@@ -622,7 +631,7 @@ const Stage4UseCases_ = (function() {
           affectedEntities: [],
           appliedChangesCount: 0,
           skippedChangesCount: 0,
-          warnings: stats.errorCount > 0 ? ['У SEND_PANEL є рядки з помилками: ' + stats.errorCount] : []
+          warnings: (stats.blockedCount || stats.errorCount || 0) > 0 ? ['У SEND_PANEL є заблоковані рядки: ' + (stats.blockedCount || stats.errorCount || 0)] : []
         };
       }
     });
