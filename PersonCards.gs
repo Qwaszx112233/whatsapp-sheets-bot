@@ -61,7 +61,7 @@ function getPersonGroupForDate_(sheet, row, dateStr) {
   const col = findTodayColumn_(sheet, dateStr);
   if (col === -1) return '—';
   const codeRef = sheet.getRange(CONFIG.CODE_RANGE_A1);
-  if (row < codeRef.getRow() || row >codeRef.getLastRow()) return '—';
+  if (row < codeRef.getRow() || row > codeRef.getLastRow()) return '—';
   const code = String(sheet.getRange(row, col).getDisplayValue() || '').trim();
   if (!code) return '—';
   for (const [group, codes] of Object.entries(SUMMARY_GROUPS)) {
@@ -76,7 +76,7 @@ function _buildPersonCardData_(callsign, dateStr) {
 }
 
 function getPersonCardData(callsign, dateStr) {
-  const context = { function: 'getPersonCardData', callsign: callsign || '', date: dateStr || ''};
+  const context = { function: 'getPersonCardData', callsign: callsign || '', date: dateStr || '' };
   try {
     const data = PersonsRepository_.getPersonByCallsign(callsign, dateStr);
     return Object.assign(okResponse_(data, 'Дані картки завантажено', context), data, { ok: true });
@@ -98,7 +98,7 @@ function openPersonCardByCallsignAndDate_(callsign, dateStr) {
   const currentVacHtml = data.vac && data.vac.inVacation && Array.isArray(data.vac.matches)
     ? `<div style="margin-top:14px;padding:12px;border-radius:12px;background:#fff3cd;border:1px solid #ffc107;">
         <b>Відпустка зараз</b><br>
-        ${data.vac.matches.map(v =>`${HtmlUtils_.escapeHtml(v.no)}: ${HtmlUtils_.escapeHtml(v.start)} — ${HtmlUtils_.escapeHtml(v.end)}`).join('<br>')}
+        ${data.vac.matches.map(v => `${HtmlUtils_.escapeHtml(v.no)}: ${HtmlUtils_.escapeHtml(v.start)} — ${HtmlUtils_.escapeHtml(v.end)}`).join('<br>')}
       </div>`
     : '';
 
@@ -220,7 +220,7 @@ function openPersonCardByCallsignAndDate_(callsign, dateStr) {
           ${nextVacHtml}
 
           <div class="actions">
-            ${data.waLink ? `<a class="btn primary" href="${data.waLink}" target="WAPB_WHATSAPP_SENDER_TAB">WhatsApp</a>`: ''}
+            ${data.waLink ? `<a class="btn primary" href="${data.waLink}" target="WAPB_WHATSAPP_SENDER_TAB">WhatsApp</a>` : ''}
             <button class="btn" onclick="navigator.clipboard.writeText(document.getElementById('msg').innerText)">Копіювати</button>
             <button class="btn" onclick="openCalendar()">Календар</button>
             <button class="btn" onclick="openMainSidebar()">В меню</button>
@@ -237,13 +237,13 @@ function openPersonCardByCallsignAndDate_(callsign, dateStr) {
           }
           function gsRun(method) {
             const args = Array.prototype.slice.call(arguments, 1);
-            return new Promise((resolve, reject) =>{
+            return new Promise((resolve, reject) => {
               try {
                 let runner = google.script.run
                   .withSuccessHandler(resolve)
-                  .withFailureHandler(err =>reject(normalizeError(err)));
+                  .withFailureHandler(err => reject(normalizeError(err)));
                 if (typeof runner[method] !== 'function') {
-                  reject('Метод не знайдено: '+ method);
+                  reject('Метод не знайдено: ' + method);
                   return;
                 }
                 runner[method].apply(runner, args);
@@ -254,11 +254,11 @@ function openPersonCardByCallsignAndDate_(callsign, dateStr) {
           }
           function openCalendar() {
             gsRun('openPersonCalendar', '${HtmlUtils_.escapeHtml(data.callsign)}')
-              .catch(err =>alert('✘ ' + normalizeError(err)));
+              .catch(err => alert('✕ ' + normalizeError(err)));
           }
           function openMainSidebar() {
             gsRun('showSidebar')
-              .catch(err =>alert('✘ ' + normalizeError(err)));
+              .catch(err => alert('✕ ' + normalizeError(err)));
           }
         </script>
       </body>
@@ -266,7 +266,7 @@ function openPersonCardByCallsignAndDate_(callsign, dateStr) {
   `;
 
   const html = HtmlService.createHtmlOutput(htmlContent)
-    .setTitle(`${data.callsign}`)
+    .setTitle(`👤 ${data.callsign}`)
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
   SpreadsheetApp.getUi().showSidebar(html);
   return true;
@@ -277,7 +277,7 @@ function openPersonCalendar_(callsign) {
   t.callsign = String(callsign || '').trim();
   t.today = _todayStr_();
   const html = t.evaluate()
-    .setTitle(`${callsign}`)
+    .setTitle(`📅 ${callsign}`)
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
   SpreadsheetApp.getUi().showSidebar(html);
 }

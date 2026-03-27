@@ -4,9 +4,8 @@
 
 function _apiBuildWarningsForSendPanel_(payload) {
   const warnings = [];
-  if (payload && payload.stats && ((payload.stats.blockedCount || payload.stats.errorCount || 0) >0)) {
-    const blockedCount = payload.stats.blockedCount || payload.stats.errorCount || 0;
-    warnings.push(`У SEND_PANEL є заблоковані рядки: ${blockedCount}`);
+  if (payload && payload.stats && payload.stats.errorCount > 0) {
+    warnings.push(`У SEND_PANEL є рядки з помилками: ${payload.stats.errorCount}`);
   }
   return warnings;
 }
@@ -232,7 +231,7 @@ function apiGetPersonCardData(callsign, dateStr) {
 }
 
 function apiSwitchBotToMonth(monthSheetName) {
-  return apiExecute_('apiSwitchBotToMonth', { month: monthSheetName || ''}, function() {
+  return apiExecute_('apiSwitchBotToMonth', { month: monthSheetName || '' }, function() {
     const validated = validateMonthSwitch_(monthSheetName);
     setBotMonthSheetName_(validated.month);
     return okResponse_({

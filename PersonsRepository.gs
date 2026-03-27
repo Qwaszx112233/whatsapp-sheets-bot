@@ -111,7 +111,7 @@ var PersonsRepository_ = PersonsRepository_ || (function() {
     const sheet = getSheetByDate(safeDate);
     const item = findRowByCallsign(callsign, sheet);
     if (!item) {
-      throw new Error(`Позивний "${callsign}"не знайдено`);
+      throw new Error(`Позивний "${callsign}" не знайдено`);
     }
 
     const payload = getPayloadByRow(item._meta.rowNumber, safeDate, sheet);

@@ -44,7 +44,7 @@ const Stage4AuditTrail_ = (function() {
       stage4AsArray_(e.affectedEntities).join(', '),
       Number(e.appliedChangesCount) || 0,
       Number(e.skippedChangesCount) || 0,
-      stage4AsArray_(e.warnings).join('| '),
+      stage4AsArray_(e.warnings).join(' | '),
       stage4SafeStringify_(e.payload, 12000),
       stage4SafeStringify_(e.before, 12000),
       stage4SafeStringify_(e.after, 12000),
@@ -89,7 +89,7 @@ const Stage4AuditTrail_ = (function() {
         link: ''
       }]);
     } catch (err) {
-      return errorResponse_(err, { function: 'Stage4AuditTrail_.writeCompactLegacyLog'});
+      return errorResponse_(err, { function: 'Stage4AuditTrail_.writeCompactLegacyLog' });
     }
   }
 

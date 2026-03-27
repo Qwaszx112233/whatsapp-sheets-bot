@@ -9,7 +9,7 @@ function _domainAssert_(condition, message) {
 function _domainPush_(report, name, fn) {
   try {
     const details = fn();
-    report.checks.push({ name: name, status: 'OK', details: details || 'OK'});
+    report.checks.push({ name: name, status: 'OK', details: details || 'OK' });
   } catch (e) {
     report.ok = false;
     report.checks.push({ name: name, status: 'FAIL', details: e && e.message ? e.message : String(e) });
@@ -28,19 +28,19 @@ function runStage6ADomainTests_(options) {
 
   // Templates
   _domainPush_(report, 'templates.renderTemplate basic substitution', function() {
-    const out = renderTemplate_('Привіт, {name}!', { name: 'Сергій'});
+    const out = renderTemplate_('Привіт, {name}!', { name: 'Сергій' });
     _domainAssert_(out === 'Привіт, Сергій!', 'Некоректна базова підстановка');
     return out;
   });
 
   _domainPush_(report, 'templates.renderTemplate case fallback', function() {
-    const out = renderTemplate_('Код: {CODE}', { code: 'БР'});
+    const out = renderTemplate_('Код: {CODE}', { code: 'БР' });
     _domainAssert_(out === 'Код: БР', 'Не спрацював fallback по регістру');
     return out;
   });
 
   _domainPush_(report, 'templates.renderTemplate double braces', function() {
-    const out = renderTemplate_('Привіт, {{name}}!', { name: 'Сергій'});
+    const out = renderTemplate_('Привіт, {{name}}!', { name: 'Сергій' });
     _domainAssert_(out === 'Привіт, Сергій!', 'Подвійні дужки {{name}} не працюють');
     return out;
   });
@@ -48,22 +48,22 @@ function runStage6ADomainTests_(options) {
   _domainPush_(report, 'templates.missing keys detection', function() {
     const resolved = TemplateResolver_.resolve('DAY_SUMMARY_HEADER', {}, { preview: true });
     _domainAssert_(resolved.missingKeys.indexOf('date') !== -1, 'missingKeys не містить date');
-    return 'missing='+ resolved.missingKeys.join(',');
+    return 'missing=' + resolved.missingKeys.join(',');
   });
 
   _domainPush_(report, 'templates.fallback resolution', function() {
     const descriptor = TemplateRegistry_.get('DAY_SUMMARY_HEADER');
-    _domainAssert_(descriptor.source === 'system-fallback'|| descriptor.source === 'managed-sheet', 'Не знайдено fallback/managed template');
+    _domainAssert_(descriptor.source === 'system-fallback' || descriptor.source === 'managed-sheet', 'Не знайдено fallback/managed template');
     return descriptor.source;
   });
 
   _domainPush_(report, 'templates.preview vs final mode', function() {
-    const data = { date: '01.01.2026'};
+    const data = { date: '01.01.2026' };
     const preview = Stage4Templates_.preview('DAY_SUMMARY_HEADER', data, { maxLen: 5 });
     const full = Stage4Templates_.render('DAY_SUMMARY_HEADER', data, { preview: false });
-    _domainAssert_(preview.length <= 6, ' Preview не обрізається');
+    _domainAssert_(preview.length <= 6, 'Preview не обрізається');
     _domainAssert_(full.indexOf('01.01.2026') !== -1, 'Final render пошкоджений');
-    return 'preview='+ preview;
+    return 'preview=' + preview;
   });
 
   // Send panel helpers
@@ -76,15 +76,15 @@ function runStage6ADomainTests_(options) {
 
   _domainPush_(report, 'phone lookup canonical index contract', function() {
     const index = {
-      byFio: { 'Петренко Іван Іванович': '+380661111111'},
-      byNorm: { 'петренко іван іванович': '+380661111111'},
-      byRole: { 'ГРАФ': '+380662222222'},
-      byCallsign: { 'РОЛАНД': '+380663333333'},
+      byFio: { 'Петренко Іван Іванович': '+380661111111' },
+      byNorm: { 'петренко іван іванович': '+380661111111' },
+      byRole: { 'ГРАФ': '+380662222222' },
+      byCallsign: { 'РОЛАНД': '+380663333333' },
       items: []
     };
-    const byFio = findPhone_({ fio: 'Петренко Іван Іванович'}, { index: index });
-    const byRole = findPhone_({ role: 'ГРАФ'}, { index: index });
-    const byCallsign = findPhone_({ callsign: 'роланд'}, { index: index });
+    const byFio = findPhone_({ fio: 'Петренко Іван Іванович' }, { index: index });
+    const byRole = findPhone_({ role: 'ГРАФ' }, { index: index });
+    const byCallsign = findPhone_({ callsign: 'роланд' }, { index: index });
     _domainAssert_(byFio === '+380661111111', 'findPhone_() не знайшов телефон по fio');
     _domainAssert_(byRole === '+380662222222', 'findPhone_() не знайшов телефон по role');
     _domainAssert_(byCallsign === '+380663333333', 'findPhone_() не знайшов телефон по callsign');
@@ -93,19 +93,19 @@ function runStage6ADomainTests_(options) {
 
   _domainPush_(report, 'sendPanel.normalize rows', function() {
     const rows = SendPanelService_.normalizeRows([
-      { fio: 'Петренко ', phone: "'+380661234567", code: 'БР ', status: getSendPanelReadyStatus_(), sent: false },
+      { fio: ' Петренко ', phone: "'+380661234567", code: ' БР ', status: getSendPanelReadyStatus_(), sent: false },
       { fio: '', phone: '', code: '', status: '', sent: false }
     ]);
     _domainAssert_(rows.length === 1, 'normalizeRows повинен відкидати порожні рядки');
     _domainAssert_(rows[0].phone === '+380661234567', 'Телефон не нормалізовано');
-    return 'rows='+ rows.length;
+    return 'rows=' + rows.length;
   });
 
   _domainPush_(report, 'sendPanel.duplicate detection', function() {
     const duplicates = SendPanelService_.findDuplicateKeys([
-      { fio: 'Петренко', phone: '+380661234567', code: 'БР'},
-      { fio: 'Петренко', phone: '+380661234567', code: 'БР'},
-      { fio: 'Іванов', phone: '+380661234568', code: 'КП'}
+      { fio: 'Петренко', phone: '+380661234567', code: 'БР' },
+      { fio: 'Петренко', phone: '+380661234567', code: 'БР' },
+      { fio: 'Іванов', phone: '+380661234568', code: 'КП' }
     ]);
     _domainAssert_(duplicates.length === 1, 'Duplicate detection повинен знайти 1 ключ');
     return duplicates[0];
@@ -113,27 +113,28 @@ function runStage6ADomainTests_(options) {
 
   _domainPush_(report, 'sendPanel.sent transition rules', function() {
     const next = SendPanelService_.resolveTransition({ sent: false, status: getSendPanelReadyStatus_() }, 'markSent');
-    _domainAssert_(next.sent === true && next.status === getSendPanelReadyStatus_(), 'markSent rule пошкоджений');
+    _domainAssert_(next.sent === true && next.status === getSendPanelSentStatus_(), 'markSent rule пошкоджений');
     return next.status;
   });
 
   _domainPush_(report, 'sendPanel.pending transition rules', function() {
     const next = SendPanelService_.resolveTransition({ sent: false, status: getSendPanelReadyStatus_() }, 'markPending');
-    _domainAssert_(next.sent === false && next.status === getSendPanelReadyStatus_(), 'markPending rule пошкоджений');
+    _domainAssert_(next.sent === false && next.status === SendPanelConstants_.STATUS_PENDING, 'markPending rule пошкоджений');
     return next.status;
   });
 
   _domainPush_(report, 'sendPanel.unsent transition rules', function() {
-    const next = SendPanelService_.resolveTransition({ sent: true, status: getSendPanelReadyStatus_() }, 'markUnsent');
-    _domainAssert_(next.sent === false && next.status === getSendPanelReadyStatus_(), 'markUnsent rule пошкоджений');
+    const next = SendPanelService_.resolveTransition({ sent: true, status: getSendPanelSentStatus_() }, 'markUnsent');
+    _domainAssert_(next.sent === false && next.status === SendPanelConstants_.STATUS_UNSENT, 'markUnsent rule пошкоджений');
     return next.status;
   });
 
   _domainPush_(report, 'sendPanel.allowed statuses canonical set', function() {
     const statuses = getSendPanelAllAllowedStatuses_();
     _domainAssert_(statuses.indexOf(SendPanelConstants_.STATUS_READY) !== -1, 'Немає STATUS_READY');
-    _domainAssert_(statuses.indexOf(SendPanelConstants_.STATUS_READY) !== -1, 'Немає STATUS_READY');
-    _domainAssert_(statuses.indexOf(SendPanelConstants_.STATUS_BLOCKED) !== -1, 'Немає STATUS_BLOCKED');
+    _domainAssert_(statuses.indexOf(SendPanelConstants_.STATUS_PENDING) !== -1, 'Немає STATUS_PENDING');
+    _domainAssert_(statuses.indexOf(SendPanelConstants_.STATUS_UNSENT) !== -1, 'Немає STATUS_UNSENT');
+    _domainAssert_(statuses.indexOf(SendPanelConstants_.STATUS_SENT) !== -1, 'Немає STATUS_SENT');
     return statuses.join(', ');
   });
 
@@ -182,20 +183,20 @@ function runStage6ADomainTests_(options) {
   _domainPush_(report, 'reconciliation.targeted repair preview', function() {
     const preview = Reconciliation_.previewRepairPlan([
       { type: 'missingExpectedItem', repairable: true, key: 'k1', expectedRow: 3 },
-      { type: 'summaryMismatch', repairable: false, key: 'k2'}
+      { type: 'summaryMismatch', repairable: false, key: 'k2' }
     ], { issueTypes: ['missingExpectedItem'] });
     _domainAssert_(preview.selectedCount === 1, 'previewRepairPlan некоректно фільтрує issueTypes');
-    return 'selected='+ preview.selectedCount;
+    return 'selected=' + preview.selectedCount;
   });
 
   _domainPush_(report, 'reconciliation.post-repair verification formatter', function() {
     const verification = Reconciliation_.verifyRepairResult(
-      { issues: [{ severity: 'CRITICAL'}, { severity: 'WARN'}] },
-      { issues: [{ severity: 'WARN'}] }
+      { issues: [{ severity: 'CRITICAL' }, { severity: 'WARN' }] },
+      { issues: [{ severity: 'WARN' }] }
     );
     _domainAssert_(verification.remainingIssues === 1, 'remainingIssues має бути 1');
     _domainAssert_(verification.criticalRemaining === 0, 'criticalRemaining має бути 0');
-    return 'remaining='+ verification.remainingIssues;
+    return 'remaining=' + verification.remainingIssues;
   });
 
   // Vacation / date logic
@@ -242,29 +243,29 @@ function runStage6ADomainTests_(options) {
     const msg = buildMessage_({ reportDate: '17.03.2026', service: 'Охорона', place: 'Запоріжжя', tasks: 'Супровід', brDays: 5, minimal: false });
     _domainAssert_(msg.indexOf('17.03.2026') !== -1, 'Повідомлення не містить дату');
     _domainAssert_(msg.indexOf('Охорона') !== -1, 'Повідомлення не містить service');
-    return 'len='+ msg.length;
+    return 'len=' + msg.length;
   });
 
   _domainPush_(report, 'summary.detailed composition', function() {
     const text = formatDetailedSummaryLegacy_('17.03.2026', [
-      { code: 'БР', surname: 'Петренко'},
-      { code: 'КП', surname: 'Іванов'}
+      { code: 'БР', surname: 'Петренко' },
+      { code: 'КП', surname: 'Іванов' }
     ]);
     _domainAssert_(text.indexOf('17.03.2026') !== -1, 'Detailed summary не містить дату');
     _domainAssert_(text.indexOf('Петренко') !== -1, 'Detailed summary не містить прізвище');
-    return 'len='+ text.length;
+    return 'len=' + text.length;
   });
 
   _domainPush_(report, 'summary.empty-state behavior', function() {
     const text = formatDetailedSummaryLegacy_('17.03.2026', []);
     _domainAssert_(text.indexOf('17.03.2026') !== -1, 'Навіть empty state має містити дату');
-    return 'len='+ text.length;
+    return 'len=' + text.length;
   });
 
   _domainPush_(report, 'summary.optional fields behavior', function() {
     const msg = buildMessage_({ reportDate: '17.03.2026', service: '', place: '', tasks: '', brDays: 0, minimal: true });
     _domainAssert_(msg.indexOf('17.03.2026') !== -1, 'Minimal message не містить дату');
-    return 'len='+ msg.length;
+    return 'len=' + msg.length;
   });
 
   // Routing / lifecycle / contract
@@ -281,7 +282,7 @@ function runStage6ADomainTests_(options) {
   });
 
   _domainPush_(report, 'contract normalization / top-level fields', function() {
-    const response = buildStage4Response_(true, 'OK', null, { a: 1 }, [], { scenario: 'x', operationId: 'op1', dryRun: false, affectedSheets: ['SEND_PANEL'], partial: false, retrySafe: true, lockUsed: true }, { lifecycle: ['response.built'] }, { scenario: 'x'}, []);
+    const response = buildStage4Response_(true, 'OK', null, { a: 1 }, [], { scenario: 'x', operationId: 'op1', dryRun: false, affectedSheets: ['SEND_PANEL'], partial: false, retrySafe: true, lockUsed: true }, { lifecycle: ['response.built'] }, { scenario: 'x' }, []);
     _domainAssert_(response.operationId === 'op1', 'operationId має дублюватися у top-level');
     _domainAssert_(response.retrySafe === true, 'retrySafe має бути true');
     _domainAssert_(response.lockUsed === true, 'lockUsed має бути true');
@@ -289,7 +290,7 @@ function runStage6ADomainTests_(options) {
   });
 
   _domainPush_(report, 'contract.partial success formatting', function() {
-    const response = buildStage4Response_(true, 'PARTIAL', null, {}, [], { scenario: 'x', operationId: 'op2', partial: true, skippedChangesCount: 2, appliedChangesCount: 1, retrySafe: true }, { lifecycle: ['response.built'] }, { scenario: 'x'}, ['warning']);
+    const response = buildStage4Response_(true, 'PARTIAL', null, {}, [], { scenario: 'x', operationId: 'op2', partial: true, skippedChangesCount: 2, appliedChangesCount: 1, retrySafe: true }, { lifecycle: ['response.built'] }, { scenario: 'x' }, ['warning']);
     _domainAssert_(response.partial === true, 'partial має бути true');
     _domainAssert_(response.skippedChangesCount === 2, 'skippedChangesCount має бути 2');
     return 'partial-ok';

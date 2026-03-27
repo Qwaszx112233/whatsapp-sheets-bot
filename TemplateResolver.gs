@@ -31,7 +31,7 @@ const TemplateResolver_ = (function() {
     const opts = options || {};
     const preview = opts.preview === true;
     const maxLen = Number(opts.maxLen) || STAGE4_CONFIG.TEMPLATE_PREVIEW_LIMIT;
-    const text = preview && rendered.length >maxLen ? rendered.slice(0, maxLen) + '…': rendered;
+    const text = preview && rendered.length > maxLen ? rendered.slice(0, maxLen) + '…' : rendered;
 
     return {
       key: descriptor.key,
@@ -41,7 +41,7 @@ const TemplateResolver_ = (function() {
       missingKeys: missing,
       ok: !!sourceText,
       preview: preview,
-      versionMarker: descriptor.source === 'managed-sheet'? 'managed-v1': 'fallback-v1'
+      versionMarker: descriptor.source === 'managed-sheet' ? 'managed-v1' : 'fallback-v1'
     };
   }
 

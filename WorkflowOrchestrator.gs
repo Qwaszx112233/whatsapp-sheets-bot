@@ -74,7 +74,7 @@ const WorkflowOrchestrator_ = (function() {
       lockUsed: !!lock,
       lockRequired: !!lockRequired,
       durationMs: new Date().getTime() - startedAt.getTime(),
-      lifecycle: lifecycle ? { fingerprint: lifecycle.fingerprint || '', reason: lifecycle.reason || ''} : null,
+      lifecycle: lifecycle ? { fingerprint: lifecycle.fingerprint || '', reason: lifecycle.reason || '' } : null,
       idempotency: {
         fingerprint: lifecycle && lifecycle.fingerprint || '',
         reason: lifecycle && lifecycle.reason || '',
@@ -153,9 +153,9 @@ const WorkflowOrchestrator_ = (function() {
           operationId: operationId,
           dryRun: dryRun,
           parentOperationId: payload.parentOperationId || '',
-          initiator: payload.initiator || (payload.trigger ? 'trigger': 'manual'),
-          runSource: payload.source || (payload.trigger ? 'trigger': 'manual'),
-          lockHolder: lock ? 'document-lock': ''
+          initiator: payload.initiator || (payload.trigger ? 'trigger' : 'manual'),
+          runSource: payload.source || (payload.trigger ? 'trigger' : 'manual'),
+          lockHolder: lock ? 'document-lock' : ''
         });
         diagnostics.idempotencyFingerprint = lifecycle.fingerprint || '';
         diagnostics.lifecycle.push('lifecycle.preflight');
@@ -207,7 +207,7 @@ const WorkflowOrchestrator_ = (function() {
         execution = { result: null, changes: [], warnings: [] };
       }
       warnings.push.apply(warnings, stage4MergeWarnings_(execution.warnings));
-      diagnostics.lifecycle.push(dryRun ? 'execute.dryRun': 'execute.applied');
+      diagnostics.lifecycle.push(dryRun ? 'execute.dryRun' : 'execute.applied');
 
       if (cfg.write && !dryRun && typeof OperationRepository_ === 'object') {
         OperationRepository_.saveCheckpoint({
@@ -303,7 +303,7 @@ const WorkflowOrchestrator_ = (function() {
           success: execution.success !== false,
           message: response.message,
           repairNeeded: meta.repairNeeded,
-          transitionReason: (verification && verification.ok === false) ? 'post-write-verification-failed': 'commit-complete'
+          transitionReason: (verification && verification.ok === false) ? 'post-write-verification-failed' : 'commit-complete'
         });
       }
 
@@ -312,9 +312,9 @@ const WorkflowOrchestrator_ = (function() {
           timestamp: new Date(),
           operationId: operationId,
           scenario: lifecycleScenario,
-          level: execution.partial ? 'WARN': 'AUDIT',
-          status: execution.success === false ? 'ERROR': (execution.partial ? 'PARTIAL': 'SUCCESS'),
-          initiator: payload.initiator || (payload.trigger ? 'trigger': 'manual'),
+          level: execution.partial ? 'WARN' : 'AUDIT',
+          status: execution.success === false ? 'ERROR' : (execution.partial ? 'PARTIAL' : 'SUCCESS'),
+          initiator: payload.initiator || (payload.trigger ? 'trigger' : 'manual'),
           dryRun: dryRun,
           partial: !!execution.partial,
           affectedSheets: meta.affectedSheets,
@@ -335,7 +335,7 @@ const WorkflowOrchestrator_ = (function() {
           timestamp: new Date(),
           operationId: operationId,
           scenario: lifecycleScenario,
-          level: execution.partial ? 'WARN': 'AUDIT',
+          level: execution.partial ? 'WARN' : 'AUDIT',
           affectedSheets: meta.affectedSheets,
           affectedEntities: meta.affectedEntities,
           message: response.message,
@@ -401,7 +401,7 @@ const WorkflowOrchestrator_ = (function() {
           scenario: rawScenario,
           level: 'ERROR',
           status: 'ERROR',
-          initiator: payload.initiator || (payload.trigger ? 'trigger': 'manual'),
+          initiator: payload.initiator || (payload.trigger ? 'trigger' : 'manual'),
           dryRun: dryRun,
           partial: false,
           affectedSheets: [],

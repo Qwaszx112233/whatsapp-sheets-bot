@@ -16,8 +16,8 @@ const DateUtils_ = {
 
   getTimeZone() {
     const candidates = [
-      (typeof CONFIG === 'object'&& CONFIG && CONFIG.TZ) ? CONFIG.TZ : '',
-      (typeof Session !== 'undefined'&& Session && typeof Session.getScriptTimeZone === 'function')
+      (typeof CONFIG === 'object' && CONFIG && CONFIG.TZ) ? CONFIG.TZ : '',
+      (typeof Session !== 'undefined' && Session && typeof Session.getScriptTimeZone === 'function')
         ? Session.getScriptTimeZone()
         : '',
       'Europe/Kyiv',
@@ -65,7 +65,7 @@ const DateUtils_ = {
       return this.formatUaDate(value);
     }
 
-    if (typeof value === 'number'&& value >25569 && value < 60000) {
+    if (typeof value === 'number' && value > 25569 && value < 60000) {
       const dt = new Date((value - 25569) * 86400 * 1000);
       if (!isNaN(dt.getTime())) return this.formatUaDate(dt);
     }
@@ -73,7 +73,7 @@ const DateUtils_ = {
     const source = String(displayValue || value || '').trim();
     if (!source) throw new Error('[DateUtils_.normalizeDate] Порожня дата');
 
-    const createStrict = (year, month, day) =>{
+    const createStrict = (year, month, day) => {
       const dt = new Date(year, month - 1, day, 12, 0, 0, 0);
       if (isNaN(dt.getTime())) return null;
       if (dt.getFullYear() !== year || dt.getMonth() !== (month - 1) || dt.getDate() !== day) return null;
@@ -84,7 +84,7 @@ const DateUtils_ = {
     if (match) {
       const day = parseInt(match[1], 10);
       const month = parseInt(match[2], 10);
-      const year = String(match[3]).length === 2 ? parseInt('20'+ match[3], 10) : parseInt(match[3], 10);
+      const year = String(match[3]).length === 2 ? parseInt('20' + match[3], 10) : parseInt(match[3], 10);
       const normalized = createStrict(year, month, day);
       if (normalized) return normalized;
     }

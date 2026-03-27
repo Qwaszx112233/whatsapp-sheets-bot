@@ -35,12 +35,12 @@ function _ensureLogSheet_() {
 function writeLogsBatch_(items) {
   items = Array.isArray(items) ? items.filter(Boolean) : [];
   if (!items.length) {
-    return { success: true, count: 0, message: 'Немає логів для запису'};
+    return { success: true, count: 0, message: 'Немає логів для запису' };
   }
 
   const sh = _ensureLogSheet_();
 
-  const rows = items.map(item =>{
+  const rows = items.map(item => {
     if (Array.isArray(item)) return item;
 
     const o = item || {};

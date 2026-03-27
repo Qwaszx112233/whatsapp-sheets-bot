@@ -5,10 +5,10 @@
 
 const PreviewLinkService_ = (function() {
   function escapeHtmlLocal(value) {
-    if (typeof HtmlUtils_ === 'object'&& typeof HtmlUtils_.escapeHtml === 'function') {
+    if (typeof HtmlUtils_ === 'object' && typeof HtmlUtils_.escapeHtml === 'function') {
       return HtmlUtils_.escapeHtml(value);
     }
-    return String(value == null ? '': value)
+    return String(value == null ? '' : value)
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
@@ -25,7 +25,7 @@ const PreviewLinkService_ = (function() {
     const cleanedPhone = String(phone || '').replace(/\D/g, '');
     if (!cleanedPhone) return '';
     const body = trimToEncoded_(String(text || ''), CONFIG.MAX_WA_TEXT);
-    return 'https://wa.me/'+ cleanedPhone + '?text='+ encodeURIComponent(body);
+    return 'https://wa.me/' + cleanedPhone + '?text=' + encodeURIComponent(body);
   }
 
   function buildSinglePreview(payload, options) {

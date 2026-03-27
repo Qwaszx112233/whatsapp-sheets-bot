@@ -36,15 +36,10 @@ function _stage4ApplyPanelState_(rowNumbers, sentValue, statusText) {
 
   groups.forEach(function(group) {
     const count = group.rows.length;
-    if (statusText !== null && statusText !== undefined) {
-      panel.getRange(group.start, schema.columns.status, count, 1)
-        .setValues(group.rows.map(function() { return [statusText]; }));
-    }
-    if (sentValue !== null && sentValue !== undefined) {
-      const mark = sentValue ? getSendPanelSentMark_() : getSendPanelUnsentMark_();
-      panel.getRange(group.start, schema.columns.sent, count, 1)
-        .setValues(group.rows.map(function() { return [mark]; }));
-    }
+    panel.getRange(group.start, schema.columns.status, count, 1)
+      .setValues(group.rows.map(function() { return [statusText]; }));
+    panel.getRange(group.start, schema.columns.sent, count, 1)
+      .setValues(group.rows.map(function() { return [!!sentValue]; }));
   });
 
   return SendPanelRepository_.readRows();
@@ -60,18 +55,14 @@ function _stage6AVerifyPanelStatuses_(rows, expectedStatus, expectedSent) {
   const selected = SendPanelRepository_.readRows().filter(function(item) {
     return stage4AsArray_(rows).map(Number).indexOf(Number(item.row)) !== -1;
   });
-  const expectStatus = expectedStatus !== null && expectedStatus !== undefined && expectedStatus !== '';
-  const expectSent = expectedSent !== null && expectedSent !== undefined;
   const mismatches = selected.filter(function(item) {
-    if (expectStatus && String(item.status || '') !== String(expectedStatus || '')) return true;
-    if (expectSent && !!item.sent !== !!expectedSent) return true;
-    return false;
+    return String(item.status || '') !== String(expectedStatus || '') || !!item.sent !== !!expectedSent;
   });
   return {
     ok: mismatches.length === 0,
     verifiedRows: selected.length,
     mismatchCount: mismatches.length,
-    partial: mismatches.length >0,
+    partial: mismatches.length > 0,
     warnings: mismatches.length ? [`Післяопераційна перевірка виявила ${mismatches.length} невідповідностей`] : []
   };
 }
@@ -81,7 +72,7 @@ function _stage6AVerifySendPanelBuild_(execution) {
   const rows = stage4AsArray_(result.rows);
   const stats = result.stats || SendPanelRepository_.buildStats(rows);
   return {
-    ok: rows.length >0 || !!result.persisted,
+    ok: rows.length > 0 || !!result.persisted,
     rows: rows.length,
     stats: stats,
     partial: false,
@@ -95,14 +86,14 @@ function _stage4CreateNextMonthCore_(payload) {
   const src = explicitSource;
   const srcName = String(src.getName()).trim();
 
-  _stage4Assert_(/^\d{2}$/.test(srcName), '_stage4CreateNextMonthCore_', { sheet: srcName }, `Активний лист "${srcName}"не є місячним`);
+  _stage4Assert_(/^\d{2}$/.test(srcName), '_stage4CreateNextMonthCore_', { sheet: srcName }, `Активний лист "${srcName}" не є місячним`);
 
   let nextNum = parseInt(srcName, 10) + 1;
-  if (nextNum >12) nextNum = 1;
+  if (nextNum > 12) nextNum = 1;
   if (nextNum < 1) nextNum = 1;
 
   const nextName = String(nextNum).padStart(2, '0');
-  _stage4Assert_(!ss.getSheetByName(nextName), '_stage4CreateNextMonthCore_', { sourceMonth: srcName, nextMonth: nextName }, `Лист "${nextName}"вже існує`);
+  _stage4Assert_(!ss.getSheetByName(nextName), '_stage4CreateNextMonthCore_', { sourceMonth: srcName, nextMonth: nextName }, `Лист "${nextName}" вже існує`);
 
   const newSheet = src.copyTo(ss).setName(nextName);
   const srcMY = _inferMonthYearFromSheet_(src);
@@ -161,7 +152,7 @@ const Stage4UseCases_ = (function() {
             affectedEntities: [],
             plannedRows: stats.totalCount || 0
           },
-          warnings: (stats.blockedCount || stats.errorCount || 0) >0 ? [`У SEND_PANEL є заблоковані рядки: ${stats.blockedCount || stats.errorCount || 0}`] : []
+          warnings: stats.errorCount > 0 ? [`У SEND_PANEL є рядки з помилками: ${stats.errorCount}`] : []
         };
       },
       execute: function(input, beforeState, plan) {
@@ -169,7 +160,7 @@ const Stage4UseCases_ = (function() {
         const stats = built.stats || SendPanelRepository_.buildStats(built.rows || []);
         return {
           success: true,
-          message: input.dryRun ? 'SEND_PANEL перевірено без запису': 'SEND_PANEL згенеровано',
+          message: input.dryRun ? 'SEND_PANEL перевірено без запису' : 'SEND_PANEL згенеровано',
           result: built,
           changes: input.dryRun ? [] : [{
             type: 'rebuildSendPanel',
@@ -185,7 +176,7 @@ const Stage4UseCases_ = (function() {
           meta: {
             stats: stats
           },
-          warnings: (stats.blockedCount || stats.errorCount || 0) >0 ? [`У SEND_PANEL є заблоковані рядки: ${stats.blockedCount || stats.errorCount || 0}`] : []
+          warnings: stats.errorCount > 0 ? [`У SEND_PANEL є рядки з помилками: ${stats.errorCount}`] : []
         };
       },
       sync: function(input, beforeState, plan, execution) {
@@ -265,7 +256,7 @@ const Stage4UseCases_ = (function() {
           affectedEntities: [],
           appliedChangesCount: !input.dryRun && persisted ? ((persisted.rows || []).length || 0) : 0,
           skippedChangesCount: input.dryRun ? reports.length : Math.max(reports.length - 1, 0),
-          partial: !input.dryRun && reports.length >1,
+          partial: !input.dryRun && reports.length > 1,
           warnings: warnings
         };
       },
@@ -302,7 +293,7 @@ const Stage4UseCases_ = (function() {
         if (input.dryRun) {
           return {
             success: true,
-            message: `Dry-run: сумісний маршрут pending більше не змінює рядки`,
+            message: `Dry-run: буде позначено ${targetRows.length} рядків як такі, що очікують підтвердження`,
             result: {
               rows: beforeState.allRows,
               updatedRows: input.rowNumbers,
@@ -320,7 +311,7 @@ const Stage4UseCases_ = (function() {
         const result = SendPanelRepository_.markRowsAsPending(input.rowNumbers, {});
         return {
           success: true,
-          message: `Сумісний маршрут pending виконано без зміни стану рядків`,
+          message: `Позначено ${result.updatedRows.length} рядків як такі, що очікують підтвердження`,
           result: result,
           changes: _stage4RowsToChangeList_(targetRows, 'markPending'),
           affectedSheets: [CONFIG.SEND_PANEL_SHEET],
@@ -337,7 +328,7 @@ const Stage4UseCases_ = (function() {
         };
       },
       verify: function(input) {
-        return input.dryRun ? { ok: true, verifiedRows: 0, mismatchCount: 0 } : _stage6AVerifyPanelStatuses_(input.rowNumbers, null, false);
+        return input.dryRun ? { ok: true, verifiedRows: 0, mismatchCount: 0 } : _stage6AVerifyPanelStatuses_(input.rowNumbers, SendPanelConstants_.STATUS_PENDING, false);
       }
     });
   }
@@ -366,7 +357,7 @@ const Stage4UseCases_ = (function() {
       },
       execute: function(input, beforeState) {
         const targetRows = beforeState.selectedRows || [];
-        const alreadySent = targetRows.filter(function(item) { return item.sent === true; });
+        const alreadySent = targetRows.filter(function(item) { return item.sent || item.status === getSendPanelSentStatus_(); });
         const warnings = alreadySent.length ? [`Уже відправлені рядки: ${alreadySent.length}`] : [];
 
         if (input.dryRun) {
@@ -398,7 +389,7 @@ const Stage4UseCases_ = (function() {
           affectedEntities: targetRows.map(function(item) { return item.fio; }),
           appliedChangesCount: result.updatedRows.length,
           skippedChangesCount: alreadySent.length,
-          partial: alreadySent.length >0,
+          partial: alreadySent.length > 0,
           warnings: warnings
         };
       },
@@ -409,7 +400,7 @@ const Stage4UseCases_ = (function() {
         };
       },
       verify: function(input) {
-        return input.dryRun ? { ok: true, verifiedRows: 0, mismatchCount: 0 } : _stage6AVerifyPanelStatuses_(input.rowNumbers, null, true);
+        return input.dryRun ? { ok: true, verifiedRows: 0, mismatchCount: 0 } : _stage6AVerifyPanelStatuses_(input.rowNumbers, getSendPanelSentStatus_(), true);
       }
     });
   }
@@ -476,7 +467,7 @@ const Stage4UseCases_ = (function() {
         };
       },
       verify: function(input) {
-        return input.dryRun ? { ok: true, verifiedRows: 0, mismatchCount: 0 } : _stage6AVerifyPanelStatuses_(input.rowNumbers, null, false);
+        return input.dryRun ? { ok: true, verifiedRows: 0, mismatchCount: 0 } : _stage6AVerifyPanelStatuses_(input.rowNumbers, SendPanelConstants_.STATUS_UNSENT, false);
       }
     });
   }
@@ -526,7 +517,7 @@ const Stage4UseCases_ = (function() {
         if (input.dryRun) {
           return {
             success: true,
-            message: `Dry-run: буде автоматично зафіксовано ${queue.length} рядків після відкриття чатів`,
+            message: `Dry-run: підготовлено ${queue.length} чатів без фіксації відправки`,
             result: {
               queue: queue,
               rows: beforeState.allRows,
@@ -541,17 +532,17 @@ const Stage4UseCases_ = (function() {
           };
         }
 
-        const result = SendPanelRepository_.markRowsAsSent(queue.map(function(item) { return item.row; }), {});
+        const result = SendPanelRepository_.markRowsAsPending(queue.map(function(item) { return item.row; }), {});
         return {
           success: true,
-          message: `Автоматично зафіксовано ${queue.length} рядків як відправлені`,
+          message: `Позначено ${queue.length} рядків як такі, що очікують підтвердження`,
           result: {
             queue: queue,
             rows: result.rows,
             updatedRows: result.updatedRows,
             stats: result.stats
           },
-          changes: _stage4RowsToChangeList_(queue, 'markSentAuto'),
+          changes: _stage4RowsToChangeList_(queue, 'markPending'),
           affectedSheets: [CONFIG.SEND_PANEL_SHEET],
           affectedEntities: queue.map(function(item) { return item.fio; }),
           appliedChangesCount: queue.length,
@@ -568,7 +559,7 @@ const Stage4UseCases_ = (function() {
       verify: function(input, beforeState, plan, execution) {
         if (input.dryRun) return { ok: true, verifiedRows: 0, mismatchCount: 0 };
         const updatedRows = stage4AsArray_(execution && execution.result && execution.result.updatedRows);
-        return _stage6AVerifyPanelStatuses_(updatedRows, null, true);
+        return _stage6AVerifyPanelStatuses_(updatedRows, SendPanelConstants_.STATUS_PENDING, false);
       }
     });
   }
@@ -616,7 +607,7 @@ const Stage4UseCases_ = (function() {
       execute: function() {
         const rows = SendPanelRepository_.readRows();
         const stats = SendPanelRepository_.buildStats(rows);
-        const panelMeta = typeof SendPanelRepository_.getPanelMetadata === 'function'? SendPanelRepository_.getPanelMetadata() : { month: getBotMonthSheetName_(), date: ''};
+        const panelMeta = typeof SendPanelRepository_.getPanelMetadata === 'function' ? SendPanelRepository_.getPanelMetadata() : { month: getBotMonthSheetName_(), date: '' };
         return {
           success: true,
           message: 'SEND_PANEL перечитано',
@@ -631,14 +622,14 @@ const Stage4UseCases_ = (function() {
           affectedEntities: [],
           appliedChangesCount: 0,
           skippedChangesCount: 0,
-          warnings: (stats.blockedCount || stats.errorCount || 0) >0 ? ['У SEND_PANEL є заблоковані рядки: '+ (stats.blockedCount || stats.errorCount || 0)] : []
+          warnings: stats.errorCount > 0 ? ['У SEND_PANEL є рядки з помилками: ' + stats.errorCount] : []
         };
       }
     });
   }
 
   function buildDaySummary(options) {
-    const payload = typeof options === 'string'? { date: options } : Object.assign({}, options || {});
+    const payload = typeof options === 'string' ? { date: options } : Object.assign({}, options || {});
     return WorkflowOrchestrator_.run({
       scenario: 'buildDaySummary',
       payload: payload,
@@ -675,7 +666,7 @@ const Stage4UseCases_ = (function() {
   }
 
   function buildDetailedSummary(options) {
-    const payload = typeof options === 'string'? { date: options } : Object.assign({}, options || {});
+    const payload = typeof options === 'string' ? { date: options } : Object.assign({}, options || {});
     return WorkflowOrchestrator_.run({
       scenario: 'buildDetailedSummary',
       payload: payload,
@@ -743,7 +734,7 @@ const Stage4UseCases_ = (function() {
   }
 
   function loadCalendarDay(options) {
-    const payload = typeof options === 'string'? { date: options } : Object.assign({}, options || {});
+    const payload = typeof options === 'string' ? { date: options } : Object.assign({}, options || {});
     return WorkflowOrchestrator_.run({
       scenario: 'loadCalendarDay',
       payload: payload,
@@ -771,7 +762,7 @@ const Stage4UseCases_ = (function() {
   }
 
   function checkVacationsAndBirthdays(options) {
-    const payload = typeof options === 'string'? { date: options } : Object.assign({}, options || {});
+    const payload = typeof options === 'string' ? { date: options } : Object.assign({}, options || {});
     return WorkflowOrchestrator_.run({
       scenario: 'checkVacationsAndBirthdays',
       payload: payload,
@@ -865,7 +856,7 @@ const Stage4UseCases_ = (function() {
         const created = _stage4CreateNextMonthCore_(input);
         return {
           success: true,
-          message: `Місяць "${created.createdMonth}"створено`,
+          message: `Місяць "${created.createdMonth}" створено`,
           result: created,
           changes: [{
             type: 'createMonthSheet',
@@ -940,7 +931,7 @@ const Stage4UseCases_ = (function() {
         }
         const postCheck = execution && execution.result && execution.result.postCheck || null;
         if (postCheck) {
-          return { ok: Number(postCheck.criticalRemaining || 0) === 0, partial: Number(postCheck.remainingIssues || 0) >0, remainingIssues: postCheck.remainingIssues || 0, criticalRemaining: postCheck.criticalRemaining || 0 };
+          return { ok: Number(postCheck.criticalRemaining || 0) === 0, partial: Number(postCheck.remainingIssues || 0) > 0, remainingIssues: postCheck.remainingIssues || 0, criticalRemaining: postCheck.criticalRemaining || 0 };
         }
         return { ok: true, partial: false, warnings: ['Reconciliation verify повернувся без postCheck'] };
       }
@@ -998,14 +989,14 @@ const Stage4UseCases_ = (function() {
     });
 
     Object.keys(allScriptProps).forEach(function(key) {
-      if (typeof isKnownBlockingKey_ === 'function'&& isKnownBlockingKey_(key)) {
+      if (typeof isKnownBlockingKey_ === 'function' && isKnownBlockingKey_(key)) {
         scriptProps.deleteProperty(key);
         report.blockingKeysCleared += 1;
       }
     });
 
     Object.keys(allDocProps).forEach(function(key) {
-      if (typeof isKnownBlockingKey_ === 'function'&& isKnownBlockingKey_(key)) {
+      if (typeof isKnownBlockingKey_ === 'function' && isKnownBlockingKey_(key)) {
         docProps.deleteProperty(key);
         report.blockingKeysCleared += 1;
       }
@@ -1013,7 +1004,7 @@ const Stage4UseCases_ = (function() {
 
     if (typeof OperationRepository_ === 'object') {
       try {
-        const opts = options && typeof options === 'object'? options : {};
+        const opts = options && typeof options === 'object' ? options : {};
         const abandoned = OperationRepository_.abandonAllActive('restart-bot', {
           excludeOperationId: opts.excludeOperationId || '',
           excludeOperationIds: stage4AsArray_(opts.excludeOperationIds)
@@ -1030,7 +1021,7 @@ const Stage4UseCases_ = (function() {
   }
 
   function runMaintenanceScenario(options) {
-    const payload = Object.assign({ type: 'quick'}, options || {});
+    const payload = Object.assign({ type: 'quick' }, options || {});
     const type = String(payload.type || 'quick');
     const writeTypes = {
       cleanupCaches: true,
@@ -1047,7 +1038,7 @@ const Stage4UseCases_ = (function() {
       payload: payload,
       write: !!writeTypes[type],
       validate: function(input) {
-        if (String(input.type || '') === 'postCreateMonth'&& input.month) {
+        if (String(input.type || '') === 'postCreateMonth' && input.month) {
           validateMonthSwitch_(input.month);
         }
         return { payload: input, warnings: [] };
@@ -1061,8 +1052,8 @@ const Stage4UseCases_ = (function() {
             return {
               success: true,
               message: 'Кеші очищено',
-              result: { cleaned: true, type: 'cleanupCaches'},
-              changes: [{ type: 'cleanupCaches'}],
+              result: { cleaned: true, type: 'cleanupCaches' },
+              changes: [{ type: 'cleanupCaches' }],
               affectedSheets: [],
               affectedEntities: [],
               appliedChangesCount: 1,
@@ -1072,13 +1063,13 @@ const Stage4UseCases_ = (function() {
 
           case 'clearLog': {
             const response = normalizeServerResponse_(LogsRepository_.clear(), 'clearLog', {});
-            const result = Object.assign({ type: 'clearLog'}, response.data || {});
+            const result = Object.assign({ type: 'clearLog' }, response.data || {});
             const cleared = !!result.cleared;
             return {
               success: response.success !== false,
-              message: response.message || (cleared ? 'LOG очищено': 'LOG не знайдено'),
+              message: response.message || (cleared ? 'LOG очищено' : 'LOG не знайдено'),
               result: result,
-              changes: cleared ? [{ type: 'clearLog'}] : [],
+              changes: cleared ? [{ type: 'clearLog' }] : [],
               affectedSheets: ['LOG'],
               affectedEntities: [],
               appliedChangesCount: cleared ? 1 : 0,
@@ -1152,8 +1143,8 @@ const Stage4UseCases_ = (function() {
             const setup = setupVacationTrigger();
             return {
               success: setup.success !== false,
-              message: setup.message || (setup.success === false ? 'Не вдалося налаштувати тригери': 'Тригери налаштовано'),
-              result: Object.assign({ type: 'setupVacationTriggers'}, setup || {}),
+              message: setup.message || (setup.success === false ? 'Не вдалося налаштувати тригери' : 'Тригери налаштовано'),
+              result: Object.assign({ type: 'setupVacationTriggers' }, setup || {}),
               changes: [{
                 type: 'setupVacationTriggers',
                 removed: Number(setup && setup.removed || 0)
@@ -1176,7 +1167,7 @@ const Stage4UseCases_ = (function() {
                     ? 'Дублі тригерів очищено'
                     : 'Дублі тригерів не знайдено')
                 : 'Не вдалося очистити дублікати тригерів',
-              result: Object.assign({ type: 'cleanupDuplicateTriggers'}, cleanup || {}),
+              result: Object.assign({ type: 'cleanupDuplicateTriggers' }, cleanup || {}),
               changes: Number(cleanup && cleanup.removed || 0)
                 ? [{ type: 'cleanupDuplicateTriggers', removed: Number(cleanup.removed || 0) }]
                 : [],
@@ -1193,8 +1184,8 @@ const Stage4UseCases_ = (function() {
             const success = debug && debug.success !== false;
             return {
               success: success,
-              message: success ? 'Діагностику PHONES виконано': 'Діагностика PHONES завершилась з помилкою',
-              result: Object.assign({ type: 'debugPhones'}, debug || {}),
+              message: success ? 'Діагностику PHONES виконано' : 'Діагностика PHONES завершилась з помилкою',
+              result: Object.assign({ type: 'debugPhones' }, debug || {}),
               changes: [],
               affectedSheets: [CONFIG.PHONES_SHEET],
               affectedEntities: [],
@@ -1211,7 +1202,7 @@ const Stage4UseCases_ = (function() {
             return {
               success: true,
               message: 'Lifecycle retention cleanup виконано',
-              result: Object.assign({ type: 'cleanupLifecycleRetention'}, cleanup || {}),
+              result: Object.assign({ type: 'cleanupLifecycleRetention' }, cleanup || {}),
               changes: [{
                 type: 'cleanupLifecycleRetention',
                 archived: Number(cleanup && cleanup.archived || 0),

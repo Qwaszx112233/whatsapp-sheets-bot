@@ -47,7 +47,7 @@ function _veCommanderRole_() {
     return (
       typeof
       CONFIG !==
-      'undefined'&&
+      'undefined' &&
       CONFIG &&
       CONFIG.COMMANDER_ROLE)
       ? String(CONFIG.COMMANDER_ROLE)
@@ -64,7 +64,7 @@ function _veTimeZone_() {
       const tz = getTimeZone_();
       if (tz) return tz;
     }
-    if (typeof DateUtils_ !== 'undefined'&& DateUtils_ && typeof DateUtils_.getTimeZone === 'function') {
+    if (typeof DateUtils_ !== 'undefined' && DateUtils_ && typeof DateUtils_.getTimeZone === 'function') {
       return DateUtils_.getTimeZone();
     }
   } catch (_) { }
@@ -77,7 +77,7 @@ function _veBool_(
     || value === false)
     return value;
   const s = String(
-    value == null ? '': value)
+    value == null ? '' : value)
     .trim()
     .toUpperCase();
   if (s === 'TRUE'
@@ -128,7 +128,7 @@ function _veParseDate_(value) {
   }
 
   if (typeof value === 'number'
-    && value >25569
+    && value > 25569
     && value < 60000) {
     const d = new Date((
       value - 25569) * 86400 * 1000);
@@ -163,7 +163,7 @@ function _veParseDate_(value) {
   }
 
   try {
-    if (typeof DateUtils_ !== 'undefined'&& DateUtils_ && typeof DateUtils_.parseUaDate === 'function') {
+    if (typeof DateUtils_ !== 'undefined' && DateUtils_ && typeof DateUtils_.parseUaDate === 'function') {
       const d = DateUtils_.parseUaDate(s);
       if (d instanceof Date
         && !isNaN(d.getTime())) {
@@ -213,7 +213,7 @@ function _veNumberToVacationWord_(num) {
   ];
 
   if (typeof num ===
-    'number'&& num >= 0 && num <= 10)
+    'number' && num >= 0 && num <= 10)
     return words[num];
   return String(num || '');
 }
@@ -294,7 +294,7 @@ function _veRandomTemplateOrFallback_(keys, data, fallbackText) {
 function _veWaLink_(phone, message) {
   const cleanedPhone = String(phone || '').replace(/\D/g, '');
   if (!cleanedPhone) return '';
-  const maxLen = (typeof CONFIG !== 'undefined'&& CONFIG && CONFIG.MAX_WA_TEXT)
+  const maxLen = (typeof CONFIG !== 'undefined' && CONFIG && CONFIG.MAX_WA_TEXT)
     ? CONFIG.MAX_WA_TEXT
     : 3800;
   const safeMessage = (typeof trimToEncoded_ === 'function')
@@ -420,7 +420,7 @@ function runVacationEngine_(targetDate) {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const sh = ss.getSheetByName(VACATION_ENGINE_CONFIG.VACATIONS_SHEET);
     if (!sh) {
-      result.debug.error = `Лист "${VACATION_ENGINE_CONFIG.VACATIONS_SHEET}"не знайдено`;
+      result.debug.error = `Лист "${VACATION_ENGINE_CONFIG.VACATIONS_SHEET}" не знайдено`;
       return result;
     }
     const lastRow = sh.getLastRow();
@@ -451,10 +451,10 @@ function runVacationEngine_(targetDate) {
       const daysUntil = Math.round((startDate.getTime() - today.getTime()) / 86400000);
       if (daysUntil < 0) continue;
       result.debug.futureRows++;
-      const surname = fio.split('')[0] || fio;
+      const surname = fio.split(' ')[0] || fio;
       const callsign =
         (typeof _getCallsignByFio_ ===
-          'function'? _getCallsignByFio_(fio) : '') ||
+          'function' ? _getCallsignByFio_(fio) : '') ||
         surname;
       const name = String(callsign || surname || fio).trim();
       const vacationNum = _veVacationWordToNumber_(vacationWordRaw);
@@ -648,7 +648,7 @@ function checkVacationsAndNotify() {
 function autoVacationReminder() {
   try {
     const result = runVacationEngine_(new Date());
-    console.log(`Автоперевірка відпусток: командиру ${result.commanderMessages.length}, бійцям ${result.soldierMessages.length}`);
+    console.log(`🏖️ Автоперевірка відпусток: командиру ${result.commanderMessages.length}, бійцям ${result.soldierMessages.length}`);
     return result;
   } catch (e) {
     console.error('autoVacationReminder error:', e);
@@ -684,7 +684,7 @@ function _veBuildBirthdayCommanderMessage_(data) {
     return _veRenderTemplateOrFallback_(
       BIRTHDAY_ENGINE_CONFIG.COMMANDER_TEMPLATE_3,
       d,
-      `Нагадування: у ${d.callsign} (${d.fio}) через 3 дні День Народження (${d.birthday}).`
+      `🎂 Нагадування: у ${d.callsign} (${d.fio}) через 3 дні День Народження (${d.birthday}).`
     );
   }
 
@@ -692,14 +692,14 @@ function _veBuildBirthdayCommanderMessage_(data) {
     return _veRenderTemplateOrFallback_(
       BIRTHDAY_ENGINE_CONFIG.COMMANDER_TEMPLATE_2,
       d,
-      `Нагадування: у ${d.callsign} (${d.fio}) через 2 дні День Народження (${d.birthday}).`
+      `🎂 Нагадування: у ${d.callsign} (${d.fio}) через 2 дні День Народження (${d.birthday}).`
     );
   }
 
   return _veRenderTemplateOrFallback_(
     BIRTHDAY_ENGINE_CONFIG.COMMANDER_TEMPLATE_1,
     d,
-    `Нагадування: у ${d.callsign} (${d.fio}) завтра День Народження (${d.birthday}).`
+    `🎂 Нагадування: у ${d.callsign} (${d.fio}) завтра День Народження (${d.birthday}).`
   );
 }
 
@@ -716,9 +716,9 @@ function _veBuildBirthdayGreetingMessage_(data) {
     });
   }
 
-  const ageLine = d.age ? `З ${d.age}-річчям!`: 'З Днем Народження!';
+  const ageLine = d.age ? ` З ${d.age}-річчям!` : ' З Днем Народження!';
   return [
-    `Вітаю, ${d.name}!`,
+    `🎂 Вітаю, ${d.name}!`,
     '',
     `${ageLine}`,
     `Бажаю здоров'я, витримки, сил і мирного неба.`,
@@ -762,7 +762,7 @@ function runBirthdayEngine_(targetDate) {
       const daysUntil = Math.round((nextBirthday.getTime() - today.getTime()) / 86400000);
       if ([3, 2, 1, 0].indexOf(daysUntil) === -1) continue;
 
-      const callsign = String(item.role || '').trim() || String(item.fio).split('')[0];
+      const callsign = String(item.role || '').trim() || String(item.fio).split(' ')[0];
       const name = callsign || item.fio;
       const age = (birth.year && daysUntil === 0) ? (today.getFullYear() - birth.year) : null;
 
@@ -829,7 +829,7 @@ function checkBirthdayReminders() {
 function autoBirthdayReminder() {
   try {
     const result = runBirthdayEngine_(new Date());
-    console.log(`Автоперевірка ДН: командиру ${result.commanderMessages.length}, іменинникам ${result.birthdayMessages.length}`);
+    console.log(`🎂 Автоперевірка ДН: командиру ${result.commanderMessages.length}, іменинникам ${result.birthdayMessages.length}`);
     return result;
   } catch (e) {
     console.error('autoBirthdayReminder error:', e);
@@ -866,7 +866,7 @@ function buildBirthdayLink(phone, name) {
   try {
     const cleanedPhone = String(phone || '').replace(/\D/g, '');
     if (!cleanedPhone) {
-      return { success: false, error: 'Немає телефону'};
+      return { success: false, error: 'Немає телефону' };
     }
 
     const msg = _veBuildBirthdayGreetingMessage_({

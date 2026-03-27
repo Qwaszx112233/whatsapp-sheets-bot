@@ -1,5 +1,5 @@
 <script>
-  var UiState = {
+  const UiState = {
     patch(values = {}) {
       Object.assign(STATE, values || {});
       return STATE;
@@ -14,22 +14,22 @@
   if (!Array.isArray(STATE.lastNonEmptyPanelData)) STATE.lastNonEmptyPanelData = [];
   if (typeof STATE.lastPanelDataUpdatedAt !== 'number') STATE.lastPanelDataUpdatedAt = 0;
 
-  var LoaderService = {
-    show: () =>showLoading(),
-    hide: () =>hideLoading()
+  const LoaderService = {
+    show: () => showLoading(),
+    hide: () => hideLoading()
   };
 
-  var ToastService = {
-    success: (message) =>showToast(message),
-    warning: (message) =>showToast(message),
-    error: (message) =>showToast(message)
+  const ToastService = {
+    success: (message) => showToast(message),
+    warning: (message) => showToast(message),
+    error: (message) => showToast(message)
   };
 
-  var ErrorPresenter = {
-    present: (error) =>handleError(error)
+  const ErrorPresenter = {
+    present: (error) => handleError(error)
   };
 
-  var RenderCoordinator = {
+  const RenderCoordinator = {
     async sync(meta = {}) {
       const syncMeta = meta?.sync || meta || {};
       const refresh = Array.isArray(syncMeta.refresh) ? syncMeta.refresh : [];
@@ -68,7 +68,7 @@
     }
   };
 
-  var ActionDispatcher = {
+  const ActionDispatcher = {
     async run(methodName, handler, options = {}) {
       const opts = options || {};
       if (opts.showLoader !== false) LoaderService.show();
@@ -113,7 +113,7 @@
 
   function clonePanelRows_(rows) {
     return Array.isArray(rows)
-      ? rows.map(item =>(item && typeof item === 'object'? Object.assign({}, item) : item))
+      ? rows.map(item => (item && typeof item === 'object' ? Object.assign({}, item) : item))
       : [];
   }
 
@@ -123,7 +123,7 @@
 
     STATE.currentPanelData = rows;
 
-    if (preserveLastNonEmpty && rows.length >0) {
+    if (preserveLastNonEmpty && rows.length > 0) {
       STATE.lastNonEmptyPanelData = clonePanelRows_(rows);
       STATE.lastPanelDataUpdatedAt = Date.now();
     }
@@ -142,7 +142,7 @@
     }, options || {});
 
     const currentRows = Array.isArray(STATE.currentPanelData) ? STATE.currentPanelData : [];
-    if (currentRows.length >0 && !opts.force) return currentRows;
+    if (currentRows.length > 0 && !opts.force) return currentRows;
 
     const result = await refreshSendPanelDataFromServer(opts);
     if (result?.success) {
@@ -154,12 +154,12 @@
 
   function getReadyPanelItems(panelData = STATE.currentPanelData) {
     const data = Array.isArray(panelData) ? panelData : [];
-    return data.filter(item =>item && item.link && !item.sent && item.status === PANEL_READY_STATUS);
+    return data.filter(item => item && item.link && !item.sent && (item.status === PANEL_READY_STATUS || item.status === PANEL_UNSENT_STATUS));
   }
 
   function getPanelErrorItems(panelData = STATE.currentPanelData) {
     const data = Array.isArray(panelData) ? panelData : [];
-    return data.filter(item =>item && item.status !== PANEL_READY_STATUS);
+    return data.filter(item => String(item?.status || '').startsWith(PANEL_ERROR_PREFIX));
   }
 
   function updateSendUnsentButtonState() {
@@ -175,13 +175,13 @@
 
     const unsentCount = getReadyPanelItems(panelData).length;
     sendBtn.disabled = unsentCount === 0;
-    sendBtn.title = unsentCount >0
+    sendBtn.title = unsentCount > 0
       ? `Відправити ${unsentCount} повідомлень`
       : 'Немає невідправлених';
   }
 
   function waitMs_(ms) {
-    return new Promise(resolve =>setTimeout(resolve, Math.max(0, Number(ms || 0))));
+    return new Promise(resolve => setTimeout(resolve, Math.max(0, Number(ms || 0))));
   }
 
   async function refreshSendPanelDataFromServer(options = {}) {
@@ -208,10 +208,10 @@
         }
 
         const rows = Array.isArray(result.data) ? result.data : [];
-        const hasRows = rows.length >0;
+        const hasRows = rows.length > 0;
 
         const currentRows = Array.isArray(STATE.currentPanelData) ? STATE.currentPanelData : [];
-        const currentHasRows = currentRows.length >0;
+        const currentHasRows = currentRows.length > 0;
 
         if (refreshToken !== STATE.panelRefreshSeq) {
           return result;
@@ -221,7 +221,7 @@
           setCurrentPanelData(rows);
 
           if (!silent) {
-            logToConsole(`SEND_PANEL синхронізовано (${reason})`, 'info');
+            logToConsole(`🔄 SEND_PANEL синхронізовано (${reason})`, 'info');
           }
 
           return result;
@@ -230,7 +230,7 @@
         if (attempt < retries) {
           if (!silent) {
             logToConsole(
-              `⚠︎ SEND_PANEL ще перебудовується, повторна спроба ${attempt + 2}/${retries + 1}`,
+              `⏳ SEND_PANEL ще перебудовується, повторна спроба ${attempt + 2}/${retries + 1}`,
               'warning'
             );
           }
@@ -248,7 +248,7 @@
 
         if (!silent) {
           logToConsole(
-            '⚠︎ Сервер тимчасово повернув порожній SEND_PANEL — залишаю останні непорожні дані',
+            '⁈ Сервер тимчасово повернув порожній SEND_PANEL — залишаю останні непорожні дані',
             'warning'
           );
         }
@@ -318,8 +318,8 @@
 
     let cleaned = String(phone).replace(/[^\d+]/g, '');
 
-    if (cleaned.startsWith('380') && !cleaned.startsWith('+')) cleaned = '+'+ cleaned;
-    if (cleaned.startsWith('0') && cleaned.length === 10) cleaned = '+38'+ cleaned;
+    if (cleaned.startsWith('380') && !cleaned.startsWith('+')) cleaned = '+' + cleaned;
+    if (cleaned.startsWith('0') && cleaned.length === 10) cleaned = '+38' + cleaned;
 
     if (cleaned.startsWith('+380') && cleaned.length === 13) {
       const operator = cleaned.slice(4, 6);
@@ -335,7 +335,7 @@
   function formatDateForDisplay(dateStr) {
     if (!dateStr) return '';
     const parts = String(dateStr).split('.');
-    return parts.length === 3 ? `${parts[0]}.${parts[1]}.${parts[2]}`: String(dateStr);
+    return parts.length === 3 ? `${parts[0]}.${parts[1]}.${parts[2]}` : String(dateStr);
   }
 
   function hidePersonCard() {
@@ -380,7 +380,7 @@
     toast.style.transform = 'translateX(-50%) translateY(0)';
 
     clearTimeout(window.__toastTimer__);
-    window.__toastTimer__ = setTimeout(() =>{
+    window.__toastTimer__ = setTimeout(() => {
       toast.style.opacity = '0';
       toast.style.transform = 'translateX(-50%) translateY(6px)';
     }, 1800);

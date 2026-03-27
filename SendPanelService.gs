@@ -25,10 +25,10 @@ const SendPanelService_ = (function() {
       return shouldTreatRowAsReadyToOpen_(item);
     }).length;
     const sent = items.filter(function(item) {
-      return item.sent === true;
+      return item.sent === true || item.status === getSendPanelSentStatus_();
     }).length;
     const errors = items.filter(function(item) {
-      return normalizeSendPanelStatus_(item.status) !== getSendPanelReadyStatus_();
+      return String(item.status || '').indexOf(getSendPanelErrorPrefix_()) === 0;
     }).length;
 
     return {
@@ -71,19 +71,19 @@ const SendPanelService_ = (function() {
     const item = Object.assign({}, row || {});
     const normalizedAction = String(action || '').trim();
 
-    if (normalizedAction === 'markPending'|| normalizedAction === 'openChat'|| normalizedAction === 'sendPending') {
+    if (normalizedAction === 'markPending' || normalizedAction === 'openChat' || normalizedAction === 'sendPending') {
       item.sent = false;
-      item.status = getSendPanelReadyStatus_();
+      item.status = SendPanelConstants_.STATUS_PENDING;
       return item;
     }
-    if (normalizedAction === 'markSent'|| normalizedAction === 'confirmSent') {
+    if (normalizedAction === 'markSent' || normalizedAction === 'confirmSent') {
       item.sent = true;
-      item.status = getSendPanelReadyStatus_();
+      item.status = getSendPanelSentStatus_();
       return item;
     }
     if (normalizedAction === 'markUnsent') {
       item.sent = false;
-      item.status = getSendPanelReadyStatus_();
+      item.status = SendPanelConstants_.STATUS_UNSENT;
       return item;
     }
     return item;

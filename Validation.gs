@@ -77,7 +77,7 @@ function validateDateRangePayload_(payload) {
       dateFrom: start.dateStr,
       dateTo: end.dateStr
     }),
-    warnings: diffDays >14 ? [`Великий діапазон: ${diffDays} дн.`] : []
+    warnings: diffDays > 14 ? [`Великий діапазон: ${diffDays} дн.`] : []
   };
 }
 
@@ -88,7 +88,7 @@ function validatePanelRowSelection_(rowNumbers, options) {
     .filter(function(v) { return Number.isFinite(v); });
 
   const uniqueRows = [...new Set(rows)].sort(function(a, b) { return a - b; });
-  _stage4Assert_(uniqueRows.length >0, 'validatePanelRowSelection_', {}, 'Не передано жодного рядка SEND_PANEL');
+  _stage4Assert_(uniqueRows.length > 0, 'validatePanelRowSelection_', {}, 'Не передано жодного рядка SEND_PANEL');
   _stage4Assert_(uniqueRows.length <= (Number(opts.maxRows) || STAGE4_CONFIG.MAX_BATCH_ROWS), 'validatePanelRowSelection_', { count: uniqueRows.length }, `Забагато рядків для batch-операції: ${uniqueRows.length}`);
 
   const panel = DataAccess_.getSheet('SEND_PANEL', null, false);
@@ -97,7 +97,7 @@ function validatePanelRowSelection_(rowNumbers, options) {
     const minRow = Number(schema.dataStartRow) || 3;
     const maxRow = Math.max(panel.getLastRow(), minRow - 1);
     const validRows = uniqueRows.filter(function(row) { return row >= minRow && row <= maxRow; });
-    _stage4Assert_(validRows.length >0, 'validatePanelRowSelection_', { count: uniqueRows.length }, 'Усі рядки поза межами SEND_PANEL');
+    _stage4Assert_(validRows.length > 0, 'validatePanelRowSelection_', { count: uniqueRows.length }, 'Усі рядки поза межами SEND_PANEL');
     return {
       rows: validRows,
       warnings: validRows.length !== uniqueRows.length ? ['Частина рядків була відкинута як некоректна'] : []
@@ -124,7 +124,7 @@ function validateSendOperation_(payload) {
   const source = payload || {};
   const dryRun = !!source.dryRun;
   const limit = Number(source.limit) || STAGE4_CONFIG.MAX_BATCH_ROWS;
-  _stage4Assert_(limit >0 && limit <= STAGE4_CONFIG.MAX_BATCH_ROWS, 'validateSendOperation_', source, `Некоректний limit: ${limit}`);
+  _stage4Assert_(limit > 0 && limit <= STAGE4_CONFIG.MAX_BATCH_ROWS, 'validateSendOperation_', source, `Некоректний limit: ${limit}`);
   return {
     dryRun: dryRun,
     limit: limit,
@@ -138,7 +138,7 @@ function validateMonthSwitch_(monthSheetName) {
   const month = String(monthSheetName || '').trim();
   _stage4Assert_(/^\d{2}$/.test(month), 'validateMonthSwitch_', { month: month }, `Некоректна назва місяця "${month}"`);
   const sh = SpreadsheetApp.getActive().getSheetByName(month);
-  _stage4Assert_(!!sh, 'validateMonthSwitch_', { month: month }, `Аркуш "${month}"не знайдено`);
+  _stage4Assert_(!!sh, 'validateMonthSwitch_', { month: month }, `Аркуш "${month}" не знайдено`);
   return {
     month: month,
     sheet: sh,
@@ -158,7 +158,7 @@ function validateRepairOperation_(payload) {
     : !!source.dryRun;
 
   const limit = Number(source.limit) || STAGE4_CONFIG.MAX_REPAIR_ITEMS;
-  _stage4Assert_(limit >0 && limit <= STAGE4_CONFIG.MAX_REPAIR_ITEMS, 'validateRepairOperation_', source, `Некоректний repair limit: ${limit}`);
+  _stage4Assert_(limit > 0 && limit <= STAGE4_CONFIG.MAX_REPAIR_ITEMS, 'validateRepairOperation_', source, `Некоректний repair limit: ${limit}`);
 
   return {
     mode: mode,

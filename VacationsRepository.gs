@@ -41,7 +41,7 @@ const VacationsRepository_ = (function() {
     });
 
     return {
-      inVacation: matches.length >0,
+      inVacation: matches.length > 0,
       matches: matches.map(function(item) {
         return {
           no: item.vacationNo || '—',

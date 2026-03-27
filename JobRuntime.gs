@@ -13,7 +13,7 @@ const JobRuntime_ = (function() {
 
     const active = JobRuntimeRepository_.getActive(jobName);
     if (active && Number(active.ts || 0) && (Date.now() - Number(active.ts || 0)) < 60 * 60 * 1000) {
-      throw new Error(`Job "${jobName}"уже виконується або був запущений надто недавно`);
+      throw new Error(`Job "${jobName}" уже виконується або був запущений надто недавно`);
     }
 
     JobRuntimeRepository_.setActive(jobName, {
@@ -77,7 +77,7 @@ const JobRuntime_ = (function() {
 
     const jobs = items.map(function(item) {
       const ageMs = item && item.tsEnd ? (now - new Date(item.tsEnd).getTime()) : null;
-      const stale = ageMs != null && ageMs >36 * 60 * 60 * 1000;
+      const stale = ageMs != null && ageMs > 36 * 60 * 60 * 1000;
       const history = getHistory(item.jobName);
       const consecutiveFailures = history
         .slice(0, 5)

@@ -1,7 +1,7 @@
 /************ СТАНДАРТИ ДЛЯ ЛИСТІВ ************/
 function applyGlobalSheetStandards_() {
   const ss = SpreadsheetApp.getActive();
-  ss.getSheets().forEach(sh =>{
+  ss.getSheets().forEach(sh => {
     const name = sh.getName();
     if (/^\d{2}$/.test(name) || name === CONFIG.SEND_PANEL_SHEET) {
       applyFontStandardsToSheet_(sh);
@@ -34,8 +34,8 @@ function applyColumnWidthsStandardsToSheet_(sheet) {
     ? [320, 110, 90, 150, 95, 125, 95].slice(0, maxCols)
     : [110, 110, 110, 110, 150, 40, 315].slice(0, maxCols);
 
-  widths.forEach((w, i) =>{
-    if (Number(w) >0) {
+  widths.forEach((w, i) => {
+    if (Number(w) > 0) {
       try { sheet.setColumnWidth(i + 1, w); } catch (e) { }
     }
   });

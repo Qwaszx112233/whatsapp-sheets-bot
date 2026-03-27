@@ -50,9 +50,9 @@ function errorResponse_(error, arg2, arg3, arg4, arg5) {
 }
 
 function normalizeServerResponse_(value, functionName, context) {
-  const baseContext = Object.assign({ function: functionName || ''}, context || {});
+  const baseContext = Object.assign({ function: functionName || '' }, context || {});
 
-  if (value && typeof value === 'object'&& 'success'in value && 'data'in value && 'context'in value) {
+  if (value && typeof value === 'object' && 'success' in value && 'data' in value && 'context' in value) {
     return {
       success: !!value.success,
       message: String(value.message || ''),
@@ -63,7 +63,7 @@ function normalizeServerResponse_(value, functionName, context) {
     };
   }
 
-  if (value && typeof value === 'object'&& 'ok'in value && !('success'in value)) {
+  if (value && typeof value === 'object' && 'ok' in value && !('success' in value)) {
     const data = Object.assign({}, value);
     const success = !!data.ok;
     delete data.ok;
@@ -77,7 +77,7 @@ function normalizeServerResponse_(value, functionName, context) {
     return buildServerResponse_(value, { value: value }, '', value ? null : 'Операція повернула false', baseContext, []);
   }
 
-  if (typeof value === 'string'|| typeof value === 'number') {
+  if (typeof value === 'string' || typeof value === 'number') {
     return okResponse_({ value: value }, '', baseContext);
   }
 
@@ -146,9 +146,9 @@ function buildContextError_(functionName, context, errorOrMessage) {
   const ctx = context || {};
   Object.keys(ctx).forEach(function(key) {
     const value = ctx[key];
-    if (value === ''|| value === null || value === undefined) return;
+    if (value === '' || value === null || value === undefined) return;
     parts.push(`${key}=${value}`);
   });
   parts.push(base);
-  return new Error(parts.join(''));
+  return new Error(parts.join(' '));
 }

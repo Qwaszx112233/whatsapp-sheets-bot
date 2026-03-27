@@ -1,15 +1,15 @@
 # whatsapp-sheets-bot — Stage 7.1.1 Final Stabilized Repair Baseline
 
->This repack is prepared for **Google Apps Script Web Editor use without VS Code**.
->Local PowerShell / Node helper scripts are **not included** in this archive.
->See `GAS_WEB_EDITOR_IMPORT_GUIDE.md`for the import flow.
+> This repack is prepared for **Google Apps Script Web Editor use without VS Code**.
+> Local PowerShell / Node helper scripts are **not included** in this archive.
+> See `GAS_WEB_EDITOR_IMPORT_GUIDE.md` for the import flow.
 
 This archive is the **Stage 7.1.1 Final Stabilized Repair Baseline** with preserved SEND_PANEL stabilization and lifecycle hardening.
 
 ## What is included
 
-- All active `.gs`source files
-- All active `.html`source files
+- All active `.gs` source files
+- All active `.html` source files
 - `appsscript.json`
 - Active root documentation:
   - `README.md`
@@ -19,12 +19,13 @@ This archive is the **Stage 7.1.1 Final Stabilized Repair Baseline** with preser
 
 ## What was fixed in this build
 
-- SEND_PANEL treats sidebar opening of the stored Action link as the sending fixation point.
+- SEND_PANEL no longer treats opening WhatsApp as automatic sending.
 - Canonical status model is preserved:
-  - `Status`: `✔`або `✘`
-  - `Sent`: `✔`або `✘`
-  - `Action`: готове посилання з листа
-  - `✘ ...`
+  - `✓ Готово`
+  - `🟡 Очікує підтвердження`
+  - `↩️ Не відправлено`
+  - `📤 Відправлено`
+  - `✕ ...`
 - SEND_PANEL rebuild preserves state from the sheet for the same panel date.
 - Panel date is read from explicit SEND_PANEL metadata instead of silently falling back to "today".
 - WhatsApp links use one named sender tab instead of `_blank`.

@@ -3,19 +3,13 @@
  */
 
 const SendPanelConstants_ = Object.freeze({
-  STATUS_READY: '✔',
-  STATUS_BLOCKED: '✘',
-  SENT_MARK: '✔',
-  UNSENT_MARK: '✘',
-  STATUS_ERROR_PREFIX: '✘',
-  LEGACY_STATUS_READY: '✔',
-  LEGACY_STATUS_OPENED: '⚠︎ Відкрито',
-  LEGACY_STATUS_PENDING: '⚠︎ Очікує підтвердження',
-  LEGACY_STATUS_UNSENT: '✘ Не відправлено',
-  LEGACY_STATUS_SENT: '✔ Відправлено',
-  ACTION_READY_LABEL: 'НАДІСЛАТИ',
-  ACTION_SENT_LABEL: '✔ ВІДПРАВЛЕНО',
-  ACTION_BLOCKED_LABEL: '',
+  STATUS_READY: '✓ Готово',
+  STATUS_PENDING: '🟡 Очікує підтвердження',
+  STATUS_UNSENT: '↩️ Не відправлено',
+  STATUS_SENT: '📤 Відправлено',
+  STATUS_ERROR_PREFIX: '✕',
+  LEGACY_STATUS_READY: '✓',
+  LEGACY_STATUS_OPENED: '🟦 Відкрито',
   WA_SENDER_TARGET: 'WAPB_WHATSAPP_SENDER_TAB',
   METADATA_MONTH_CELL: 'H1',
   METADATA_DATE_CELL: 'H2'
@@ -24,83 +18,43 @@ const SendPanelConstants_ = Object.freeze({
 function getSendPanelAllAllowedStatuses_() {
   return [
     SendPanelConstants_.STATUS_READY,
-    SendPanelConstants_.STATUS_BLOCKED
+    SendPanelConstants_.STATUS_PENDING,
+    SendPanelConstants_.STATUS_UNSENT,
+    SendPanelConstants_.STATUS_SENT
   ];
 }
 
 function normalizeSendPanelStatus_(status) {
   const value = String(status || '').trim();
-  if (!value) return SendPanelConstants_.STATUS_BLOCKED;
-  if (value === SendPanelConstants_.STATUS_READY || value === SendPanelConstants_.LEGACY_STATUS_READY) return SendPanelConstants_.STATUS_READY;
-  if (value === SendPanelConstants_.STATUS_BLOCKED) return SendPanelConstants_.STATUS_BLOCKED;
-  if (value === SendPanelConstants_.LEGACY_STATUS_OPENED) return SendPanelConstants_.STATUS_READY;
-  if (value === SendPanelConstants_.LEGACY_STATUS_PENDING) return SendPanelConstants_.STATUS_READY;
-  if (value === SendPanelConstants_.LEGACY_STATUS_UNSENT) return SendPanelConstants_.STATUS_READY;
-  if (value === SendPanelConstants_.LEGACY_STATUS_SENT) return SendPanelConstants_.STATUS_READY;
-  if (value.indexOf(SendPanelConstants_.STATUS_ERROR_PREFIX) === 0) return SendPanelConstants_.STATUS_BLOCKED;
-  return value === 'TRUE'? SendPanelConstants_.STATUS_READY : SendPanelConstants_.STATUS_BLOCKED;
-}
-
-function normalizeSendPanelSentMark_(mark) {
-  const value = String(mark == null ? '': mark).trim().toUpperCase();
-  if (mark === true || value === 'TRUE'|| value === SendPanelConstants_.SENT_MARK) return SendPanelConstants_.SENT_MARK;
-  if (value === SendPanelConstants_.LEGACY_STATUS_SENT.toUpperCase()) return SendPanelConstants_.SENT_MARK;
-  return SendPanelConstants_.UNSENT_MARK;
+  if (!value) return SendPanelConstants_.STATUS_READY;
+  if (value === SendPanelConstants_.LEGACY_STATUS_READY) return SendPanelConstants_.STATUS_READY;
+  if (value === SendPanelConstants_.LEGACY_STATUS_OPENED) return SendPanelConstants_.STATUS_PENDING;
+  if (value === SendPanelConstants_.STATUS_READY) return SendPanelConstants_.STATUS_READY;
+  if (value === SendPanelConstants_.STATUS_PENDING) return SendPanelConstants_.STATUS_PENDING;
+  if (value === SendPanelConstants_.STATUS_UNSENT) return SendPanelConstants_.STATUS_UNSENT;
+  if (value === SendPanelConstants_.STATUS_SENT) return SendPanelConstants_.STATUS_SENT;
+  if (value.indexOf(SendPanelConstants_.STATUS_ERROR_PREFIX) === 0) return value;
+  return value;
 }
 
 function isSendPanelReadyLikeStatus_(status) {
-  return normalizeSendPanelStatus_(status) === SendPanelConstants_.STATUS_READY;
+  const value = normalizeSendPanelStatus_(status);
+  return value === SendPanelConstants_.STATUS_READY || value === SendPanelConstants_.STATUS_UNSENT;
 }
 
 function isSendPanelPendingStatus_(status) {
-  return false;
+  return normalizeSendPanelStatus_(status) === SendPanelConstants_.STATUS_PENDING;
 }
 
 function isSendPanelSentStatusValue_(status) {
-  return false;
-}
-
-function isSendPanelSentMark_(mark) {
-  return normalizeSendPanelSentMark_(mark) === SendPanelConstants_.SENT_MARK;
+  return normalizeSendPanelStatus_(status) === SendPanelConstants_.STATUS_SENT;
 }
 
 function isSendPanelErrorStatus_(status) {
-  return normalizeSendPanelStatus_(status) === SendPanelConstants_.STATUS_BLOCKED;
-}
-
-function getSendPanelSentMark_() {
-  return SendPanelConstants_.SENT_MARK;
-}
-
-function getSendPanelUnsentMark_() {
-  return SendPanelConstants_.UNSENT_MARK;
-}
-
-function getSendPanelActionReadyLabel_() {
-  return SendPanelConstants_.ACTION_READY_LABEL;
-}
-
-function getSendPanelActionSentLabel_() {
-  return SendPanelConstants_.ACTION_SENT_LABEL;
-}
-
-function buildSendPanelActionFormula_(url, label) {
-  const safeUrl = String(url || '').trim();
-  if (!safeUrl) return '';
-  const safeLabel = String(label || getSendPanelActionReadyLabel_()).replace(/"/g, '""');
-  return `=HYPERLINK("${safeUrl.replace(/"/g, '""')}"; "${safeLabel}")`;
-}
-
-function resolveSendPanelActionCellValue_(url, status, sent) {
-  const normalizedStatus = normalizeSendPanelStatus_(status);
-  const safeUrl = String(url || '').trim();
-  if (!safeUrl || normalizedStatus !== SendPanelConstants_.STATUS_READY) {
-    return SendPanelConstants_.ACTION_BLOCKED_LABEL;
-  }
-  return buildSendPanelActionFormula_(safeUrl, sent ? getSendPanelActionSentLabel_() : getSendPanelActionReadyLabel_());
+  return String(normalizeSendPanelStatus_(status) || '').indexOf(SendPanelConstants_.STATUS_ERROR_PREFIX) === 0;
 }
 
 function shouldTreatRowAsReadyToOpen_(row) {
   const item = row || {};
-  return !!item.link && !item.sent && normalizeSendPanelStatus_(item.status) === SendPanelConstants_.STATUS_READY;
+  return !!item.link && !item.sent && isSendPanelReadyLikeStatus_(item.status);
 }

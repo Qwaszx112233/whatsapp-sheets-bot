@@ -42,7 +42,7 @@ function _safeErr_(e) {
 
 /**
  * healthCheck() — перевірка стану системи
- * Викликається кнопкою "⚠︎ Перевірити"з сайдбару
+ * Викликається кнопкою "🩺 Перевірити" з сайдбару
  */
 /************ HEALTH CHECK ************/
 function _ensureSendPanelTechnicalSheet_() {
@@ -58,7 +58,7 @@ function _ensureSendPanelTechnicalSheet_() {
   if (sh.getLastRow() < 1) {
     sh.getRange(1, 1, 1, 7)
       .merge()
-      .setValue(`Активний місяць: ${getBotMonthSheetName_()}`)
+      .setValue(`🤖 Активний місяць: ${getBotMonthSheetName_()}`)
       .setFontWeight('bold')
       .setHorizontalAlignment('center')
       .setBackground('#fff3cd');
@@ -66,7 +66,7 @@ function _ensureSendPanelTechnicalSheet_() {
 
   if (sh.getLastRow() < 2) {
     sh.getRange(2, 1, 1, 7)
-      .setValues([['FIO', 'Phone', 'Code', 'Tasks', 'Status', 'Sent', 'Action']])
+      .setValues([['ПІБ', 'Телефон', 'Код', 'Завдання', 'Статус', 'Дія', 'Відправлено']])
       .setFontWeight('bold')
       .setHorizontalAlignment('center')
       .setBackground('#f0f0f0');
@@ -77,7 +77,7 @@ function _ensureSendPanelTechnicalSheet_() {
 }
 function _addHealthCheck_(report, item) {
   const status = String(item.status || 'OK').toUpperCase();
-  const severity = String(item.severity || (status === 'FAIL'? 'CRITICAL': (status === 'WARN'? 'WARN': 'INFO'))).toUpperCase();
+  const severity = String(item.severity || (status === 'FAIL' ? 'CRITICAL' : (status === 'WARN' ? 'WARN' : 'INFO'))).toUpperCase();
   const ok = status === 'OK';
   const pseudo = status === 'PSEUDO';
 
@@ -126,28 +126,28 @@ function healthCheck() {
   };
 
   _runHealthCheckItem_(report, 'CONFIG об\'єкт', 'CRITICAL', function () {
-    const hasConfig = typeof CONFIG === 'object'&& CONFIG !== null;
+    const hasConfig = typeof CONFIG === 'object' && CONFIG !== null;
     return {
-      status: hasConfig ? 'OK': 'FAIL',
+      status: hasConfig ? 'OK' : 'FAIL',
       details: hasConfig
         ? `TARGET_SHEET=${CONFIG.TARGET_SHEET}, PHONES=${CONFIG.PHONES_SHEET}, LOG=${CONFIG.LOG_SHEET}`
         : 'CONFIG не визначено',
-      howTo: hasConfig ? '': 'Перевірте, чи CONFIG оголошений до запуску healthCheck()'
+      howTo: hasConfig ? '' : 'Перевірте, чи CONFIG оголошений до запуску healthCheck()'
     };
   });
 
   _runHealthCheckItem_(report, 'CONFIG.OS_FIO_RANGE_A1', 'CRITICAL', function () {
     const a1 = CONFIG.OS_FIO_RANGE_A1 || CONFIG.OS_FIO_RANGE;
     return {
-      status: a1 ? 'OK': 'FAIL',
-      details: a1 ? `Використовується діапазон: ${a1}`: 'OS_FIO_RANGE_A1 / OS_FIO_RANGE не задано',
-      howTo: a1 ? '': 'Додайте в CONFIG поле OS_FIO_RANGE_A1, наприклад "G2:G40"'
+      status: a1 ? 'OK' : 'FAIL',
+      details: a1 ? `Використовується діапазон: ${a1}` : 'OS_FIO_RANGE_A1 / OS_FIO_RANGE не задано',
+      howTo: a1 ? '' : 'Додайте в CONFIG поле OS_FIO_RANGE_A1, наприклад "G2:G40"'
     };
   });
 
   _runHealthCheckItem_(report, 'Обов\'язкові аркуші', 'CRITICAL', function () {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const sheets = ss.getSheets().map(s =>s.getName());
+    const sheets = ss.getSheets().map(s => s.getName());
 
     const required = [
       CONFIG.PHONES_SHEET,
@@ -158,14 +158,14 @@ function healthCheck() {
       'TEMPLATES'
     ].filter(Boolean);
 
-    const missing = required.filter(name =>!sheets.includes(name));
+    const missing = required.filter(name => !sheets.includes(name));
 
     return {
-      status: missing.length === 0 ? 'OK': 'FAIL',
+      status: missing.length === 0 ? 'OK' : 'FAIL',
       details: missing.length === 0
         ? `Усі обов'язкові аркуші знайдено (${required.length})`
         : `Відсутні: ${missing.join(', ')}`,
-      howTo: missing.length ? `Створіть аркуші: ${missing.join(', ')}`: ''
+      howTo: missing.length ? `Створіть аркуші: ${missing.join(', ')}` : ''
     };
   });
 
@@ -174,7 +174,7 @@ function healthCheck() {
     const sh = ensured.sheet;
 
     return {
-      status: sh ? 'OK': 'WARN',
+      status: sh ? 'OK' : 'WARN',
       severity: 'WARN',
       details: ensured.created
         ? `Аркуш ${CONFIG.SEND_PANEL_SHEET} був відсутній і створений автоматично`
@@ -194,16 +194,16 @@ function healthCheck() {
       };
     }
 
-    const statuses = sh.getRange(3, 5, sh.getLastRow() - 2, 1).getDisplayValues().flat().map(v =>String(v || '').trim()).filter(Boolean);
-    const invalid = statuses.filter(status =>getSendPanelAllAllowedStatuses_().indexOf(normalizeSendPanelStatus_(status)) === -1 && !String(status || '').startsWith(getSendPanelErrorPrefix_()));
+    const statuses = sh.getRange(3, 5, sh.getLastRow() - 2, 1).getDisplayValues().flat().map(v => String(v || '').trim()).filter(Boolean);
+    const invalid = statuses.filter(status => getSendPanelAllAllowedStatuses_().indexOf(normalizeSendPanelStatus_(status)) === -1 && !String(status || '').startsWith(getSendPanelErrorPrefix_()));
 
     return {
-      status: invalid.length === 0 ? 'OK': 'WARN',
+      status: invalid.length === 0 ? 'OK' : 'WARN',
       severity: 'WARN',
       details: invalid.length === 0
         ? `Усі ${statuses.length} статусів валідні`
         : `Некоректні статуси: ${[...new Set(invalid)].join(', ')}`,
-      howTo: invalid.length === 0 ? '': 'Використовуйте тільки ✔ або ✘ у колонці Status'
+      howTo: invalid.length === 0 ? '' : 'Використовуйте тільки ✓ Готово, 🟡 Очікує підтвердження, ↩️ Не відправлено, 📤 Відправлено або ✕ ...'
     };
   });
 
@@ -213,11 +213,11 @@ function healthCheck() {
     const sh = ss.getSheetByName(activeMonth);
 
     return {
-      status: sh ? 'OK': 'FAIL',
+      status: sh ? 'OK' : 'FAIL',
       details: sh
         ? `Активний місяць: ${activeMonth}`
-        : `Аркуш "${activeMonth}"не знайдено`,
-      howTo: sh ? '': 'Перевірте BOT_MONTH_PROP_KEY або перемкніть місяць у панелі'
+        : `Аркуш "${activeMonth}" не знайдено`,
+      howTo: sh ? '' : 'Перевірте BOT_MONTH_PROP_KEY або перемкніть місяць у панелі'
     };
   });
 
@@ -225,12 +225,12 @@ function healthCheck() {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const activeMonth = getBotMonthSheetName_();
     const sh = ss.getSheetByName(activeMonth);
-    if (!sh) throw new Error(`Аркуш "${activeMonth}"не знайдено`);
+    if (!sh) throw new Error(`Аркуш "${activeMonth}" не знайдено`);
 
     const lastCol = sh.getLastColumn();
     const dateRow = Number(CONFIG.DATE_ROW) || 1;
 
-    const values = lastCol >0
+    const values = lastCol > 0
       ? sh.getRange(dateRow, 1, 1, lastCol).getValues()[0]
       : [];
 
@@ -240,11 +240,11 @@ function healthCheck() {
     );
 
     return {
-      status: hasDates ? 'OK': 'FAIL',
+      status: hasDates ? 'OK' : 'FAIL',
       details: hasDates
         ? `У рядку ${dateRow} дати знайдено`
         : `У рядку ${dateRow} дати не знайдено`,
-      howTo: hasDates ? '': `Заповніть рядок ${dateRow} датами формату dd.MM.yyyy`
+      howTo: hasDates ? '' : `Заповніть рядок ${dateRow} датами формату dd.MM.yyyy`
     };
   });
 
@@ -254,12 +254,12 @@ function healthCheck() {
     const col = findTodayColumn_(sh, today);
 
     return {
-      status: col !== -1 ? 'OK': 'WARN',
+      status: col !== -1 ? 'OK' : 'WARN',
       severity: 'WARN',
       details: col !== -1
         ? `Сьогоднішня дата ${today} знайдена в колонці ${col}`
         : `Сьогоднішня дата ${today} не знайдена`,
-      howTo: col !== -1 ? '': 'Перевірте, чи у шапці місячного аркуша є сьогоднішня дата'
+      howTo: col !== -1 ? '' : 'Перевірте, чи у шапці місячного аркуша є сьогоднішня дата'
     };
   });
 
@@ -277,9 +277,9 @@ function healthCheck() {
     const rows = Math.max(0, sh.getLastRow() - 1);
 
     return {
-      status: rows >0 ? 'OK': 'FAIL',
+      status: rows > 0 ? 'OK' : 'FAIL',
       details: `Рядків з даними: ${rows}`,
-      howTo: rows >0 ? '': 'Заповніть PHONES: A=ПІБ, B=Телефон, C=Роль'
+      howTo: rows > 0 ? '' : 'Заповніть PHONES: A=ПІБ, B=Телефон, C=Роль'
     };
   });
 
@@ -288,23 +288,23 @@ function healthCheck() {
     const count = Object.keys(map || {}).length;
 
     return {
-      status: count >0 ? 'OK': 'FAIL',
+      status: count > 0 ? 'OK' : 'FAIL',
       details: `Ключів у phonesMap: ${count}`,
-      howTo: count >0 ? '': 'Перевірте PHONES та очистіть кеш телефонів'
+      howTo: count > 0 ? '' : 'Перевірте PHONES та очистіть кеш телефонів'
     };
   });
 
   _runHealthCheckItem_(report, 'Телефонний index', 'CRITICAL', function () {
-    const index = typeof loadPhonesIndex_ === 'function'? loadPhonesIndex_() : null;
+    const index = typeof loadPhonesIndex_ === 'function' ? loadPhonesIndex_() : null;
     const ok = !!(index && index.byFio && index.byNorm && index.byRole && index.byCallsign);
     const items = ok && Array.isArray(index.items) ? index.items.length : 0;
 
     return {
-      status: ok && items >0 ? 'OK': 'FAIL',
+      status: ok && items > 0 ? 'OK' : 'FAIL',
       details: ok
         ? `items=${items}; byFio=${Object.keys(index.byFio || {}).length}; byRole=${Object.keys(index.byRole || {}).length}; byCallsign=${Object.keys(index.byCallsign || {}).length}`
         : 'loadPhonesIndex_() не повернув канонічну структуру',
-      howTo: ok && items >0 ? '': 'Перевірте Stage 7 phone-layer і очистіть кеш телефонів'
+      howTo: ok && items > 0 ? '' : 'Перевірте Stage 7 phone-layer і очистіть кеш телефонів'
     };
   });
 
@@ -312,11 +312,11 @@ function healthCheck() {
     const phone = findPhone_({ role: CONFIG.COMMANDER_ROLE });
 
     return {
-      status: phone ? 'OK': 'FAIL',
+      status: phone ? 'OK' : 'FAIL',
       details: phone
         ? `${CONFIG.COMMANDER_ROLE}: ${phone}`
-        : `Роль "${CONFIG.COMMANDER_ROLE}"не знайдена в PHONES`,
-      howTo: phone ? '': `У PHONES в колонці C має бути роль "${CONFIG.COMMANDER_ROLE}"`
+        : `Роль "${CONFIG.COMMANDER_ROLE}" не знайдена в PHONES`,
+      howTo: phone ? '' : `У PHONES в колонці C має бути роль "${CONFIG.COMMANDER_ROLE}"`
     };
   });
 
@@ -324,11 +324,11 @@ function healthCheck() {
     const exists = _fnExists_('writeLogsBatch_');
 
     return {
-      status: exists ? 'OK': 'FAIL',
+      status: exists ? 'OK' : 'FAIL',
       details: exists
         ? 'Функція writeLogsBatch_ знайдена'
         : 'Функція writeLogsBatch_ відсутня',
-      howTo: exists ? '': 'Додайте функцію writeLogsBatch_ у проєкт'
+      howTo: exists ? '' : 'Додайте функцію writeLogsBatch_ у проєкт'
     };
   });
 
@@ -355,27 +355,27 @@ function healthCheck() {
       'healthCheck'
     ];
 
-    const missing = fns.filter(name =>!_fnExists_(name));
+    const missing = fns.filter(name => !_fnExists_(name));
 
     return {
-      status: missing.length === 0 ? 'OK': 'FAIL',
+      status: missing.length === 0 ? 'OK' : 'FAIL',
       details: missing.length === 0
         ? `Усі ключові функції знайдено (${fns.length})`
         : `Відсутні: ${missing.join(', ')}`,
-      howTo: missing.length ? 'Перевірте, чи всі .gs файли додані в проєкт': ''
+      howTo: missing.length ? 'Перевірте, чи всі .gs файли додані в проєкт' : ''
     };
   });
 
   _runHealthCheckItem_(report, 'Картка бійця і календар', 'CRITICAL', function () {
     const functionsOk = ['getPersonCardData', 'openPersonCalendar', 'openPersonCardByCallsignAndDate']
-      .every(name =>_fnExists_(name));
+      .every(name => _fnExists_(name));
 
     return {
-      status: functionsOk ? 'OK': 'FAIL',
+      status: functionsOk ? 'OK' : 'FAIL',
       details: functionsOk
         ? 'Функції картки бійця і календаря знайдено'
         : 'Відсутні одна або кілька функцій картки бійця / календаря',
-      howTo: functionsOk ? '': 'Перевірте PersonCards.gs і PersonCalendar.html'
+      howTo: functionsOk ? '' : 'Перевірте PersonCards.gs і PersonCalendar.html'
     };
   });
 
@@ -384,25 +384,25 @@ function healthCheck() {
     const hasVacMap = _fnExists_('_vacationWordToNumber_');
 
     return {
-      status: hasParse && hasVacMap ? 'OK': 'FAIL',
-      details: `parse=${hasParse ? '✔': '✘'}, vacationWord=${hasVacMap ? '✔': '✘'}`,
-      howTo: hasParse && hasVacMap ? '': 'Додайте thin-wrapper helper-и в Utils.gs'
+      status: hasParse && hasVacMap ? 'OK' : 'FAIL',
+      details: `parse=${hasParse ? '✓' : '✕'}, vacationWord=${hasVacMap ? '✓' : '✕'}`,
+      howTo: hasParse && hasVacMap ? '' : 'Додайте thin-wrapper helper-и в Utils.gs'
     };
   });
 
 
   _runHealthCheckItem_(report, 'Canonical date/html layer', 'CRITICAL', function () {
-    const hasDateUtils = typeof DateUtils_ === 'object'&& DateUtils_ !== null;
-    const hasHtmlUtils = typeof HtmlUtils_ === 'object'&& HtmlUtils_ !== null;
+    const hasDateUtils = typeof DateUtils_ === 'object' && DateUtils_ !== null;
+    const hasHtmlUtils = typeof HtmlUtils_ === 'object' && HtmlUtils_ !== null;
     const hasSmoke = _fnExists_('runSmokeTests');
 
     return {
-      status: hasDateUtils && hasHtmlUtils && hasSmoke ? 'OK': 'WARN',
+      status: hasDateUtils && hasHtmlUtils && hasSmoke ? 'OK' : 'WARN',
       severity: 'WARN',
       details: [
-        `DateUtils_: ${hasDateUtils ? '✔': '✘'}`,
-        `HtmlUtils_: ${hasHtmlUtils ? '✔': '✘'}`,
-        `runSmokeTests(): ${hasSmoke ? '✔': '✘'}`
+        `DateUtils_: ${hasDateUtils ? '✓' : '✕'}`,
+        `HtmlUtils_: ${hasHtmlUtils ? '✓' : '✕'}`,
+        `runSmokeTests(): ${hasSmoke ? '✓' : '✕'}`
       ].join('\n'),
       howTo: hasDateUtils && hasHtmlUtils && hasSmoke
         ? ''
@@ -415,40 +415,40 @@ function healthCheck() {
     const hasEscapeAlias = _fnExists_('escapeHtml_');
 
     return {
-      status: hasParseAlias && hasEscapeAlias ? 'PSEUDO': 'WARN',
-      severity: hasParseAlias && hasEscapeAlias ? 'INFO': 'WARN',
+      status: hasParseAlias && hasEscapeAlias ? 'PSEUDO' : 'WARN',
+      severity: hasParseAlias && hasEscapeAlias ? 'INFO' : 'WARN',
       details: hasParseAlias && hasEscapeAlias
-        ? `Compatibility-only alias layer retained intentionally: parseAlias=✔, escapeAlias=✔`
-        : `parseAlias=${hasParseAlias ? '✔': '✘'}, escapeAlias=${hasEscapeAlias ? '✔': '✘'}`,
-      howTo: hasParseAlias && hasEscapeAlias ? 'Нейтральний сумісний шар; не є canonical-path': 'Поверніть thin-wrapper сумісності для старих викликів'
+        ? `Compatibility-only alias layer retained intentionally: parseAlias=✓, escapeAlias=✓`
+        : `parseAlias=${hasParseAlias ? '✓' : '✕'}, escapeAlias=${hasEscapeAlias ? '✓' : '✕'}`,
+      howTo: hasParseAlias && hasEscapeAlias ? 'Нейтральний сумісний шар; не є canonical-path' : 'Поверніть thin-wrapper сумісності для старих викликів'
     };
   });
 
   _runHealthCheckItem_(report, 'Тригери автозапуску', 'WARN', function () {
     const triggers = ScriptApp.getProjectTriggers();
 
-    const vac = triggers.filter(t =>t.getHandlerFunction() === 'autoVacationReminder');
-    const bd = triggers.filter(t =>t.getHandlerFunction() === 'autoBirthdayReminder');
+    const vac = triggers.filter(t => t.getHandlerFunction() === 'autoVacationReminder');
+    const bd = triggers.filter(t => t.getHandlerFunction() === 'autoBirthdayReminder');
 
-    const hasVac = vac.length >0;
-    const hasBd = bd.length >0;
-    const dupVac = vac.length >1;
-    const dupBd = bd.length >1;
+    const hasVac = vac.length > 0;
+    const hasBd = bd.length > 0;
+    const dupVac = vac.length > 1;
+    const dupBd = bd.length > 1;
 
     const ok = hasVac && hasBd && !dupVac && !dupBd;
 
     return {
-      status: ok ? 'OK': 'WARN',
+      status: ok ? 'OK' : 'WARN',
       severity: 'WARN',
       details: [
-        `Відпустки: ${hasVac ? `✔ (${vac.length} шт)`: '✘ немає'}`,
-        `ДН: ${hasBd ? `✔ (${bd.length} шт)`: '✘ немає'}`,
-        dupVac || dupBd ? '⚠︎ Є дублікати тригерів': ''
+        `Відпустки: ${hasVac ? `✓ (${vac.length} шт)` : '✕ немає'}`,
+        `ДН: ${hasBd ? `✓ (${bd.length} шт)` : '✕ немає'}`,
+        dupVac || dupBd ? '⁈ Є дублікати тригерів' : ''
       ].filter(Boolean).join('\n'),
       howTo: (!hasVac || !hasBd)
-        ? 'Натисніть "⚠︎ Створити тригер"'
+        ? 'Натисніть "⏰ Створити тригер"'
         : (dupVac || dupBd)
-          ? 'Натисніть "⚠︎ Дублі"'
+          ? 'Натисніть "🧹 Дублі"'
           : ''
     };
   });
@@ -463,7 +463,7 @@ function _pushCheck_(report, check) {
   if (check.status === 'ERROR') {
     report.status = 'ERROR';
     report.errors.push(check.message || check.name || 'Помилка перевірки');
-  } else if (check.status === 'WARN'&& report.status !== 'ERROR') {
+  } else if (check.status === 'WARN' && report.status !== 'ERROR') {
     report.status = 'WARN';
   }
 }
@@ -479,7 +479,7 @@ function _makeReport_(name) {
 }
 
 function checkSheets() {
-  const report = _makeReport_('ПЕРЕВІРКА ЛИСТІВ');
+  const report = _makeReport_('📄 ПЕРЕВІРКА ЛИСТІВ');
 
   try {
     const ss = _getSS_();
@@ -503,12 +503,12 @@ function checkSheets() {
       _pushCheck_(report, {
         type: 'sheet_exists',
         name: item.name,
-        status: exists ? 'OK': (item.required ? 'ERROR': 'WARN'),
+        status: exists ? 'OK' : (item.required ? 'ERROR' : 'WARN'),
         message: exists
-          ? '✔ Лист "'+ item.name + '"знайдено'
+          ? '✓ Лист "' + item.name + '" знайдено'
           : (item.required
-            ? '✘ Обов\'язковий лист "'+ item.name + '"не знайдено'
-            : '⚠︎ Лист "'+ item.name + '"не знайдено')
+            ? '✕ Обов\'язковий лист "' + item.name + '" не знайдено'
+            : '⁈ Лист "' + item.name + '" не знайдено')
       });
     });
 
@@ -523,15 +523,15 @@ function checkSheets() {
     _pushCheck_(report, {
       type: 'month_sheets',
       name: 'month_sheets',
-      status: existingMonths.length >0 ? 'OK': 'WARN',
-      message: existingMonths.length >0
-        ? '✔ Місячні листи: '+ existingMonths.join(', ')
-        : '⚠︎ Не знайдено жодного місячного листа'
+      status: existingMonths.length > 0 ? 'OK' : 'WARN',
+      message: existingMonths.length > 0
+        ? '✓ Місячні листи: ' + existingMonths.join(', ')
+        : '⁈ Не знайдено жодного місячного листа'
     });
 
   } catch (e) {
     report.status = 'ERROR';
-    report.errors.push('Помилка checkSheets: '+ _safeErr_(e));
+    report.errors.push('Помилка checkSheets: ' + _safeErr_(e));
   }
 
   DIAGNOSTICS.results.sheets = report;
@@ -539,7 +539,7 @@ function checkSheets() {
 }
 
 function checkFiles() {
-  const report = _makeReport_('ПЕРЕВІРКА ПРОЄКТУ');
+  const report = _makeReport_('📁 ПЕРЕВІРКА ПРОЄКТУ');
 
   try {
     const requiredFunctions = [
@@ -568,16 +568,16 @@ function checkFiles() {
       _pushCheck_(report, {
         type: 'function_exists',
         name: func.name,
-        status: exists ? 'OK': (func.required ? 'ERROR': 'WARN'),
+        status: exists ? 'OK' : (func.required ? 'ERROR' : 'WARN'),
         message: exists
-          ? '✔ ' + func.name + 'існує'
-          : '✘ ' + func.name + 'не знайдена'
+          ? '✓ ' + func.name + ' існує'
+          : '✕ ' + func.name + ' не знайдена'
       });
     });
 
   } catch (e) {
     report.status = 'ERROR';
-    report.errors.push('Помилка checkFiles: '+ _safeErr_(e));
+    report.errors.push('Помилка checkFiles: ' + _safeErr_(e));
   }
 
   DIAGNOSTICS.results.files = report;
@@ -585,7 +585,7 @@ function checkFiles() {
 }
 
 function checkDuplicates() {
-  const report = _makeReport_('ПЕРЕВІРКА ДУБЛІКАТІВ');
+  const report = _makeReport_('🧬 ПЕРЕВІРКА ДУБЛІКАТІВ');
 
   try {
     const ss = _getSS_();
@@ -596,7 +596,7 @@ function checkDuplicates() {
         type: 'duplicates_skip',
         name: 'PHONES',
         status: 'WARN',
-        message: '⚠︎ Лист PHONES не знайдено або порожній'
+        message: '⁈ Лист PHONES не знайдено або порожній'
       });
       DIAGNOSTICS.results.duplicates = report;
       return report;
@@ -659,24 +659,24 @@ function checkDuplicates() {
     Object.entries(counters.fio).forEach(function (entry) {
       const value = entry[0];
       const rows = entry[1];
-      if (rows.length >1) {
-        dups.push('ПІБ "'+ value + '"→ '+ rows.join(', '));
+      if (rows.length > 1) {
+        dups.push('ПІБ "' + value + '" → ' + rows.join(', '));
       }
     });
 
     Object.entries(counters.callsign).forEach(function (entry) {
       const value = entry[0];
       const rows = entry[1];
-      if (rows.length >1) {
-        dups.push('Позивний "'+ value + '"→ '+ rows.join(', '));
+      if (rows.length > 1) {
+        dups.push('Позивний "' + value + '" → ' + rows.join(', '));
       }
     });
 
     Object.entries(counters.phone).forEach(function (entry) {
       const value = entry[0];
       const rows = entry[1];
-      if (rows.length >1) {
-        dups.push('Телефон "'+ value + '"→ '+ rows.join(', '));
+      if (rows.length > 1) {
+        dups.push('Телефон "' + value + '" → ' + rows.join(', '));
       }
     });
 
@@ -685,7 +685,7 @@ function checkDuplicates() {
         type: 'duplicates_result',
         name: 'duplicates',
         status: 'OK',
-        message: '✔ Явних дублікатів не знайдено'
+        message: '✓ Явних дублікатів не знайдено'
       });
     } else {
       dups.forEach(function (message) {
@@ -693,14 +693,14 @@ function checkDuplicates() {
           type: 'duplicate',
           name: 'duplicate',
           status: 'WARN',
-          message: '⚠︎ '+ message
+          message: '⁈ ' + message
         });
       });
     }
 
   } catch (e) {
     report.status = 'ERROR';
-    report.errors.push('Помилка checkDuplicates: '+ _safeErr_(e));
+    report.errors.push('Помилка checkDuplicates: ' + _safeErr_(e));
   }
 
   DIAGNOSTICS.results.duplicates = report;
@@ -708,7 +708,7 @@ function checkDuplicates() {
 }
 
 function testFunctions() {
-  const report = _makeReport_('ТЕСТ ФУНКЦІЙ');
+  const report = _makeReport_('🧪 ТЕСТ ФУНКЦІЙ');
 
   try {
     try {
@@ -716,15 +716,15 @@ function testFunctions() {
       _pushCheck_(report, {
         type: 'test_function',
         name: '_todayStr_',
-        status: /^\d{2}\.\d{2}\.\d{4}$/.test(today) ? 'OK': 'ERROR',
-        message: '✔ _todayStr_() → '+ today
+        status: /^\d{2}\.\d{2}\.\d{4}$/.test(today) ? 'OK' : 'ERROR',
+        message: '✓ _todayStr_() → ' + today
       });
     } catch (e) {
       _pushCheck_(report, {
         type: 'test_function',
         name: '_todayStr_',
         status: 'ERROR',
-        message: '✘ _todayStr_(): '+ _safeErr_(e)
+        message: '✕ _todayStr_(): ' + _safeErr_(e)
       });
     }
 
@@ -733,17 +733,17 @@ function testFunctions() {
       _pushCheck_(report, {
         type: 'test_function',
         name: '_parseUaDate_',
-        status: d instanceof Date ? 'OK': 'ERROR',
+        status: d instanceof Date ? 'OK' : 'ERROR',
         message: d instanceof Date
-          ? '✔ _parseUaDate_() працює'
-          : '✘ _parseUaDate_() не змогла розібрати дату'
+          ? '✓ _parseUaDate_() працює'
+          : '✕ _parseUaDate_() не змогла розібрати дату'
       });
     } catch (e) {
       _pushCheck_(report, {
         type: 'test_function',
         name: '_parseUaDate_',
         status: 'ERROR',
-        message: '✘ _parseUaDate_(): '+ _safeErr_(e)
+        message: '✕ _parseUaDate_(): ' + _safeErr_(e)
       });
     }
 
@@ -752,17 +752,17 @@ function testFunctions() {
       _pushCheck_(report, {
         type: 'test_function',
         name: '_formatPhoneDisplay_',
-        status: f ? 'OK': 'ERROR',
+        status: f ? 'OK' : 'ERROR',
         message: f
-          ? '✔ _formatPhoneDisplay_() → '+ f
-          : '✘ _formatPhoneDisplay_() повернула порожнє значення'
+          ? '✓ _formatPhoneDisplay_() → ' + f
+          : '✕ _formatPhoneDisplay_() повернула порожнє значення'
       });
     } catch (e) {
       _pushCheck_(report, {
         type: 'test_function',
         name: '_formatPhoneDisplay_',
         status: 'ERROR',
-        message: '✘ _formatPhoneDisplay_(): '+ _safeErr_(e)
+        message: '✕ _formatPhoneDisplay_(): ' + _safeErr_(e)
       });
     }
 
@@ -771,23 +771,23 @@ function testFunctions() {
       _pushCheck_(report, {
         type: 'test_function',
         name: 'healthCheck',
-        status: hc && Array.isArray(hc.checks) ? 'OK': 'ERROR',
+        status: hc && Array.isArray(hc.checks) ? 'OK' : 'ERROR',
         message: hc && Array.isArray(hc.checks)
-          ? '✔ healthCheck() повернув звіт'
-          : '✘ healthCheck() повернув невалідні дані'
+          ? '✓ healthCheck() повернув звіт'
+          : '✕ healthCheck() повернув невалідні дані'
       });
     } catch (e) {
       _pushCheck_(report, {
         type: 'test_function',
         name: 'healthCheck',
         status: 'ERROR',
-        message: '✘ healthCheck(): '+ _safeErr_(e)
+        message: '✕ healthCheck(): ' + _safeErr_(e)
       });
     }
 
   } catch (e) {
     report.status = 'ERROR';
-    report.errors.push('Помилка testFunctions: '+ _safeErr_(e));
+    report.errors.push('Помилка testFunctions: ' + _safeErr_(e));
   }
 
   DIAGNOSTICS.results.functions = report;
@@ -855,7 +855,7 @@ function _stage3PushCheck_(checks, name, status, details, recommendation) {
   const lowerDetails = String(details || '').toLowerCase();
 
   const pseudoLike =
-    normalizedStatus === 'PSEUDO'||
+    normalizedStatus === 'PSEUDO' ||
     lowerName.indexOf('deprecated ') === 0 ||
     lowerName.indexOf('compatibility ') === 0 ||
     lowerName.indexOf('wrapper source ') === 0 ||
@@ -874,7 +874,7 @@ function _stage3PushCheck_(checks, name, status, details, recommendation) {
 
   let uiGroup = 'ok';
 
-  if (normalizedStatus === 'FAIL'|| (normalizedStatus === 'WARN'&& severity === 'CRITICAL')) {
+  if (normalizedStatus === 'FAIL' || (normalizedStatus === 'WARN' && severity === 'CRITICAL')) {
     uiGroup = 'critical';
   } else if (normalizedStatus === 'WARN') {
     uiGroup = 'warnings';
@@ -908,26 +908,26 @@ function runStage3HealthCheck_(options) {
 
   Object.keys(schemas).forEach(function(key) {
     const schema = schemas[key];
-    const sheetName = schema.key === 'MONTHLY'? getBotMonthSheetName_() : schema.name;
+    const sheetName = schema.key === 'MONTHLY' ? getBotMonthSheetName_() : schema.name;
     const sheet = ss.getSheetByName(sheetName);
 
     if (schema.key === 'MONTHLY') {
       _stage3PushCheck_(
         checks,
         `Schema ${schema.key}`,
-        sheet ? 'OK': 'FAIL',
-        sheet ? `Активний місячний лист: ${sheetName}`: `Активний місячний лист "${sheetName}"не знайдено`,
-        sheet ? '': 'Перевірте CONFIG.TARGET_SHEET або active bot month property'
+        sheet ? 'OK' : 'FAIL',
+        sheet ? `Активний місячний лист: ${sheetName}` : `Активний місячний лист "${sheetName}" не знайдено`,
+        sheet ? '' : 'Перевірте CONFIG.TARGET_SHEET або active bot month property'
       );
       return;
     }
 
-    const status = sheet ? 'OK': (schema.required ? 'FAIL': 'WARN');
+    const status = sheet ? 'OK' : (schema.required ? 'FAIL' : 'WARN');
     const details = sheet
-      ? `Аркуш "${sheetName}"доступний`
-      : `Аркуш "${sheetName}"${schema.required ? 'обов’язковий, але не знайдений': 'ще не створений'}`;
+      ? `Аркуш "${sheetName}" доступний`
+      : `Аркуш "${sheetName}" ${schema.required ? 'обов’язковий, але не знайдений' : 'ще не створений'}`;
 
-    _stage3PushCheck_(checks, `Schema ${schema.key}`, status, details, sheet ? '': 'Створіть лист або перевірте CONFIG');
+    _stage3PushCheck_(checks, `Schema ${schema.key}`, status, details, sheet ? '' : 'Створіть лист або перевірте CONFIG');
   });
 
   ['PHONES', 'DICT', 'DICT_SUM', 'SEND_PANEL', 'VACATIONS', 'LOG'].forEach(function(key) {
@@ -939,11 +939,11 @@ function runStage3HealthCheck_(options) {
       _stage3PushCheck_(
         checks,
         `Headers ${schema.key}`,
-        result.ok ? 'OK': 'WARN',
+        result.ok ? 'OK' : 'WARN',
         result.ok
           ? 'Headers відповідають схемі'
-          : ('Проблеми з headers: '+ [].concat(result.missing || []).concat(result.mismatches || []).join('; ')),
-        result.ok ? '': 'Звірте header row зі схемою у SheetSchemas.gs'
+          : ('Проблеми з headers: ' + [].concat(result.missing || []).concat(result.mismatches || []).join('; ')),
+        result.ok ? '' : 'Звірте header row зі схемою у SheetSchemas.gs'
       );
     } catch (e) {
       _stage3PushCheck_(checks, `Headers ${key}`, 'WARN', e && e.message ? e.message : String(e), 'Перевірте schema/header contract');
@@ -960,8 +960,8 @@ function runStage3HealthCheck_(options) {
     'LogsRepository_'
   ].forEach(function(name) {
     const resolved = _stage3ResolveSymbol_(name);
-    const exists = typeof resolved === 'object'|| typeof resolved === 'function';
-    _stage3PushCheck_(checks, `Repository ${name}`, exists ? 'OK': 'FAIL', exists ? 'Доступний': 'Не знайдено', exists ? '': 'Перевірте файл stage 3 repository');
+    const exists = typeof resolved === 'object' || typeof resolved === 'function';
+    _stage3PushCheck_(checks, `Repository ${name}`, exists ? 'OK' : 'FAIL', exists ? 'Доступний' : 'Не знайдено', exists ? '' : 'Перевірте файл stage 3 repository');
   });
 
   [
@@ -981,9 +981,9 @@ function runStage3HealthCheck_(options) {
     _stage3PushCheck_(
       checks,
       `Public API ${fnName}`,
-      _stage3HasFn_(fnName) ? 'OK': 'FAIL',
-      _stage3HasFn_(fnName) ? 'Публічний API доступний': 'Метод не знайдено',
-      _stage3HasFn_(fnName) ? '': 'Перевірте Stage3ServerApi.gs'
+      _stage3HasFn_(fnName) ? 'OK' : 'FAIL',
+      _stage3HasFn_(fnName) ? 'Публічний API доступний' : 'Метод не знайдено',
+      _stage3HasFn_(fnName) ? '' : 'Перевірте Stage3ServerApi.gs'
     );
   });
 
@@ -996,19 +996,19 @@ function runStage3HealthCheck_(options) {
 
     contractChecks.forEach(function(result, idx) {
       const valid = !!result && typeof result === 'object'
-        && 'success'in result
-        && 'message'in result
-        && 'error'in result
-        && 'data'in result
-        && 'context'in result
-        && 'warnings'in result;
+        && 'success' in result
+        && 'message' in result
+        && 'error' in result
+        && 'data' in result
+        && 'context' in result
+        && 'warnings' in result;
 
       _stage3PushCheck_(
         checks,
         `Contract #${idx + 1}`,
-        valid ? 'OK': 'FAIL',
-        valid ? 'Контракт відповіді валідний': 'Відповідь не відповідає server-side contract',
-        valid ? '': 'Перевірте normalizeServerResponse_/apiExecute_'
+        valid ? 'OK' : 'FAIL',
+        valid ? 'Контракт відповіді валідний' : 'Відповідь не відповідає server-side contract',
+        valid ? '' : 'Перевірте normalizeServerResponse_/apiExecute_'
       );
     });
   } catch (e) {
@@ -1031,7 +1031,7 @@ function runStage3HealthCheck_(options) {
 
   return {
     ok: failures === 0,
-    status: failures === 0 ? 'OK': 'FAIL',
+    status: failures === 0 ? 'OK' : 'FAIL',
     checks: checks,
     warnings: warnings,
     summary: failures === 0
@@ -1049,11 +1049,11 @@ function runStage3HealthCheck_(options) {
 
 
 function _projectBundleHas_(path) {
-  return typeof isProjectBundleFilePresent_ === 'function'? isProjectBundleFilePresent_(path) : false;
+  return typeof isProjectBundleFilePresent_ === 'function' ? isProjectBundleFilePresent_(path) : false;
 }
 
 function _projectBundleMissing_(paths) {
-  return typeof getMissingProjectBundleFiles_ === 'function'? getMissingProjectBundleFiles_(paths || []) : (paths || []).slice();
+  return typeof getMissingProjectBundleFiles_ === 'function' ? getMissingProjectBundleFiles_(paths || []) : (paths || []).slice();
 }
 
 function _isArchivePath_(path) {
@@ -1069,25 +1069,25 @@ function _diagPushPathCheck_(checks, name, path, expectedKind) {
   _stage3PushCheck_(
     checks,
     name,
-    present ? 'OK': 'FAIL',
-    present ? `${expectedKind}: ${path}`: `${expectedKind} missing: ${path}`,
-    present ? '': `Відсутній файл ${path}`
+    present ? 'OK' : 'FAIL',
+    present ? `${expectedKind}: ${path}` : `${expectedKind} missing: ${path}`,
+    present ? '' : `Відсутній файл ${path}`
   );
 }
 
 
 function runStage41ProjectConsistencyCheck_() {
   const checks = [];
-  const meta = typeof PROJECT_BUNDLE_METADATA_ === 'object'&& PROJECT_BUNDLE_METADATA_
+  const meta = typeof PROJECT_BUNDLE_METADATA_ === 'object' && PROJECT_BUNDLE_METADATA_
     ? PROJECT_BUNDLE_METADATA_
     : null;
 
   _stage3PushCheck_(
     checks,
     'Project bundle metadata',
-    meta ? 'OK': 'FAIL',
-    meta ? 'PROJECT_BUNDLE_METADATA_ доступний': 'PROJECT_BUNDLE_METADATA_ не знайдено',
-    meta ? '': 'Додайте ProjectMetadata.gs'
+    meta ? 'OK' : 'FAIL',
+    meta ? 'PROJECT_BUNDLE_METADATA_ доступний' : 'PROJECT_BUNDLE_METADATA_ не знайдено',
+    meta ? '' : 'Додайте ProjectMetadata.gs'
   );
 
   if (!meta) return checks;
@@ -1095,7 +1095,7 @@ function runStage41ProjectConsistencyCheck_() {
   _stage3PushCheck_(
     checks,
     'Release stage marker',
-    String(meta.stage || '') === '7.1'? 'OK': 'WARN',
+    String(meta.stage || '') === '7.1' ? 'OK' : 'WARN',
     `stage=${meta.stage || 'n/a'}, stageVersion=${meta.stageVersion || 'n/a'}, label=${meta.stageLabel || 'n/a'}`,
     'Оновіть ProjectMetadata.gs до Stage 7.1'
   );
@@ -1103,15 +1103,15 @@ function runStage41ProjectConsistencyCheck_() {
   _stage3PushCheck_(
     checks,
     'Root manifest declaration',
-    meta.manifestIncluded ? 'OK': 'FAIL',
-    meta.manifestIncluded ? `manifestIncluded=true, path=${(meta.packagingPolicy && meta.packagingPolicy.manifestPath) || 'n/a'}`: 'manifestIncluded=false',
+    meta.manifestIncluded ? 'OK' : 'FAIL',
+    meta.manifestIncluded ? `manifestIncluded=true, path=${(meta.packagingPolicy && meta.packagingPolicy.manifestPath) || 'n/a'}` : 'manifestIncluded=false',
     'Вирівняйте packaging policy'
   );
 
   _stage3PushCheck_(
     checks,
     'Root manifest physical presence',
-    _projectBundleHas_((meta.packagingPolicy && meta.packagingPolicy.manifestPath) || 'appsscript.json') ? 'OK': 'FAIL',
+    _projectBundleHas_((meta.packagingPolicy && meta.packagingPolicy.manifestPath) || 'appsscript.json') ? 'OK' : 'FAIL',
     _projectBundleHas_((meta.packagingPolicy && meta.packagingPolicy.manifestPath) || 'appsscript.json')
       ? ((meta.packagingPolicy && meta.packagingPolicy.manifestPath) || 'appsscript.json')
       : 'appsscript.json відсутній у root bundle',
@@ -1121,18 +1121,18 @@ function runStage41ProjectConsistencyCheck_() {
   _stage3PushCheck_(
     checks,
     'Root clasp example omitted intentionally',
-    (!meta.packagingPolicy || !meta.packagingPolicy.claspExamplePath || !_projectBundleHas_(meta.packagingPolicy.claspExamplePath)) ? 'OK': 'WARN',
+    (!meta.packagingPolicy || !meta.packagingPolicy.claspExamplePath || !_projectBundleHas_(meta.packagingPolicy.claspExamplePath)) ? 'OK' : 'WARN',
     (!meta.packagingPolicy || !meta.packagingPolicy.claspExamplePath || !_projectBundleHas_(meta.packagingPolicy.claspExamplePath))
       ? 'web-editor-ready archive intentionally omits .clasp.json.example'
-      : ('Unexpected optional clasp example present: '+ meta.packagingPolicy.claspExamplePath),
+      : ('Unexpected optional clasp example present: ' + meta.packagingPolicy.claspExamplePath),
     'Для web-editor bundle .clasp.json.example не потрібний'
   );
 
   _stage3PushCheck_(
     checks,
     'GAS-first policy marker',
-    meta.gasFirst ? 'OK': 'WARN',
-    meta.gasFirst ? 'Bundle позначено як GAS-first': 'gasFirst=false',
+    meta.gasFirst ? 'OK' : 'WARN',
+    meta.gasFirst ? 'Bundle позначено як GAS-first' : 'gasFirst=false',
     'Зафіксуйте GAS-first політику в ProjectMetadata.gs'
   );
 
@@ -1141,15 +1141,15 @@ function runStage41ProjectConsistencyCheck_() {
     _stage3PushCheck_(
       checks,
       `Required doc declared ${doc}`,
-      requiredDocs.indexOf(doc) !== -1 ? 'OK': 'FAIL',
+      requiredDocs.indexOf(doc) !== -1 ? 'OK' : 'FAIL',
       'Документ включено в metadata.requiredDocs',
       'Оновіть ProjectMetadata.gs'
     );
     _stage3PushCheck_(
       checks,
       `Required doc physical ${doc}`,
-      _projectBundleHas_(doc) ? 'OK': 'FAIL',
-      _projectBundleHas_(doc) ? `present=${doc}`: `missing=${doc}`,
+      _projectBundleHas_(doc) ? 'OK' : 'FAIL',
+      _projectBundleHas_(doc) ? `present=${doc}` : `missing=${doc}`,
       'Вирівняйте bundle layout'
     );
   });
@@ -1164,9 +1164,9 @@ function runStage41ProjectConsistencyCheck_() {
   _stage3PushCheck_(
     checks,
     'Canonical HTML helper',
-    helperOk ? 'OK': 'FAIL',
-    helperOk ? 'HtmlUtils_.escapeHtml() є source-of-truth, wrappers узгоджені': 'Helper-layer розсинхронізований',
-    helperOk ? '': 'Перевірте HtmlUtils.gs / DeprecatedRegistry.gs'
+    helperOk ? 'OK' : 'FAIL',
+    helperOk ? 'HtmlUtils_.escapeHtml() є source-of-truth, wrappers узгоджені' : 'Helper-layer розсинхронізований',
+    helperOk ? '' : 'Перевірте HtmlUtils.gs / DeprecatedRegistry.gs'
   );
 
   return checks;
@@ -1177,14 +1177,14 @@ function runHistoricalStructuralDiagnosticsInternal_(options) {
   const opts = options || {};
   const checks = [];
   const warnings = [];
-  const meta = typeof getProjectBundleMetadata_ === 'function'? getProjectBundleMetadata_() : PROJECT_BUNDLE_METADATA_;
-  const apiMap = typeof getStage4CanonicalApiMap_ === 'function'? getStage4CanonicalApiMap_() : null;
-  const routing = typeof getStage4ClientRoutingPolicy_ === 'function'? getStage4ClientRoutingPolicy_() : null;
+  const meta = typeof getProjectBundleMetadata_ === 'function' ? getProjectBundleMetadata_() : PROJECT_BUNDLE_METADATA_;
+  const apiMap = typeof getStage4CanonicalApiMap_ === 'function' ? getStage4CanonicalApiMap_() : null;
+  const routing = typeof getStage4ClientRoutingPolicy_ === 'function' ? getStage4ClientRoutingPolicy_() : null;
 
   _stage3PushCheck_(
     checks,
     'Canonical layer map',
-    meta && meta.canonicalLayers ? 'OK': 'FAIL',
+    meta && meta.canonicalLayers ? 'OK' : 'FAIL',
     meta && meta.canonicalLayers ? JSON.stringify(meta.canonicalLayers) : 'canonicalLayers відсутній',
     'Оновіть ProjectMetadata.gs'
   );
@@ -1205,7 +1205,7 @@ function runHistoricalStructuralDiagnosticsInternal_(options) {
       .map(function(alias) { return meta && meta.canonicalLayers ? meta.canonicalLayers[alias] : ''; })
       .filter(Boolean)[0] || '';
     const ok = !!resolved;
-    _stage3PushCheck_(checks, `Layer pointer ${key}`, ok ? 'OK': 'FAIL', ok ? resolved : 'Не задано', 'Оновіть ProjectMetadata.gs');
+    _stage3PushCheck_(checks, `Layer pointer ${key}`, ok ? 'OK' : 'FAIL', ok ? resolved : 'Не задано', 'Оновіть ProjectMetadata.gs');
   });
 
   ['application', 'maintenance', 'compatibility'].forEach(function(kind) {
@@ -1213,8 +1213,8 @@ function runHistoricalStructuralDiagnosticsInternal_(options) {
     _stage3PushCheck_(
       checks,
       `Canonical API map ${kind}`,
-      list.length ? 'OK': 'FAIL',
-      list.length ? `entrypoints=${list.length}`: 'Список порожній',
+      list.length ? 'OK' : 'FAIL',
+      list.length ? `entrypoints=${list.length}` : 'Список порожній',
       'Оновіть ProjectMetadata.gs'
     );
 
@@ -1222,8 +1222,8 @@ function runHistoricalStructuralDiagnosticsInternal_(options) {
       _stage3PushCheck_(
         checks,
         `Entrypoint ${fnName}`,
-        _stage3HasFn_(fnName) ? 'OK': 'FAIL',
-        _stage3HasFn_(fnName) ? 'Доступний': 'Не знайдено',
+        _stage3HasFn_(fnName) ? 'OK' : 'FAIL',
+        _stage3HasFn_(fnName) ? 'Доступний' : 'Не знайдено',
         'Перевірте відповідний файл API'
       );
     });
@@ -1232,8 +1232,8 @@ function runHistoricalStructuralDiagnosticsInternal_(options) {
   _stage3PushCheck_(
     checks,
     'Client routing policy map',
-    routing && typeof routing === 'object'? 'OK': 'FAIL',
-    routing && typeof routing === 'object'? `routes=${Object.keys(routing).length}`: 'routing map відсутній',
+    routing && typeof routing === 'object' ? 'OK' : 'FAIL',
+    routing && typeof routing === 'object' ? `routes=${Object.keys(routing).length}` : 'routing map відсутній',
     'Оновіть ProjectMetadata.gs'
   );
 
@@ -1241,17 +1241,17 @@ function runHistoricalStructuralDiagnosticsInternal_(options) {
     const fnName = routing[action];
     _stage3PushCheck_(
       checks,
-      `Client route ${action} ->${fnName}`,
-      _stage3HasFn_(fnName) ? 'OK': 'FAIL',
-      _stage3HasFn_(fnName) ? 'Маршрут розвʼязується': 'Target function не знайдено',
+      `Client route ${action} -> ${fnName}`,
+      _stage3HasFn_(fnName) ? 'OK' : 'FAIL',
+      _stage3HasFn_(fnName) ? 'Маршрут розвʼязується' : 'Target function не знайдено',
       'Вирівняйте JavaScript.html та server API'
     );
   });
 
   return {
     ok: checks.filter(function(item) { return item.status === 'FAIL'; }).length === 0,
-    status: checks.some(function(item) { return item.status === 'FAIL'; }) ? 'FAIL': 'OK',
-    stage: (typeof getProjectBundleMetadata_ === 'function'? getProjectBundleMetadata_().stageVersion : '6.0.0-final'),
+    status: checks.some(function(item) { return item.status === 'FAIL'; }) ? 'FAIL' : 'OK',
+    stage: (typeof getProjectBundleMetadata_ === 'function' ? getProjectBundleMetadata_().stageVersion : '6.0.0-final'),
     mode: opts.mode || 'structural',
     checks: checks,
     warnings: warnings,
@@ -1264,13 +1264,13 @@ function runHistoricalCompatibilityDiagnosticsInternal_(options) {
   const opts = options || {};
   const checks = [];
   const warnings = [];
-  const registry = typeof getStage4CompatibilityMap_ === 'function'? getStage4CompatibilityMap_() : [];
+  const registry = typeof getStage4CompatibilityMap_ === 'function' ? getStage4CompatibilityMap_() : [];
 
   _stage3PushCheck_(
     checks,
     'Compatibility registry',
-    registry.length ? 'PSEUDO': 'FAIL',
-    registry.length ? `entries=${registry.length}`: 'Реєстр порожній',
+    registry.length ? 'PSEUDO' : 'FAIL',
+    registry.length ? `entries=${registry.length}` : 'Реєстр порожній',
     'Оновіть DeprecatedRegistry.gs'
   );
 
@@ -1279,21 +1279,21 @@ function runHistoricalCompatibilityDiagnosticsInternal_(options) {
     _stage3PushCheck_(
       checks,
       `Compatibility function ${item.name}`,
-      exists ? 'PSEUDO': 'FAIL',
-      exists ? `${item.scope || 'unknown scope'} ->${item.replacement || ''}`: 'Функцію не знайдено',
-      exists ? 'Нейтральний compatibility-only alias; не canonical-path': 'Перевірте DeprecatedRegistry.gs / відповідний файл'
+      exists ? 'PSEUDO' : 'FAIL',
+      exists ? `${item.scope || 'unknown scope'} -> ${item.replacement || ''}` : 'Функцію не знайдено',
+      exists ? 'Нейтральний compatibility-only alias; не canonical-path' : 'Перевірте DeprecatedRegistry.gs / відповідний файл'
     );
 
     if (!exists || !item.verifySourceToken) return;
     try {
       const fn = _global_()[item.name];
-      const src = typeof fn === 'function'? String(fn) : '';
+      const src = typeof fn === 'function' ? String(fn) : '';
       const sourceOk = src.indexOf(item.verifySourceToken) !== -1;
       _stage3PushCheck_(
         checks,
         `Wrapper source ${item.name}`,
-        sourceOk ? 'PSEUDO': 'WARN',
-        sourceOk ? `source ->${item.verifySourceToken}`: 'Wrapper source не вказує на canonical replacement',
+        sourceOk ? 'PSEUDO' : 'WARN',
+        sourceOk ? `source -> ${item.verifySourceToken}` : 'Wrapper source не вказує на canonical replacement',
         'Перевірте, що wrapper лишається thin alias без нової бізнес-логіки'
       );
     } catch (e) {
@@ -1304,7 +1304,7 @@ function runHistoricalCompatibilityDiagnosticsInternal_(options) {
       _stage3PushCheck_(
         checks,
         `UI-ban marker ${item.name}`,
-        item.status === 'compatibility-only'? 'PSEUDO': 'WARN',
+        item.status === 'compatibility-only' ? 'PSEUDO' : 'WARN',
         `uiAllowed=${item.uiAllowed}, status=${item.status}`,
         'Compatibility wrapper не повинен повертатися як canonical UI route'
       );
@@ -1313,8 +1313,8 @@ function runHistoricalCompatibilityDiagnosticsInternal_(options) {
 
   return {
     ok: checks.filter(function(item) { return item.status === 'FAIL'; }).length === 0,
-    status: checks.some(function(item) { return item.status === 'FAIL'; }) ? 'FAIL': 'OK',
-    stage: (typeof getProjectBundleMetadata_ === 'function'? getProjectBundleMetadata_().stageVersion : '6.0.0-final'),
+    status: checks.some(function(item) { return item.status === 'FAIL'; }) ? 'FAIL' : 'OK',
+    stage: (typeof getProjectBundleMetadata_ === 'function' ? getProjectBundleMetadata_().stageVersion : '6.0.0-final'),
     mode: opts.mode || 'compatibility',
     checks: checks,
     warnings: [...new Set(warnings)],
@@ -1325,7 +1325,7 @@ function runHistoricalCompatibilityDiagnosticsInternal_(options) {
 
 function runHistoricalQuickDiagnosticsInternal_(options) {
   const opts = options || {};
-  const structural = runHistoricalStructuralDiagnosticsInternal_({ mode: 'quick'});
+  const structural = runHistoricalStructuralDiagnosticsInternal_({ mode: 'quick' });
   const checks = structural.checks.filter(function(item) {
     return String(item.name || '').indexOf('Entrypoint ') === 0
       || String(item.name || '').indexOf('Client route ') === 0
@@ -1336,8 +1336,8 @@ function runHistoricalQuickDiagnosticsInternal_(options) {
 
   return {
     ok: checks.filter(function(item) { return item.status === 'FAIL'; }).length === 0,
-    status: checks.some(function(item) { return item.status === 'FAIL'; }) ? 'FAIL': 'OK',
-    stage: (typeof getProjectBundleMetadata_ === 'function'? getProjectBundleMetadata_().stageVersion : '6.0.0-final'),
+    status: checks.some(function(item) { return item.status === 'FAIL'; }) ? 'FAIL' : 'OK',
+    stage: (typeof getProjectBundleMetadata_ === 'function' ? getProjectBundleMetadata_().stageVersion : '6.0.0-final'),
     mode: opts.mode || 'quick',
     checks: checks,
     warnings: [],
@@ -1348,8 +1348,8 @@ function runHistoricalQuickDiagnosticsInternal_(options) {
 
 function runHistoricalFullDiagnosticsInternal_(options) {
   const opts = options || {};
-  const structural = runHistoricalStructuralDiagnosticsInternal_({ mode: 'full'});
-  const compatibility = runHistoricalCompatibilityDiagnosticsInternal_({ mode: 'full'});
+  const structural = runHistoricalStructuralDiagnosticsInternal_({ mode: 'full' });
+  const compatibility = runHistoricalCompatibilityDiagnosticsInternal_({ mode: 'full' });
   const checks = []
     .concat(runStage41ProjectConsistencyCheck_())
     .concat(structural.checks || [])
@@ -1358,8 +1358,8 @@ function runHistoricalFullDiagnosticsInternal_(options) {
 
   return {
     ok: checks.filter(function(item) { return item.status === 'FAIL'; }).length === 0,
-    status: checks.some(function(item) { return item.status === 'FAIL'; }) ? 'FAIL': 'OK',
-    stage: (typeof getProjectBundleMetadata_ === 'function'? getProjectBundleMetadata_().stageVersion : '6.0.0-final'),
+    status: checks.some(function(item) { return item.status === 'FAIL'; }) ? 'FAIL' : 'OK',
+    stage: (typeof getProjectBundleMetadata_ === 'function' ? getProjectBundleMetadata_().stageVersion : '6.0.0-final'),
     mode: opts.mode || 'full',
     checks: checks,
     warnings: warnings,
@@ -1398,13 +1398,13 @@ function runStage4HealthCheck_(options) {
     'Stage4Templates_'
   ].forEach(function(name) {
     const resolved = _stage3ResolveSymbol_(name);
-    const exists = typeof resolved === 'object'|| typeof resolved === 'function';
+    const exists = typeof resolved === 'object' || typeof resolved === 'function';
     _stage3PushCheck_(
       checks,
       `Stage4 module ${name}`,
-      exists ? 'OK': 'FAIL',
-      exists ? 'Доступний': 'Не знайдено',
-      exists ? '': `Перевірте ${name}.gs`
+      exists ? 'OK' : 'FAIL',
+      exists ? 'Доступний' : 'Не знайдено',
+      exists ? '' : `Перевірте ${name}.gs`
     );
   });
 
@@ -1414,18 +1414,18 @@ function runStage4HealthCheck_(options) {
       _stage3PushCheck_(
         checks,
         `Stage4 use-case ${name}`,
-        exists ? 'OK': 'FAIL',
-        exists ? 'Доступний': 'Не знайдено',
-        exists ? '': 'Перевірте UseCases.gs'
+        exists ? 'OK' : 'FAIL',
+        exists ? 'Доступний' : 'Не знайдено',
+        exists ? '' : 'Перевірте UseCases.gs'
       );
     });
 
-  runHistoricalStructuralDiagnosticsInternal_({ mode: shallow ? 'quick': 'structural'}).checks.forEach(function(item) {
+  runHistoricalStructuralDiagnosticsInternal_({ mode: shallow ? 'quick' : 'structural' }).checks.forEach(function(item) {
     checks.push(item);
   });
 
   if (!shallow) {
-    runHistoricalCompatibilityDiagnosticsInternal_({ mode: 'compatibility'}).checks.forEach(function(item) {
+    runHistoricalCompatibilityDiagnosticsInternal_({ mode: 'compatibility' }).checks.forEach(function(item) {
       checks.push(item);
     });
   }
@@ -1435,9 +1435,9 @@ function runStage4HealthCheck_(options) {
     _stage3PushCheck_(
       checks,
       'Audit trail sheet',
-      auditSheet ? 'OK': 'WARN',
-      auditSheet ? `Аркуш "${auditSheet.getName()}"доступний`: 'AUDIT_LOG не створений',
-      auditSheet ? '': 'Створіть AUDIT_LOG автоматично або вручну'
+      auditSheet ? 'OK' : 'WARN',
+      auditSheet ? `Аркуш "${auditSheet.getName()}" доступний` : 'AUDIT_LOG не створений',
+      auditSheet ? '' : 'Створіть AUDIT_LOG автоматично або вручну'
     );
   } catch (e) {
     _stage3PushCheck_(
@@ -1454,9 +1454,9 @@ function runStage4HealthCheck_(options) {
     _stage3PushCheck_(
       checks,
       'Managed jobs registry',
-      jobs.length ? 'OK': 'WARN',
+      jobs.length ? 'OK' : 'WARN',
       `Jobs: ${jobs.length}`,
-      jobs.length ? '': 'Перевірте Triggers.gs'
+      jobs.length ? '' : 'Перевірте Triggers.gs'
     );
   } catch (e) {
     _stage3PushCheck_(
@@ -1473,9 +1473,9 @@ function runStage4HealthCheck_(options) {
     _stage3PushCheck_(
       checks,
       'Managed templates',
-      templateKeys.length ? 'OK': 'WARN',
+      templateKeys.length ? 'OK' : 'WARN',
       `Templates: ${templateKeys.length}`,
-      templateKeys.length ? '': 'Перевірте Templates.gs'
+      templateKeys.length ? '' : 'Перевірте Templates.gs'
     );
   } catch (e) {
     _stage3PushCheck_(
@@ -1498,14 +1498,14 @@ function runStage4HealthCheck_(options) {
       const reconciliationIssues = Number(reconciliation && reconciliation.summary && reconciliation.summary.issues || 0);
       const reconciliationCritical = Number(reconciliation && reconciliation.criticalCount || 0);
       const reconciliationMessage = reconciliation.message
-        || ('Reconciliation preview: проблем '+ reconciliationIssues + ', critical '+ reconciliationCritical);
+        || ('Reconciliation preview: проблем ' + reconciliationIssues + ', critical ' + reconciliationCritical);
 
       _stage3PushCheck_(
         checks,
         'Reconciliation preview',
-        reconciliationCritical >0 ? 'WARN': 'OK',
+        reconciliationCritical > 0 ? 'WARN' : 'OK',
         reconciliationMessage,
-        reconciliationCritical >0
+        reconciliationCritical > 0
           ? 'Це warning по поточних даних таблиці, а не по архіву коду. Перевірте report та за потреби виконайте safe repair'
           : ''
       );
@@ -1532,8 +1532,8 @@ function runStage4HealthCheck_(options) {
 
   return {
     ok: failures === 0,
-    status: failures === 0 ? 'OK': 'FAIL',
-    stage: (typeof getProjectBundleMetadata_ === 'function'? getProjectBundleMetadata_().stageVersion : '6.0.0-final'),
+    status: failures === 0 ? 'OK' : 'FAIL',
+    stage: (typeof getProjectBundleMetadata_ === 'function' ? getProjectBundleMetadata_().stageVersion : '6.0.0-final'),
     checks: checks,
     warnings: [...new Set(warnings)],
     summary: failures === 0
@@ -1547,60 +1547,60 @@ function runStage4HealthCheck_(options) {
 
 function runStage5MetadataConsistencyCheck_() {
   const checks = [];
-  const meta = typeof getProjectBundleMetadata_ === 'function'? getProjectBundleMetadata_() : PROJECT_BUNDLE_METADATA_;
-  const docs = typeof getProjectDocumentationMap_ === 'function'? getProjectDocumentationMap_() : {};
-  const maintenancePolicy = typeof getStage5MaintenancePolicy_ === 'function'? getStage5MaintenancePolicy_() : (meta && meta.maintenanceLayerPolicy) || {};
-  const release = typeof getProjectReleaseNaming_ === 'function'? getProjectReleaseNaming_() : (meta && meta.release) || {};
+  const meta = typeof getProjectBundleMetadata_ === 'function' ? getProjectBundleMetadata_() : PROJECT_BUNDLE_METADATA_;
+  const docs = typeof getProjectDocumentationMap_ === 'function' ? getProjectDocumentationMap_() : {};
+  const maintenancePolicy = typeof getStage5MaintenancePolicy_ === 'function' ? getStage5MaintenancePolicy_() : (meta && meta.maintenanceLayerPolicy) || {};
+  const release = typeof getProjectReleaseNaming_ === 'function' ? getProjectReleaseNaming_() : (meta && meta.release) || {};
 
-  _stage3PushCheck_(checks, 'Project bundle metadata', meta ? 'OK': 'FAIL', meta ? 'PROJECT_BUNDLE_METADATA_ доступний': 'PROJECT_BUNDLE_METADATA_ не знайдено', meta ? '': 'Додайте ProjectMetadata.gs');
+  _stage3PushCheck_(checks, 'Project bundle metadata', meta ? 'OK' : 'FAIL', meta ? 'PROJECT_BUNDLE_METADATA_ доступний' : 'PROJECT_BUNDLE_METADATA_ не знайдено', meta ? '' : 'Додайте ProjectMetadata.gs');
   if (!meta) return checks;
 
-  _stage3PushCheck_(checks, 'Release stage marker', String(meta.stage || '') === '7.1'? 'OK': 'FAIL', `stage=${meta.stage || 'n/a'}, stageVersion=${meta.stageVersion || 'n/a'}, label=${meta.stageLabel || 'n/a'}`, 'Оновіть ProjectMetadata.gs до Stage 7.1');
-  _stage3PushCheck_(checks, 'Active baseline marker', meta.activeBaseline === 'stage7-1-1-final-stabilized-repair-baseline'? 'OK': 'FAIL', `activeBaseline=${meta.activeBaseline || 'n/a'}`, 'Зафіксуйте Stage 7.1 як active baseline');
-  _stage3PushCheck_(checks, 'Release archive naming', release && release.archiveFileName === 'gas_wapb_stage7_1_1_final_stabilized_repair.zip'? 'OK': 'FAIL', release && release.archiveFileName ? release.archiveFileName : 'Не задано', 'Вирівняйте archive naming');
-  _stage3PushCheck_(checks, 'Release root folder naming', release && release.rootFolderName === 'gas_wapb_stage7_1_1_final_stabilized_repair'? 'OK': 'FAIL', release && release.rootFolderName ? release.rootFolderName : 'Не задано', 'Вирівняйте root folder naming');
-  _stage3PushCheck_(checks, 'Packaging policy marker', meta.packagingPolicy && meta.packagingPolicy.policy === 'root-manifest-web-editor-only'? 'OK': 'FAIL', meta.packagingPolicy && meta.packagingPolicy.policy ? meta.packagingPolicy.policy : 'Не задано', 'Зафіксуйте web-editor-only packaging policy');
-  _stage3PushCheck_(checks, 'Root manifest declared', meta.manifestIncluded === true ? 'OK': 'FAIL', `manifestIncluded=${meta.manifestIncluded}`, 'Вирівняйте metadata');
-  _stage3PushCheck_(checks, 'Root manifest physical', _projectBundleHas_((meta.packagingPolicy && meta.packagingPolicy.manifestPath) || 'appsscript.json') ? 'OK': 'FAIL', _projectBundleHas_((meta.packagingPolicy && meta.packagingPolicy.manifestPath) || 'appsscript.json') ? ((meta.packagingPolicy && meta.packagingPolicy.manifestPath) || 'appsscript.json') : 'manifest missing', 'Додайте appsscript.json у root');
-  _stage3PushCheck_(checks, 'Root clasp example omitted intentionally', (!meta.packagingPolicy || !meta.packagingPolicy.claspExamplePath || !_projectBundleHas_(meta.packagingPolicy.claspExamplePath)) ? 'OK': 'WARN', (!meta.packagingPolicy || !meta.packagingPolicy.claspExamplePath || !_projectBundleHas_(meta.packagingPolicy.claspExamplePath)) ? 'web-editor-ready archive intentionally omits .clasp.json.example': ('Unexpected optional clasp example present: '+ meta.packagingPolicy.claspExamplePath), 'Для web-editor bundle .clasp.json.example не потрібний');
+  _stage3PushCheck_(checks, 'Release stage marker', String(meta.stage || '') === '7.1' ? 'OK' : 'FAIL', `stage=${meta.stage || 'n/a'}, stageVersion=${meta.stageVersion || 'n/a'}, label=${meta.stageLabel || 'n/a'}`, 'Оновіть ProjectMetadata.gs до Stage 7.1');
+  _stage3PushCheck_(checks, 'Active baseline marker', meta.activeBaseline === 'stage7-1-1-final-stabilized-repair-baseline' ? 'OK' : 'FAIL', `activeBaseline=${meta.activeBaseline || 'n/a'}`, 'Зафіксуйте Stage 7.1 як active baseline');
+  _stage3PushCheck_(checks, 'Release archive naming', release && release.archiveFileName === 'gas_wapb_stage7_1_1_final_stabilized_repair.zip' ? 'OK' : 'FAIL', release && release.archiveFileName ? release.archiveFileName : 'Не задано', 'Вирівняйте archive naming');
+  _stage3PushCheck_(checks, 'Release root folder naming', release && release.rootFolderName === 'gas_wapb_stage7_1_1_final_stabilized_repair' ? 'OK' : 'FAIL', release && release.rootFolderName ? release.rootFolderName : 'Не задано', 'Вирівняйте root folder naming');
+  _stage3PushCheck_(checks, 'Packaging policy marker', meta.packagingPolicy && meta.packagingPolicy.policy === 'root-manifest-web-editor-only' ? 'OK' : 'FAIL', meta.packagingPolicy && meta.packagingPolicy.policy ? meta.packagingPolicy.policy : 'Не задано', 'Зафіксуйте web-editor-only packaging policy');
+  _stage3PushCheck_(checks, 'Root manifest declared', meta.manifestIncluded === true ? 'OK' : 'FAIL', `manifestIncluded=${meta.manifestIncluded}`, 'Вирівняйте metadata');
+  _stage3PushCheck_(checks, 'Root manifest physical', _projectBundleHas_((meta.packagingPolicy && meta.packagingPolicy.manifestPath) || 'appsscript.json') ? 'OK' : 'FAIL', _projectBundleHas_((meta.packagingPolicy && meta.packagingPolicy.manifestPath) || 'appsscript.json') ? ((meta.packagingPolicy && meta.packagingPolicy.manifestPath) || 'appsscript.json') : 'manifest missing', 'Додайте appsscript.json у root');
+  _stage3PushCheck_(checks, 'Root clasp example omitted intentionally', (!meta.packagingPolicy || !meta.packagingPolicy.claspExamplePath || !_projectBundleHas_(meta.packagingPolicy.claspExamplePath)) ? 'OK' : 'WARN', (!meta.packagingPolicy || !meta.packagingPolicy.claspExamplePath || !_projectBundleHas_(meta.packagingPolicy.claspExamplePath)) ? 'web-editor-ready archive intentionally omits .clasp.json.example' : ('Unexpected optional clasp example present: ' + meta.packagingPolicy.claspExamplePath), 'Для web-editor bundle .clasp.json.example не потрібний');
 
-  _stage3PushCheck_(checks, 'Maintenance layer marker', meta.maintenanceLayerStatus === 'stage5-canonical-maintenance-api'? 'OK': 'FAIL', `maintenanceLayerStatus=${meta.maintenanceLayerStatus || 'n/a'}`, 'Позначте canonical maintenance layer у metadata');
-  _stage3PushCheck_(checks, 'Compatibility policy marker', meta.compatibilityPolicyMarker === 'stage7-compatible'? 'OK': 'WARN', `compatibilityPolicyMarker=${meta.compatibilityPolicyMarker || 'n/a'}`, 'Зафіксуйте Stage 7 compatibility marker');
-  _stage3PushCheck_(checks, 'Sunset policy marker', meta.sunsetPolicyMarker === 'stage7-sunset-governed'? 'OK': 'WARN', `sunsetPolicyMarker=${meta.sunsetPolicyMarker || 'n/a'}`, 'Зафіксуйте Stage 7 sunset policy marker');
+  _stage3PushCheck_(checks, 'Maintenance layer marker', meta.maintenanceLayerStatus === 'stage5-canonical-maintenance-api' ? 'OK' : 'FAIL', `maintenanceLayerStatus=${meta.maintenanceLayerStatus || 'n/a'}`, 'Позначте canonical maintenance layer у metadata');
+  _stage3PushCheck_(checks, 'Compatibility policy marker', meta.compatibilityPolicyMarker === 'stage7-compatible' ? 'OK' : 'WARN', `compatibilityPolicyMarker=${meta.compatibilityPolicyMarker || 'n/a'}`, 'Зафіксуйте Stage 7 compatibility marker');
+  _stage3PushCheck_(checks, 'Sunset policy marker', meta.sunsetPolicyMarker === 'stage7-sunset-governed' ? 'OK' : 'WARN', `sunsetPolicyMarker=${meta.sunsetPolicyMarker || 'n/a'}`, 'Зафіксуйте Stage 7 sunset policy marker');
 
-  _stage3PushCheck_(checks, 'Canonical maintenance file', maintenancePolicy && maintenancePolicy.canonicalFile === 'Stage5MaintenanceApi.gs'? 'OK': 'FAIL', maintenancePolicy && maintenancePolicy.canonicalFile ? maintenancePolicy.canonicalFile : 'Не задано', 'Оновіть maintenance policy');
-  _stage3PushCheck_(checks, 'Compatibility maintenance facade', maintenancePolicy && maintenancePolicy.compatibilityFile === 'Stage4MaintenanceApi.gs'? 'OK': 'WARN', maintenancePolicy && maintenancePolicy.compatibilityFile ? maintenancePolicy.compatibilityFile : 'Не задано', 'Явно позначте compatibility facade');
+  _stage3PushCheck_(checks, 'Canonical maintenance file', maintenancePolicy && maintenancePolicy.canonicalFile === 'Stage5MaintenanceApi.gs' ? 'OK' : 'FAIL', maintenancePolicy && maintenancePolicy.canonicalFile ? maintenancePolicy.canonicalFile : 'Не задано', 'Оновіть maintenance policy');
+  _stage3PushCheck_(checks, 'Compatibility maintenance facade', maintenancePolicy && maintenancePolicy.compatibilityFile === 'Stage4MaintenanceApi.gs' ? 'OK' : 'WARN', maintenancePolicy && maintenancePolicy.compatibilityFile ? maintenancePolicy.compatibilityFile : 'Не задано', 'Явно позначте compatibility facade');
 
   const clientRuntimePolicy = meta && meta.clientRuntimePolicy || {};
-  _stage3PushCheck_(checks, 'Client runtime file', clientRuntimePolicy.runtimeFile === 'JavaScript.html'? 'OK': 'FAIL', clientRuntimePolicy.runtimeFile || 'Не задано', 'Зафіксуйте JavaScript.html як canonical runtime');
-  _stage3PushCheck_(checks, 'Client bootstrap mode', clientRuntimePolicy.bootstrapMode === 'sidebar-includeTemplate'? 'OK': 'FAIL', clientRuntimePolicy.bootstrapMode || 'Не задано', 'Використовуйте Sidebar.html ->includeTemplate(\'JavaScript\')');
-  _stage3PushCheck_(checks, 'Client modular status', clientRuntimePolicy.modularStatus === 'active-js-include-chain'? 'OK': 'WARN', clientRuntimePolicy.modularStatus || 'Не задано', 'Позначте Js.*.html як non-active experimental/reference artifacts');
-  _stage3PushCheck_(checks, 'Diagnostics wording policy', meta.diagnosticsPolicy && meta.diagnosticsPolicy.wording === 'stage7-1-1-final-stabilized-repair-baseline'? 'OK': 'WARN', meta.diagnosticsPolicy && meta.diagnosticsPolicy.wording ? meta.diagnosticsPolicy.wording : 'Не задано', 'Зафіксуйте Stage 7.1 diagnostics wording policy');
+  _stage3PushCheck_(checks, 'Client runtime file', clientRuntimePolicy.runtimeFile === 'JavaScript.html' ? 'OK' : 'FAIL', clientRuntimePolicy.runtimeFile || 'Не задано', 'Зафіксуйте JavaScript.html як canonical runtime');
+  _stage3PushCheck_(checks, 'Client bootstrap mode', clientRuntimePolicy.bootstrapMode === 'sidebar-includeTemplate' ? 'OK' : 'FAIL', clientRuntimePolicy.bootstrapMode || 'Не задано', 'Використовуйте Sidebar.html -> includeTemplate(\'JavaScript\')');
+  _stage3PushCheck_(checks, 'Client modular status', clientRuntimePolicy.modularStatus === 'active-js-include-chain' ? 'OK' : 'WARN', clientRuntimePolicy.modularStatus || 'Не задано', 'Позначте Js.*.html як non-active experimental/reference artifacts');
+  _stage3PushCheck_(checks, 'Diagnostics wording policy', meta.diagnosticsPolicy && meta.diagnosticsPolicy.wording === 'stage7-1-1-final-stabilized-repair-baseline' ? 'OK' : 'WARN', meta.diagnosticsPolicy && meta.diagnosticsPolicy.wording ? meta.diagnosticsPolicy.wording : 'Не задано', 'Зафіксуйте Stage 7.1 diagnostics wording policy');
 
   const requiredDocs = Array.isArray(meta.requiredDocs) ? meta.requiredDocs : [];
   requiredDocs.forEach(function(doc) {
-    _stage3PushCheck_(checks, `Required doc declared ${doc}`, requiredDocs.indexOf(doc) !== -1 ? 'OK': 'FAIL', 'Документ включено в metadata.requiredDocs', 'Оновіть ProjectMetadata.gs');
-    _stage3PushCheck_(checks, `Required doc physical ${doc}`, _projectBundleHas_(doc) ? 'OK': 'FAIL', _projectBundleHas_(doc) ? `present=${doc}`: `missing=${doc}`, 'Вирівняйте bundle layout');
+    _stage3PushCheck_(checks, `Required doc declared ${doc}`, requiredDocs.indexOf(doc) !== -1 ? 'OK' : 'FAIL', 'Документ включено в metadata.requiredDocs', 'Оновіть ProjectMetadata.gs');
+    _stage3PushCheck_(checks, `Required doc physical ${doc}`, _projectBundleHas_(doc) ? 'OK' : 'FAIL', _projectBundleHas_(doc) ? `present=${doc}` : `missing=${doc}`, 'Вирівняйте bundle layout');
   });
 
   const activeDocs = docs && docs.active ? Object.values(docs.active) : [];
   activeDocs.forEach(function(doc) {
-    _stage3PushCheck_(checks, `Active doc path ${doc}`, !_isArchivePath_(doc) ? 'OK': 'FAIL', doc, 'Активний документ не може лежати в docs/archive/');
-    _stage3PushCheck_(checks, `Active doc physical ${doc}`, _projectBundleHas_(doc) ? 'OK': 'FAIL', _projectBundleHas_(doc) ? `present=${doc}`: `missing=${doc}`, 'Вирівняйте bundle layout');
+    _stage3PushCheck_(checks, `Active doc path ${doc}`, !_isArchivePath_(doc) ? 'OK' : 'FAIL', doc, 'Активний документ не може лежати в docs/archive/');
+    _stage3PushCheck_(checks, `Active doc physical ${doc}`, _projectBundleHas_(doc) ? 'OK' : 'FAIL', _projectBundleHas_(doc) ? `present=${doc}` : `missing=${doc}`, 'Вирівняйте bundle layout');
   });
 
   const referenceDocs = Array.isArray(docs.reference) ? docs.reference : [];
   referenceDocs.forEach(function(doc) {
-    _stage3PushCheck_(checks, `Reference doc path ${doc}`, _isReferencePath_(doc) ? 'OK': 'FAIL', doc, 'Reference docs мають лежати в docs/reference/');
+    _stage3PushCheck_(checks, `Reference doc path ${doc}`, _isReferencePath_(doc) ? 'OK' : 'FAIL', doc, 'Reference docs мають лежати в docs/reference/');
   });
 
   const historicalDocs = Array.isArray(docs.historical) ? docs.historical : [];
   historicalDocs.forEach(function(doc) {
-    _stage3PushCheck_(checks, `Historical doc path ${doc}`, _isArchivePath_(doc) ? 'OK': 'FAIL', doc, 'Historical docs мають лежати в docs/archive/');
+    _stage3PushCheck_(checks, `Historical doc path ${doc}`, _isArchivePath_(doc) ? 'OK' : 'FAIL', doc, 'Historical docs мають лежати в docs/archive/');
   });
 
   ['docs/reference/PUBLIC_API_STAGE5.md', 'docs/reference/CHANGELOG_STAGE5.md', 'docs/reference/STAGE5_REPORT.md', 'docs/reference/STAGE6A_REPORT.md'].forEach(function(doc) {
-    _stage3PushCheck_(checks, `Canonical reference doc ${doc}`, _projectBundleHas_(doc) ? 'OK': 'FAIL', _projectBundleHas_(doc) ? `present=${doc}`: `missing=${doc}`, 'Відновіть canonical reference docs');
+    _stage3PushCheck_(checks, `Canonical reference doc ${doc}`, _projectBundleHas_(doc) ? 'OK' : 'FAIL', _projectBundleHas_(doc) ? `present=${doc}` : `missing=${doc}`, 'Відновіть canonical reference docs');
   });
 
   const helperOk = typeof HtmlUtils_ === 'object'
@@ -1610,7 +1610,7 @@ function runStage5MetadataConsistencyCheck_() {
     && escapeHtml_('<b>') === HtmlUtils_.escapeHtml('<b>')
     && _escapeHtml_('<b>') === HtmlUtils_.escapeHtml('<b>');
 
-  _stage3PushCheck_(checks, 'Canonical HTML helper', helperOk ? 'OK': 'FAIL', helperOk ? 'HtmlUtils_.escapeHtml() є source-of-truth, wrappers узгоджені': 'Helper-layer розсинхронізований', helperOk ? '': 'Перевірте HtmlUtils.gs / DeprecatedRegistry.gs');
+  _stage3PushCheck_(checks, 'Canonical HTML helper', helperOk ? 'OK' : 'FAIL', helperOk ? 'HtmlUtils_.escapeHtml() є source-of-truth, wrappers узгоджені' : 'Helper-layer розсинхронізований', helperOk ? '' : 'Перевірте HtmlUtils.gs / DeprecatedRegistry.gs');
 
   return checks;
 }
@@ -1658,13 +1658,13 @@ function debugSendPanelNow() {
   }
 
   SpreadsheetApp.getUi().alert(
-    'botMonth: '+ out.botMonth + '\n'+
-    'panelSheetExists: '+ out.panelSheetExists + '\n'+
-    'panelLastRow: '+ out.panelLastRow + '\n'+
-    'rawRowsCount: '+ out.rawRowsCount + '\n'+
-    'apiRowsCount: '+ apiRowsCount + '\n'+
-    'apiMonth: '+ apiMonth + '\n'+
-    'apiError: '+ (apiError || '—')
+    'botMonth: ' + out.botMonth + '\n' +
+    'panelSheetExists: ' + out.panelSheetExists + '\n' +
+    'panelLastRow: ' + out.panelLastRow + '\n' +
+    'rawRowsCount: ' + out.rawRowsCount + '\n' +
+    'apiRowsCount: ' + apiRowsCount + '\n' +
+    'apiMonth: ' + apiMonth + '\n' +
+    'apiError: ' + (apiError || '—')
   );
 }
 
@@ -1717,15 +1717,15 @@ function debugSendPanelBridge_() {
 
   Logger.log(JSON.stringify(out, null, 2));
   SpreadsheetApp.getUi().alert(
-    'DEBUG SEND_PANEL\\n'+
-    'botMonth: '+ out.botMonth + '\\n'+
-    'sheetExists: '+ out.panelSheetExists + '\\n'+
-    'panelLastRow: '+ out.panelLastRow + '\\n'+
-    'rawRowsCount: '+ out.rawRowsCount + '\\n'+
-    'repoRowsCount: '+ out.repoRowsCount + '\\n'+
-    'apiRowsCount: '+ out.apiRowsCount + '\\n'+
-    'apiMonth: '+ out.apiMonth + '\\n'+
-    'apiError: '+ (out.apiError || '—')
+    'DEBUG SEND_PANEL\\n' +
+    'botMonth: ' + out.botMonth + '\\n' +
+    'sheetExists: ' + out.panelSheetExists + '\\n' +
+    'panelLastRow: ' + out.panelLastRow + '\\n' +
+    'rawRowsCount: ' + out.rawRowsCount + '\\n' +
+    'repoRowsCount: ' + out.repoRowsCount + '\\n' +
+    'apiRowsCount: ' + out.apiRowsCount + '\\n' +
+    'apiMonth: ' + out.apiMonth + '\\n' +
+    'apiError: ' + (out.apiError || '—')
   );
 }
 
@@ -1791,23 +1791,23 @@ function _diagHasRouteApi_(fnName) {
 
 function _diagResolveKnownSymbolStage7_(name) {
   switch (String(name || '').trim()) {
-    case 'DataAccess_': return typeof DataAccess_ !== 'undefined'? DataAccess_ : undefined;
-    case 'DictionaryRepository_': return typeof DictionaryRepository_ !== 'undefined'? DictionaryRepository_ : undefined;
-    case 'PersonsRepository_': return typeof PersonsRepository_ !== 'undefined'? PersonsRepository_ : undefined;
-    case 'SendPanelRepository_': return typeof SendPanelRepository_ !== 'undefined'? SendPanelRepository_ : undefined;
-    case 'VacationsRepository_': return typeof VacationsRepository_ !== 'undefined'? VacationsRepository_ : undefined;
-    case 'SummaryRepository_': return typeof SummaryRepository_ !== 'undefined'? SummaryRepository_ : undefined;
-    case 'LogsRepository_': return typeof LogsRepository_ !== 'undefined'? LogsRepository_ : undefined;
-    case 'Stage4UseCases_': return typeof Stage4UseCases_ !== 'undefined'? Stage4UseCases_ : undefined;
-    case 'WorkflowOrchestrator_': return typeof WorkflowOrchestrator_ !== 'undefined'? WorkflowOrchestrator_ : undefined;
-    case 'Stage4AuditTrail_': return typeof Stage4AuditTrail_ !== 'undefined'? Stage4AuditTrail_ : undefined;
-    case 'Reconciliation_': return typeof Reconciliation_ !== 'undefined'? Reconciliation_ : undefined;
-    case 'Stage4Triggers_': return typeof Stage4Triggers_ !== 'undefined'? Stage4Triggers_ : undefined;
-    case 'Stage4Templates_': return typeof Stage4Templates_ !== 'undefined'? Stage4Templates_ : undefined;
-    case 'OperationRepository_': return typeof OperationRepository_ !== 'undefined'? OperationRepository_ : undefined;
-    case 'SheetSchemas_': return typeof SheetSchemas_ !== 'undefined'? SheetSchemas_ : undefined;
-    case 'SheetStandards_': return typeof SheetStandards_ !== 'undefined'? SheetStandards_ : undefined;
-    case 'Validation_': return typeof Validation_ !== 'undefined'? Validation_ : undefined;
+    case 'DataAccess_': return typeof DataAccess_ !== 'undefined' ? DataAccess_ : undefined;
+    case 'DictionaryRepository_': return typeof DictionaryRepository_ !== 'undefined' ? DictionaryRepository_ : undefined;
+    case 'PersonsRepository_': return typeof PersonsRepository_ !== 'undefined' ? PersonsRepository_ : undefined;
+    case 'SendPanelRepository_': return typeof SendPanelRepository_ !== 'undefined' ? SendPanelRepository_ : undefined;
+    case 'VacationsRepository_': return typeof VacationsRepository_ !== 'undefined' ? VacationsRepository_ : undefined;
+    case 'SummaryRepository_': return typeof SummaryRepository_ !== 'undefined' ? SummaryRepository_ : undefined;
+    case 'LogsRepository_': return typeof LogsRepository_ !== 'undefined' ? LogsRepository_ : undefined;
+    case 'Stage4UseCases_': return typeof Stage4UseCases_ !== 'undefined' ? Stage4UseCases_ : undefined;
+    case 'WorkflowOrchestrator_': return typeof WorkflowOrchestrator_ !== 'undefined' ? WorkflowOrchestrator_ : undefined;
+    case 'Stage4AuditTrail_': return typeof Stage4AuditTrail_ !== 'undefined' ? Stage4AuditTrail_ : undefined;
+    case 'Reconciliation_': return typeof Reconciliation_ !== 'undefined' ? Reconciliation_ : undefined;
+    case 'Stage4Triggers_': return typeof Stage4Triggers_ !== 'undefined' ? Stage4Triggers_ : undefined;
+    case 'Stage4Templates_': return typeof Stage4Templates_ !== 'undefined' ? Stage4Templates_ : undefined;
+    case 'OperationRepository_': return typeof OperationRepository_ !== 'undefined' ? OperationRepository_ : undefined;
+    case 'SheetSchemas_': return typeof SheetSchemas_ !== 'undefined' ? SheetSchemas_ : undefined;
+    case 'SheetStandards_': return typeof SheetStandards_ !== 'undefined' ? SheetStandards_ : undefined;
+    case 'Validation_': return typeof Validation_ !== 'undefined' ? Validation_ : undefined;
     default: return undefined;
   }
 }
@@ -1819,7 +1819,7 @@ function _diagResolveSymbolStage7_(name) {
   var directKnown = _diagResolveKnownSymbolStage7_(target);
   if (directKnown !== undefined) return directKnown;
 
-  if (target.indexOf('.') >-1) {
+  if (target.indexOf('.') > -1) {
     var parts = target.split('.').filter(Boolean);
     if (parts.length) {
       var rootSymbol = _diagResolveKnownSymbolStage7_(parts[0]);
@@ -1856,7 +1856,7 @@ function _stage3HasFn_(name) {
 }
 
 function _releaseStageLabel_() {
-  var meta = typeof getProjectBundleMetadata_ === 'function'? getProjectBundleMetadata_() : null;
+  var meta = typeof getProjectBundleMetadata_ === 'function' ? getProjectBundleMetadata_() : null;
   return meta && meta.stageLabel ? meta.stageLabel : 'Stage 7.1.1 — Final Stabilized Repair Baseline';
 }
 
@@ -1882,7 +1882,7 @@ function _diagResolveSeverity_(status, rawSeverity) {
 
 function _diagIsPseudoLikeCheck_(check) {
   var explicitStatus = String(check && check.status || '').toUpperCase();
-  if (explicitStatus === 'PSEUDO'|| explicitStatus === 'COMPAT'|| explicitStatus === 'LEGACY-COMPAT'|| explicitStatus === 'PSEUDO-COMPAT') {
+  if (explicitStatus === 'PSEUDO' || explicitStatus === 'COMPAT' || explicitStatus === 'LEGACY-COMPAT' || explicitStatus === 'PSEUDO-COMPAT') {
     return true;
   }
 
@@ -1900,8 +1900,8 @@ function _diagIsPseudoLikeCheck_(check) {
 
 function _diagResolveUiGroup_(check) {
   var explicit = String(check && check.uiGroup || '').toLowerCase();
-  if (explicit === 'critical'|| explicit === 'warnings'|| explicit === 'pseudo'|| explicit === 'compatibility'|| explicit === 'ok') {
-    return explicit === 'compatibility'? 'pseudo': explicit;
+  if (explicit === 'critical' || explicit === 'warnings' || explicit === 'pseudo' || explicit === 'compatibility' || explicit === 'ok') {
+    return explicit === 'compatibility' ? 'pseudo' : explicit;
   }
 
   var status = _diagNormalizeStatus_(check && check.status);
@@ -1909,7 +1909,7 @@ function _diagResolveUiGroup_(check) {
 
   if (status === 'FAIL') return 'critical';
   if (status === 'WARN') return 'warnings';
-  if (status === 'PSEUDO'|| (looksPseudo && status === 'OK')) return 'pseudo';
+  if (status === 'PSEUDO' || (looksPseudo && status === 'OK')) return 'pseudo';
   return 'ok';
 }
 
@@ -1918,7 +1918,7 @@ function _diagNormalizeCheck_(check, titlePrefix) {
   if (!title) title = 'Unnamed check';
   if (titlePrefix) {
     var pref = String(titlePrefix).trim();
-    if (pref && title.indexOf(pref + '/ ') !== 0) title = pref + '/ '+ title;
+    if (pref && title.indexOf(pref + ' / ') !== 0) title = pref + ' / ' + title;
   }
 
   var details = String((check && (check.details || check.message)) || '').trim();
@@ -1960,7 +1960,7 @@ function _diagMergeChecks_() {
   Array.prototype.slice.call(arguments).forEach(function(part) {
     (part || []).forEach(function(item) {
       var normalized = _diagNormalizeCheck_(item);
-      var key = [normalized.title, normalized.status, normalized.details, normalized.howTo].join('| ');
+      var key = [normalized.title, normalized.status, normalized.details, normalized.howTo].join(' | ');
       if (seen[key]) return;
       seen[key] = true;
       merged.push(normalized);
@@ -2029,8 +2029,8 @@ function _diagBuildReport_(checks, mode, summaryPrefix) {
     warnings: _diagBuildWarningsFromChecks_(list),
     counts: counts,
     summary: counts.failures === 0
-      ? ((summaryPrefix || _releaseStageLabel_()) + '. Warnings: '+ counts.warnings + ', pseudo: '+ counts.pseudo)
-      : ((summaryPrefix || _releaseStageLabel_()) + '. Failures: '+ counts.failures + ', warnings: '+ counts.warnings + ', pseudo: '+ counts.pseudo),
+      ? ((summaryPrefix || _releaseStageLabel_()) + '. Warnings: ' + counts.warnings + ', pseudo: ' + counts.pseudo)
+      : ((summaryPrefix || _releaseStageLabel_()) + '. Failures: ' + counts.failures + ', warnings: ' + counts.warnings + ', pseudo: ' + counts.pseudo),
     ts: new Date().toISOString()
   };
 }
@@ -2041,41 +2041,41 @@ function _diagServiceSheetCheck_(checks, name) {
     var sh = ss.getSheetByName(name);
     _stage3PushCheck_(
       checks,
-      'Service sheet '+ name,
-      sh ? 'OK': 'WARN',
-      sh ? 'Доступний': 'Ще не створений; буде створений автоматично при першій lifecycle-операції',
-      sh ? '': 'Запустіть будь-яку критичну write-операцію або ensureServiceSheets()'
+      'Service sheet ' + name,
+      sh ? 'OK' : 'WARN',
+      sh ? 'Доступний' : 'Ще не створений; буде створений автоматично при першій lifecycle-операції',
+      sh ? '' : 'Запустіть будь-яку критичну write-операцію або ensureServiceSheets()'
     );
   } catch (e) {
-    _stage3PushCheck_(checks, 'Service sheet '+ name, 'FAIL', e && e.message ? e.message : String(e), 'Перевірте доступ до SpreadsheetApp');
+    _stage3PushCheck_(checks, 'Service sheet ' + name, 'FAIL', e && e.message ? e.message : String(e), 'Перевірте доступ до SpreadsheetApp');
   }
 }
 
 function _diagBuildStage7CoreChecks_(options) {
   var opts = options || {};
   var checks = [];
-  var meta = typeof getProjectBundleMetadata_ === 'function'? getProjectBundleMetadata_() : {};
-  var release = typeof getProjectReleaseNaming_ === 'function'? getProjectReleaseNaming_() : {};
-  var docs = typeof getProjectDocumentationMap_ === 'function'? getProjectDocumentationMap_() : {};
+  var meta = typeof getProjectBundleMetadata_ === 'function' ? getProjectBundleMetadata_() : {};
+  var release = typeof getProjectReleaseNaming_ === 'function' ? getProjectReleaseNaming_() : {};
+  var docs = typeof getProjectDocumentationMap_ === 'function' ? getProjectDocumentationMap_() : {};
   var policy = meta && meta.clientRuntimePolicy ? meta.clientRuntimePolicy : {};
-  var runtimeContract = typeof getClientRuntimeContract_ === 'function'? getClientRuntimeContract_() : {};
+  var runtimeContract = typeof getClientRuntimeContract_ === 'function' ? getClientRuntimeContract_() : {};
 
-  _stage3PushCheck_(checks, 'Release stage marker', String(meta && meta.stage || '') === '7.1'? 'OK': 'FAIL', 'stage='+ (meta && meta.stage || 'n/a') + ', label='+ (meta && meta.stageLabel || 'n/a'), 'Оновіть ProjectMetadata.gs під Stage 7.1');
-  _stage3PushCheck_(checks, 'Active baseline marker', meta && meta.activeBaseline === 'stage7-1-1-final-stabilized-repair-baseline'? 'OK': 'FAIL', 'activeBaseline='+ (meta && meta.activeBaseline || 'n/a'), 'Оновіть activeBaseline');
-  _stage3PushCheck_(checks, 'Release naming aligned', release && release.archiveBaseName === 'gas_wapb_stage7_1_1_final_stabilized_repair'&& release.rootFolderName === 'gas_wapb_stage7_1_1_final_stabilized_repair'? 'OK': 'FAIL', (release && release.archiveBaseName || 'n/a') + '/ '+ (release && release.rootFolderName || 'n/a'), 'Вирівняйте archive/root naming');
-  _stage3PushCheck_(checks, 'Stage7 report active', docs && docs.active && docs.active.releaseReport === 'STAGE7_REPORT.md'? 'OK': 'FAIL', docs && docs.active && docs.active.releaseReport ? docs.active.releaseReport : 'Не задано', 'Зафіксуйте STAGE7_REPORT.md як active release report');
-  _stage3PushCheck_(checks, 'Modular runtime policy', policy && policy.runtimeStatus === 'canonical-modular-runtime'? 'OK': 'FAIL', policy && policy.runtimeStatus ? policy.runtimeStatus : 'Не задано', 'Оновіть clientRuntimePolicy.runtimeStatus');
-  _stage3PushCheck_(checks, 'Active Js include chain', policy && policy.modularStatus === 'active-js-include-chain'? 'OK': 'FAIL', policy && policy.modularStatus ? policy.modularStatus : 'Не задано', 'Оновіть clientRuntimePolicy.modularStatus');
-  _stage3PushCheck_(checks, 'Runtime contract marker', runtimeContract && runtimeContract.policyMarker === 'stage7-sidebar-runtime'? 'OK': 'FAIL', runtimeContract && runtimeContract.policyMarker ? runtimeContract.policyMarker : 'Не задано', 'Оновіть getClientRuntimeContract_()');
-  _stage3PushCheck_(checks, 'OperationRepository available', typeof OperationRepository_ === 'object'? 'OK': 'FAIL', typeof OperationRepository_, 'Підключіть OperationRepository.gs');
-  _stage3PushCheck_(checks, 'WorkflowOrchestrator available', typeof WorkflowOrchestrator_ === 'object'? 'OK': 'FAIL', typeof WorkflowOrchestrator_, 'Перевірте WorkflowOrchestrator.gs');
+  _stage3PushCheck_(checks, 'Release stage marker', String(meta && meta.stage || '') === '7.1' ? 'OK' : 'FAIL', 'stage=' + (meta && meta.stage || 'n/a') + ', label=' + (meta && meta.stageLabel || 'n/a'), 'Оновіть ProjectMetadata.gs під Stage 7.1');
+  _stage3PushCheck_(checks, 'Active baseline marker', meta && meta.activeBaseline === 'stage7-1-1-final-stabilized-repair-baseline' ? 'OK' : 'FAIL', 'activeBaseline=' + (meta && meta.activeBaseline || 'n/a'), 'Оновіть activeBaseline');
+  _stage3PushCheck_(checks, 'Release naming aligned', release && release.archiveBaseName === 'gas_wapb_stage7_1_1_final_stabilized_repair' && release.rootFolderName === 'gas_wapb_stage7_1_1_final_stabilized_repair' ? 'OK' : 'FAIL', (release && release.archiveBaseName || 'n/a') + ' / ' + (release && release.rootFolderName || 'n/a'), 'Вирівняйте archive/root naming');
+  _stage3PushCheck_(checks, 'Stage7 report active', docs && docs.active && docs.active.releaseReport === 'STAGE7_REPORT.md' ? 'OK' : 'FAIL', docs && docs.active && docs.active.releaseReport ? docs.active.releaseReport : 'Не задано', 'Зафіксуйте STAGE7_REPORT.md як active release report');
+  _stage3PushCheck_(checks, 'Modular runtime policy', policy && policy.runtimeStatus === 'canonical-modular-runtime' ? 'OK' : 'FAIL', policy && policy.runtimeStatus ? policy.runtimeStatus : 'Не задано', 'Оновіть clientRuntimePolicy.runtimeStatus');
+  _stage3PushCheck_(checks, 'Active Js include chain', policy && policy.modularStatus === 'active-js-include-chain' ? 'OK' : 'FAIL', policy && policy.modularStatus ? policy.modularStatus : 'Не задано', 'Оновіть clientRuntimePolicy.modularStatus');
+  _stage3PushCheck_(checks, 'Runtime contract marker', runtimeContract && runtimeContract.policyMarker === 'stage7-sidebar-runtime' ? 'OK' : 'FAIL', runtimeContract && runtimeContract.policyMarker ? runtimeContract.policyMarker : 'Не задано', 'Оновіть getClientRuntimeContract_()');
+  _stage3PushCheck_(checks, 'OperationRepository available', typeof OperationRepository_ === 'object' ? 'OK' : 'FAIL', typeof OperationRepository_, 'Підключіть OperationRepository.gs');
+  _stage3PushCheck_(checks, 'WorkflowOrchestrator available', typeof WorkflowOrchestrator_ === 'object' ? 'OK' : 'FAIL', typeof WorkflowOrchestrator_, 'Перевірте WorkflowOrchestrator.gs');
 
   var hasList = _stage3HasFn_('apiStage5ListPendingRepairs');
   var hasRepair = _stage3HasFn_('apiStage5RunRepair');
   var hasRetentionCleanup = _stage3HasFn_('apiStage5RunLifecycleRetentionCleanup');
-  _stage3PushCheck_(checks, 'Lifecycle maintenance API', hasList && hasRepair ? 'OK': 'FAIL', 'list='+ hasList + ', repair='+ hasRepair, 'Додайте maintenance API для repair flow');
-  _stage3PushCheck_(checks, 'Lifecycle retention cleanup API', hasRetentionCleanup ? 'OK': 'WARN', 'cleanup='+ hasRetentionCleanup, 'Додайте окремий maintenance flow для lifecycle retention cleanup');
-  _stage3PushCheck_(checks, 'Stage4 compatibility facade preserved', _stage3HasFn_('apiStage4ClearCache') && _stage3HasFn_('apiStage4HealthCheck') ? 'OK': 'FAIL', 'wrappers preserved='+ (_stage3HasFn_('apiStage4ClearCache') && _stage3HasFn_('apiStage4HealthCheck')), 'Не ламайте Stage4 compatibility facade');
+  _stage3PushCheck_(checks, 'Lifecycle maintenance API', hasList && hasRepair ? 'OK' : 'FAIL', 'list=' + hasList + ', repair=' + hasRepair, 'Додайте maintenance API для repair flow');
+  _stage3PushCheck_(checks, 'Lifecycle retention cleanup API', hasRetentionCleanup ? 'OK' : 'WARN', 'cleanup=' + hasRetentionCleanup, 'Додайте окремий maintenance flow для lifecycle retention cleanup');
+  _stage3PushCheck_(checks, 'Stage4 compatibility facade preserved', _stage3HasFn_('apiStage4ClearCache') && _stage3HasFn_('apiStage4HealthCheck') ? 'OK' : 'FAIL', 'wrappers preserved=' + (_stage3HasFn_('apiStage4ClearCache') && _stage3HasFn_('apiStage4HealthCheck')), 'Не ламайте Stage4 compatibility facade');
 
   ['OPS_LOG', 'ACTIVE_OPERATIONS', 'CHECKPOINTS'].forEach(function(name) {
     _diagServiceSheetCheck_(checks, name);
@@ -2085,17 +2085,17 @@ function _diagBuildStage7CoreChecks_(options) {
     try {
       var rawSidebar = include('Sidebar');
       var rawJavaScript = includeTemplate('JavaScript');
-      _stage3PushCheck_(checks, 'Sidebar uses includeTemplate(JavaScript)', rawSidebar.indexOf("includeTemplate('JavaScript')") !== -1 || rawSidebar.indexOf('includeTemplate("JavaScript")') !== -1 ? 'OK': 'FAIL', 'Sidebar bootstrap include chain checked', 'Поверніть includeTemplate(JavaScript) у Sidebar.html');
-      var modularOk = rawJavaScript.indexOf('stage7-sidebar-runtime') !== -1 && rawJavaScript.indexOf(' window.SidebarApp = SidebarApp;') !== -1 && rawJavaScript.indexOf('<script') !== -1;
-      _stage3PushCheck_(checks, 'JavaScript runtime is modular', modularOk ? 'OK': 'FAIL', 'JavaScript.html include chain evaluated', 'Зберіть JavaScript.html як модульний агрегатор');
+      _stage3PushCheck_(checks, 'Sidebar uses includeTemplate(JavaScript)', rawSidebar.indexOf("includeTemplate('JavaScript')") !== -1 || rawSidebar.indexOf('includeTemplate("JavaScript")') !== -1 ? 'OK' : 'FAIL', 'Sidebar bootstrap include chain checked', 'Поверніть includeTemplate(JavaScript) у Sidebar.html');
+      var modularOk = rawJavaScript.indexOf('stage7-sidebar-runtime') !== -1 && rawJavaScript.indexOf('window.SidebarApp = SidebarApp;') !== -1 && rawJavaScript.indexOf('<script') !== -1;
+      _stage3PushCheck_(checks, 'JavaScript runtime is modular', modularOk ? 'OK' : 'FAIL', 'JavaScript.html include chain evaluated', 'Зберіть JavaScript.html як модульний агрегатор');
     } catch (e) {
       _stage3PushCheck_(checks, 'Runtime template evaluation', 'FAIL', e && e.message ? e.message : String(e), 'Перевірте JavaScript.html і Sidebar.html');
     }
   }
 
   try {
-    var runtime = typeof JobRuntime_ === 'object'&& typeof JobRuntime_.buildRuntimeReport === 'function'? JobRuntime_.buildRuntimeReport() : null;
-    _stage3PushCheck_(checks, 'Job runtime report', runtime ? 'OK': 'WARN', runtime ? ('jobs='+ (runtime.totalJobs || 0) + ', failed='+ (runtime.failedJobs || 0) + ', stale='+ (runtime.staleJobs || 0)) : 'Недоступний', runtime ? '': 'Перевірте JobRuntime.gs');
+    var runtime = typeof JobRuntime_ === 'object' && typeof JobRuntime_.buildRuntimeReport === 'function' ? JobRuntime_.buildRuntimeReport() : null;
+    _stage3PushCheck_(checks, 'Job runtime report', runtime ? 'OK' : 'WARN', runtime ? ('jobs=' + (runtime.totalJobs || 0) + ', failed=' + (runtime.failedJobs || 0) + ', stale=' + (runtime.staleJobs || 0)) : 'Недоступний', runtime ? '' : 'Перевірте JobRuntime.gs');
   } catch (e) {
     _stage3PushCheck_(checks, 'Job runtime report', 'FAIL', e && e.message ? e.message : String(e), 'Перевірте JobRuntime.gs');
   }
@@ -2105,10 +2105,10 @@ function _diagBuildStage7CoreChecks_(options) {
 
 function _diagAppendPendingRepairsCheck_(checks) {
   try {
-    var pending = typeof OperationRepository_ === 'object'&& typeof OperationRepository_.listPendingRepairs === 'function'
+    var pending = typeof OperationRepository_ === 'object' && typeof OperationRepository_.listPendingRepairs === 'function'
       ? OperationRepository_.listPendingRepairs({ limit: 25 })
       : { operations: [] };
-    _stage3PushCheck_(checks, 'Pending repairs visibility', pending && Array.isArray(pending.operations) ? 'OK': 'WARN', pending && Array.isArray(pending.operations) ? ('visible='+ pending.operations.length) : 'Недоступно', pending && Array.isArray(pending.operations) ? '': 'Перевірте OperationRepository_.listPendingRepairs()');
+    _stage3PushCheck_(checks, 'Pending repairs visibility', pending && Array.isArray(pending.operations) ? 'OK' : 'WARN', pending && Array.isArray(pending.operations) ? ('visible=' + pending.operations.length) : 'Недоступно', pending && Array.isArray(pending.operations) ? '' : 'Перевірте OperationRepository_.listPendingRepairs()');
   } catch (e) {
     _stage3PushCheck_(checks, 'Pending repairs visibility', 'FAIL', e && e.message ? e.message : String(e), 'Перевірте OperationRepository_.listPendingRepairs()');
   }
@@ -2116,8 +2116,8 @@ function _diagAppendPendingRepairsCheck_(checks) {
 
 function _diagAppendCompatibilitySplitCheck_(checks) {
   try {
-    var sunset = typeof getCompatibilitySunsetReport_ === 'function'? getCompatibilitySunsetReport_() : { total: 0, counts: {} };
-    _stage3PushCheck_(checks, 'Compatibility split report (informational)', 'PSEUDO', 'retained='+ (sunset.total || 0), 'Compatibility wrappers intentionally remain until explicit sunset plan');
+    var sunset = typeof getCompatibilitySunsetReport_ === 'function' ? getCompatibilitySunsetReport_() : { total: 0, counts: {} };
+    _stage3PushCheck_(checks, 'Compatibility split report (informational)', 'PSEUDO', 'retained=' + (sunset.total || 0), 'Compatibility wrappers intentionally remain until explicit sunset plan');
   } catch (e) {
     _stage3PushCheck_(checks, 'Compatibility split report (informational)', 'WARN', e && e.message ? e.message : String(e), 'Перевірте DeprecatedRegistry.gs');
   }
@@ -2125,10 +2125,10 @@ function _diagAppendCompatibilitySplitCheck_(checks) {
 
 function _diagAppendLifecyclePolicyCheck_(checks) {
   try {
-    var policy = typeof OperationRepository_ === 'object'&& typeof OperationRepository_.buildLifecyclePolicyReport === 'function'
+    var policy = typeof OperationRepository_ === 'object' && typeof OperationRepository_.buildLifecyclePolicyReport === 'function'
       ? OperationRepository_.buildLifecyclePolicyReport()
       : null;
-    _stage3PushCheck_(checks, 'Lifecycle policy report', policy ? 'OK': 'FAIL', policy ? ('ttlScenarios='+ (policy.ttlScenarios || 0) + ', sheets='+ ((policy.serviceSheets || []).join(', '))) : 'Недоступно', policy ? '': 'Перевірте OperationRepository_.buildLifecyclePolicyReport()');
+    _stage3PushCheck_(checks, 'Lifecycle policy report', policy ? 'OK' : 'FAIL', policy ? ('ttlScenarios=' + (policy.ttlScenarios || 0) + ', sheets=' + ((policy.serviceSheets || []).join(', '))) : 'Недоступно', policy ? '' : 'Перевірте OperationRepository_.buildLifecyclePolicyReport()');
   } catch (e) {
     _stage3PushCheck_(checks, 'Lifecycle policy report', 'FAIL', e && e.message ? e.message : String(e), 'Перевірте OperationRepository_.buildLifecyclePolicyReport()');
   }
@@ -2215,10 +2215,10 @@ function runStage5FullDiagnostics_(options) {
 
 function runStage5FullVerboseDiagnostics_(options) {
   var base = runStage5FullDiagnostics_(options || {});
-  var hardening = runStage6AHardeningDiagnostics_({ mode: 'stage7-hardening'});
+  var hardening = runStage6AHardeningDiagnostics_({ mode: 'stage7-hardening' });
   return _diagBuildReport_(
     _diagMergeChecks_(base.checks || [], hardening.checks || []),
     'full-verbose',
-    (base.ok && hardening.ok) ? (_releaseStageLabel_() + 'verbose diagnostics OK') : (_releaseStageLabel_() + 'verbose diagnostics потребують уваги')
+    (base.ok && hardening.ok) ? (_releaseStageLabel_() + ' verbose diagnostics OK') : (_releaseStageLabel_() + ' verbose diagnostics потребують уваги')
   );
 }

@@ -12,7 +12,7 @@
  * - UI eligibility
  */
 
-var WAPB_STAGE7_ROUTING_REGISTRY_STORE_ = (typeof WAPB_STAGE7_ROUTING_REGISTRY_STORE_ !== 'undefined'&& WAPB_STAGE7_ROUTING_REGISTRY_STORE_) || Object.freeze({
+var WAPB_STAGE7_ROUTING_REGISTRY_STORE_ = (typeof WAPB_STAGE7_ROUTING_REGISTRY_STORE_ !== 'undefined' && WAPB_STAGE7_ROUTING_REGISTRY_STORE_) || Object.freeze({
 
   sidebar: Object.freeze({
     getMonthsList: Object.freeze({

@@ -18,7 +18,7 @@ function apiStage4GetSendPanelData() {
 }
 
 function apiStage4SwitchBotToMonth(monthSheetName) {
-  return Stage4UseCases_.switchBotToMonth({ month: monthSheetName || ''});
+  return Stage4UseCases_.switchBotToMonth({ month: monthSheetName || '' });
 }
 
 function apiGenerateSendPanelForDate(options) {
