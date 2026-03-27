@@ -254,11 +254,11 @@ function openPersonCardByCallsignAndDate_(callsign, dateStr) {
           }
           function openCalendar() {
             gsRun('openPersonCalendar', '${HtmlUtils_.escapeHtml(data.callsign)}')
-              .catch(err => alert('✕ ' + normalizeError(err)));
+              .catch(err => alert('(✘) ' + normalizeError(err)));
           }
           function openMainSidebar() {
             gsRun('showSidebar')
-              .catch(err => alert('✕ ' + normalizeError(err)));
+              .catch(err => alert('(✘) ' + normalizeError(err)));
           }
         </script>
       </body>
@@ -266,7 +266,7 @@ function openPersonCardByCallsignAndDate_(callsign, dateStr) {
   `;
 
   const html = HtmlService.createHtmlOutput(htmlContent)
-    .setTitle(`👤 ${data.callsign}`)
+    .setTitle(`☺︎ ${data.callsign}`)
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
   SpreadsheetApp.getUi().showSidebar(html);
   return true;
@@ -277,7 +277,7 @@ function openPersonCalendar_(callsign) {
   t.callsign = String(callsign || '').trim();
   t.today = _todayStr_();
   const html = t.evaluate()
-    .setTitle(`📅 ${callsign}`)
+    .setTitle(`[CAL] ${callsign}`)
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
   SpreadsheetApp.getUi().showSidebar(html);
 }

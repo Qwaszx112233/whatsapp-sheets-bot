@@ -41,7 +41,7 @@
     if (!consoleEl) return;
 
     consoleEl.innerHTML = '';
-    logToConsole('🧹 Консоль очищено', 'info');
+    logToConsole(' Консоль очищено', 'info');
   }
 
   function scrollConsole(direction) {
@@ -63,7 +63,7 @@
 
       resultContent.insertAdjacentHTML('afterbegin', `
         <div class="result-item" id="sendingProgress">
-          <div class="result-label">📤 Прогрес відправки</div>
+          <div class="result-label">[OUT] Прогрес відправки</div>
           <div class="progress-bar">
             <div id="progressFill" class="progress-fill"></div>
           </div>
@@ -114,9 +114,9 @@
         updateMonthBadge(STATE.currentMonth);
       }
 
-      logToConsole('✓ Панель готова до роботи', 'success');
+      logToConsole('((✔)) Панель готова до роботи', 'success');
     } catch (error) {
-      logToConsole(`✕ Помилка ініціалізації: ${normalizeError(error)}`, 'error');
+      logToConsole(`(✘) Помилка ініціалізації: ${normalizeError(error)}`, 'error');
     } finally {
       hideLoading();
     }
@@ -239,12 +239,12 @@
     hideProgressBar();
     stopSending();
 
-    logToConsole(`✕ Помилка: ${message}`, 'error');
+    logToConsole(`(✘) Помилка: ${message}`, 'error');
     displayInResult('error', { error: message });
   }
 
   async function handleMenuAction(action) {
-    logToConsole(`➡️ Виконання: ${getActionName(action)}`, 'info');
+    logToConsole(`↦ Виконання: ${getActionName(action)}`, 'info');
 
     try {
       switch (action) {
@@ -267,13 +267,13 @@
                 reason: 'sendUnsent.open'
               });
             } catch (error) {
-              logToConsole(`✕ Не вдалося перечитати SEND_PANEL: ${normalizeError(error)}`, 'error');
+              logToConsole(`(✘) Не вдалося перечитати SEND_PANEL: ${normalizeError(error)}`, 'error');
               showSendPanel();
               return;
             }
           }
           if (!Array.isArray(panelRows) || panelRows.length === 0) {
-            logToConsole('⁈ SEND_PANEL порожній навіть після перечитування', 'warning');
+            logToConsole('⚠︎ SEND_PANEL порожній навіть після перечитування', 'warning');
           }
           showSendPanel();
           break;
@@ -287,7 +287,7 @@
         case 'createNextMonth': {
           const result = await ActionDispatcher.run('createNextMonth', () => Stage4Api.createNextMonth({ switchToNewMonth: true }));
           if (result?.success) {
-            logToConsole(`✓ ${result.message}`, 'success');
+            logToConsole(`((✔)) ${result.message}`, 'success');
             showStandardResult('Створення місяця');
             displayInResult('createMonth', result);
           } else {
@@ -301,7 +301,7 @@
           if (result?.success) {
             showStandardResult('Нагадування про відпустки');
             displayInResult('vacationResult', Object.assign({}, result.vacations || {}, { message: result.message || '' }));
-            logToConsole('🏖️ Нагадування про відпустки перевірено', 'success');
+            logToConsole('[VAC] Нагадування про відпустки перевірено', 'success');
           } else {
             displayInResult('error', { error: result?.error || 'Невідома помилка' });
           }
@@ -311,9 +311,9 @@
         case 'birthdayCheck': {
           const result = await ActionDispatcher.run('checkBirthdays', () => Stage4Api.checkVacationsAndBirthdays(_todayStr_()));
           if (result?.success) {
-            showStandardResult('🎂 Дні Народження');
+            showStandardResult(' Дні Народження');
             displayBirthdayResult(result.birthdays || {});
-            logToConsole('🎂 Перевірка ДН виконана', 'success');
+            logToConsole(' Перевірка ДН виконана', 'success');
           } else {
             displayInResult('error', { error: result?.error || 'Невідома помилка' });
           }
@@ -360,7 +360,7 @@
         }
 
         default:
-          logToConsole(`⁈ Невідома дія: ${action}`, 'warning');
+          logToConsole(`⚠︎ Невідома дія: ${action}`, 'warning');
       }
     } catch (error) {
       handleError(error);

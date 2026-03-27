@@ -30,9 +30,9 @@
       document.execCommand('copy');
       document.body.removeChild(el);
 
-      showToast('✓ Скопійовано');
+      showToast('((✔)) Скопійовано');
     } catch (_) {
-      showToast('✕ Не вдалося скопіювати');
+      showToast('(✘) Не вдалося скопіювати');
     }
   }
 
@@ -40,14 +40,14 @@
     const value = String(text ?? '');
 
     if (!value) {
-      showToast('⁈ Нічого копіювати');
+      showToast('⚠︎ Нічого копіювати');
       return;
     }
 
     if (navigator.clipboard?.writeText) {
       navigator.clipboard
         .writeText(value)
-        .then(() => showToast('✓ Скопійовано'))
+        .then(() => showToast('((✔)) Скопійовано'))
         .catch(() => fallbackCopy(value));
       return;
     }
@@ -66,7 +66,7 @@
   // =========================
   async function sendDetailedToCommander() {
     if (!STATE.lastDetailedDate || !STATE.lastDetailedText) {
-      showToast('✕ Спочатку створи детальне зведення');
+      showToast('(✘) Спочатку створи детальне зведення');
       return;
     }
 
@@ -81,12 +81,12 @@
 
       if (result?.success) {
         if (!STATE.DIAG_TEST_MODE) openLinkSafe(result.link);
-        showToast('✓ Відправлено командиру');
+        showToast('((✔)) Відправлено командиру');
       } else {
-        showToast('✕ ' + (result?.error || 'Помилка'));
+        showToast('(✘) ' + (result?.error || 'Помилка'));
       }
     } catch (error) {
-      showToast('✕ ' + normalizeError(error));
+      showToast('(✘) ' + normalizeError(error));
     } finally {
       hideLoading();
     }
@@ -94,7 +94,7 @@
 
   async function sendDaySummaryToCommander() {
     if (!STATE.lastSummaryDate || !STATE.lastSummaryText) {
-      showToast('✕ Спочатку створи зведення дня');
+      showToast('(✘) Спочатку створи зведення дня');
       return;
     }
 
@@ -109,12 +109,12 @@
 
       if (result?.success) {
         if (!STATE.DIAG_TEST_MODE) openLinkSafe(result.link);
-        showToast('✓ Відправлено командиру');
+        showToast('((✔)) Відправлено командиру');
       } else {
-        showToast('✕ ' + (result?.error || 'Помилка'));
+        showToast('(✘) ' + (result?.error || 'Помилка'));
       }
     } catch (error) {
-      showToast('✕ ' + normalizeError(error));
+      showToast('(✘) ' + normalizeError(error));
     } finally {
       hideLoading();
     }
@@ -143,13 +143,13 @@
       if (Array.isArray(data.commanderMessages) && data.commanderMessages.length > 0) {
         html += `
           <div style="background:#e3f2fd;border:1px solid #2196F3;border-left:4px solid #2196F3;border-radius:14px;padding:12px;margin-bottom:12px;">
-            <div style="font-weight:800;font-size:13px;color:#0b5e9e;margin-bottom:10px;">👨‍✈️ КОМАНДИРУ (${data.commanderMessages.length})</div>
+            <div style="font-weight:800;font-size:13px;color:#0b5e9e;margin-bottom:10px;">[PILOT] КОМАНДИРУ (${data.commanderMessages.length})</div>
         `;
 
         data.commanderMessages.forEach(row => {
           html += `
             <div style="${itemStyle}">
-              <div style="${fioStyle}">🎂 ${esc(row.callsign || row.fio)}</div>
+              <div style="${fioStyle}"> ${esc(row.callsign || row.fio)}</div>
               <div style="font-size:12px;color:#374151;margin-top:4px;">
                 ${esc(row.fio)} • ${esc(row.birthday || '')}
               </div>
@@ -158,8 +158,8 @@
               </div>
               ${
                 row.link
-                  ? `<button style="${btnStyle}background:#1565C0;" onclick="SidebarApp.sendBirthdayMessage('${escapeJsString(row.link)}')">📱 Відправити</button>`
-                  : `<div style="color:#888;font-size:12px;margin-top:6px;">⁈ Немає посилання</div>`
+                  ? `<button style="${btnStyle}background:#1565C0;" onclick="SidebarApp.sendBirthdayMessage('${escapeJsString(row.link)}')">☏ Відправити</button>`
+                  : `<div style="color:#888;font-size:12px;margin-top:6px;">⚠︎ Немає посилання</div>`
               }
             </div>
           `;
@@ -171,13 +171,13 @@
       if (Array.isArray(data.birthdayMessages) && data.birthdayMessages.length > 0) {
         html += `
           <div style="background:#fff3e0;border:1px solid #ff9800;border-left:4px solid #ff9800;border-radius:14px;padding:12px;margin-bottom:12px;">
-            <div style="font-weight:800;font-size:13px;color:#e65100;margin-bottom:10px;">🎉 ІМЕНИННИКУ (${data.birthdayMessages.length})</div>
+            <div style="font-weight:800;font-size:13px;color:#e65100;margin-bottom:10px;">[PARTY] ІМЕНИННИКУ (${data.birthdayMessages.length})</div>
         `;
 
         data.birthdayMessages.forEach(person => {
           html += `
             <div style="${itemStyle}">
-              <div style="${fioStyle}">🎂 ${esc(person.displayName || person.fio)}</div>
+              <div style="${fioStyle}"> ${esc(person.displayName || person.fio)}</div>
               <div style="font-size:12px;color:#374151;margin-top:4px;">
                 ${esc(person.fio)} • ${esc(person.birthday || '')}
               </div>
@@ -186,11 +186,11 @@
               </div>
               ${
                 person.link
-                  ? `<button style="${btnStyle}" onclick="SidebarApp.sendBirthdayMessage('${escapeJsString(person.link)}')">📱 Привітати</button>`
+                  ? `<button style="${btnStyle}" onclick="SidebarApp.sendBirthdayMessage('${escapeJsString(person.link)}')">☏ Привітати</button>`
                   : (
                       person.phone
-                        ? `<button style="${btnStyle}" onclick="SidebarApp.openBirthdayWA('${escapeJsString(person.phone)}', '${escapeJsString(person.displayName || person.fio)}')">📱 Привітати у WhatsApp</button>`
-                        : `<div style="color:#888;font-size:12px;margin-top:6px;">⁈ Немає телефону</div>`
+                        ? `<button style="${btnStyle}" onclick="SidebarApp.openBirthdayWA('${escapeJsString(person.phone)}', '${escapeJsString(person.displayName || person.fio)}')">☏ Привітати у WhatsApp</button>`
+                        : `<div style="color:#888;font-size:12px;margin-top:6px;">⚠︎ Немає телефону</div>`
                     )
               }
             </div>
@@ -206,20 +206,20 @@
       if (Array.isArray(data.today) && data.today.length > 0) {
         html += `
           <div style="background:#fff3e0;border:1px solid #ff9800;border-left:4px solid #ff9800;border-radius:14px;padding:12px;margin-bottom:12px;">
-            <div style="font-weight:800;font-size:13px;color:#e65100;margin-bottom:10px;">🎂 СЬОГОДНІ ДН (${data.today.length})</div>
+            <div style="font-weight:800;font-size:13px;color:#e65100;margin-bottom:10px;"> СЬОГОДНІ ДН (${data.today.length})</div>
         `;
 
         data.today.forEach(person => {
           html += `
             <div style="${itemStyle}">
-              <div style="${fioStyle}">🎉 ${esc(person.displayName || person.fio)}</div>
+              <div style="${fioStyle}">[PARTY] ${esc(person.displayName || person.fio)}</div>
               <div style="font-size:12px;color:#374151;margin-top:4px;">
                 ${esc(person.fio)} • ${esc(person.birthday)}
               </div>
               ${
                 person.phone
-                  ? `<button style="${btnStyle}" onclick="SidebarApp.openBirthdayWA('${escapeJsString(person.phone)}', '${escapeJsString(person.displayName || person.fio)}')">📱 Привітати у WhatsApp</button>`
-                  : `<div style="color:#888;font-size:12px;margin-top:6px;">⁈ Немає телефону</div>`
+                  ? `<button style="${btnStyle}" onclick="SidebarApp.openBirthdayWA('${escapeJsString(person.phone)}', '${escapeJsString(person.displayName || person.fio)}')">☏ Привітати у WhatsApp</button>`
+                  : `<div style="color:#888;font-size:12px;margin-top:6px;">⚠︎ Немає телефону</div>`
               }
             </div>
           `;
@@ -231,20 +231,20 @@
       if (Array.isArray(data.tomorrow) && data.tomorrow.length > 0) {
         html += `
           <div style="background:#e3f2fd;border:1px solid #2196F3;border-left:4px solid #2196F3;border-radius:14px;padding:12px;margin-bottom:12px;">
-            <div style="font-weight:800;font-size:13px;color:#0b5e9e;margin-bottom:10px;">⏳ ЗАВТРА ДН (${data.tomorrow.length})</div>
+            <div style="font-weight:800;font-size:13px;color:#0b5e9e;margin-bottom:10px;">⌛︎ ЗАВТРА ДН (${data.tomorrow.length})</div>
         `;
 
         data.tomorrow.forEach(person => {
           html += `
             <div style="${itemStyle}">
-              <div style="${fioStyle}">🎂 ${esc(person.displayName || person.fio)}</div>
+              <div style="${fioStyle}"> ${esc(person.displayName || person.fio)}</div>
               <div style="font-size:12px;color:#374151;margin-top:4px;">
                 ${esc(person.fio)} • ${esc(person.birthday)}
               </div>
               ${
                 person.phone
-                  ? `<button style="${btnStyle}background:#1565C0;" onclick="SidebarApp.openBirthdayWA('${escapeJsString(person.phone)}', '${escapeJsString(person.displayName || person.fio)}')">📱 Підготувати привітання</button>`
-                  : `<div style="color:#888;font-size:12px;margin-top:6px;">⁈ Немає телефону</div>`
+                  ? `<button style="${btnStyle}background:#1565C0;" onclick="SidebarApp.openBirthdayWA('${escapeJsString(person.phone)}', '${escapeJsString(person.displayName || person.fio)}')">☏ Підготувати привітання</button>`
+                  : `<div style="color:#888;font-size:12px;margin-top:6px;">⚠︎ Немає телефону</div>`
               }
             </div>
           `;
@@ -257,7 +257,7 @@
     if (!html) {
       html = `
         <div class="result-item">
-          <div class="result-label">🎂 Дні народження</div>
+          <div class="result-label"> Дні народження</div>
           <div class="result-value" style="color:var(--text-secondary);">
             На сьогодні немає нагадувань по днях народження.
           </div>
@@ -276,12 +276,12 @@
 
       if (result?.success && result.link) {
         if (!STATE.DIAG_TEST_MODE) openLinkSafe(result.link);
-        showToast('✓ WhatsApp відкрито');
+        showToast('((✔)) WhatsApp відкрито');
       } else {
-        showToast('✕ ' + (result?.error || 'Немає телефону'));
+        showToast('(✘) ' + (result?.error || 'Немає телефону'));
       }
     } catch (error) {
-      showToast('✕ ' + normalizeError(error));
+      showToast('(✘) ' + normalizeError(error));
     } finally {
       hideLoading();
     }
@@ -289,12 +289,12 @@
 
   function sendBirthdayMessage(link) {
     if (!link) {
-      logToConsole('✕ Немає посилання для відправки', 'error');
+      logToConsole('(✘) Немає посилання для відправки', 'error');
       return;
     }
 
     if (!STATE.DIAG_TEST_MODE) openLinkSafe(link);
-    logToConsole('📱 WhatsApp відкрито', 'success');
+    logToConsole('☏ WhatsApp відкрито', 'success');
   }
 
   // =========================
@@ -302,7 +302,7 @@
   // =========================
   async function openPersonCardByCallsign_(callsign, dateStr = '') {
     if (!callsign) {
-      showToast('⁈ Позивний не вказано');
+      showToast('⚠︎ Позивний не вказано');
       return;
     }
 
@@ -311,16 +311,16 @@
       if (!data || !data.success) {
         const msg = data?.error || 'Не вдалося отримати дані картки';
         showError(msg);
-        logToConsole(`✕ ${msg}`, 'error');
+        logToConsole(`(✘) ${msg}`, 'error');
         return;
       }
 
       renderPersonCard(data);
-      logToConsole(`👤 Відкрито картку: ${data.callsign || callsign}`, 'success');
+      logToConsole(`☺︎ Відкрито картку: ${data.callsign || callsign}`, 'success');
     } catch (error) {
       const msg = normalizeError(error);
       showError(msg);
-      logToConsole(`✕ ${msg}`, 'error');
+      logToConsole(`(✘) ${msg}`, 'error');
     }
   }
 
@@ -413,7 +413,7 @@
 
   async function openPersonCalendarFromCard(callsign) {
     if (!callsign) {
-      showToast('⁈ Позивний не вказано');
+      showToast('⚠︎ Позивний не вказано');
       return;
     }
 
@@ -421,8 +421,8 @@
       await gsRun('openPersonCalendar', callsign);
     } catch (error) {
       const msg = normalizeError(error);
-      showToast('✕ ' + msg);
-      logToConsole(`✕ ${msg}`, 'error');
+      showToast('(✘) ' + msg);
+      logToConsole(`(✘) ${msg}`, 'error');
     }
   }
 
@@ -430,7 +430,7 @@
     const el = $id('personCardMessage');
 
     if (!el) {
-      showToast('⁈ Немає тексту для копіювання');
+      showToast('⚠︎ Немає тексту для копіювання');
       return;
     }
 
@@ -442,7 +442,7 @@
     if (!root) return;
 
     showCardResult('Помилка');
-    root.innerHTML = `<div class="person-card-error">✕ ${escapeHtml(message || 'Помилка')}</div>`;
+    root.innerHTML = `<div class="person-card-error">(✘) ${escapeHtml(message || 'Помилка')}</div>`;
   }
 
   // =========================
@@ -561,10 +561,10 @@
         retryDelayMs: 450,
         reason: 'manual-reload'
       });
-      logToConsole(`🔄 SEND_PANEL перечитано: ${Array.isArray(rows) ? rows.length : 0} рядків`, 'success');
+      logToConsole(`↻ SEND_PANEL перечитано: ${Array.isArray(rows) ? rows.length : 0} рядків`, 'success');
       showSendPanel();
     } catch (error) {
-      logToConsole(`✕ Не вдалося перечитати SEND_PANEL: ${normalizeError(error)}`, 'error');
+      logToConsole(`(✘) Не вдалося перечитати SEND_PANEL: ${normalizeError(error)}`, 'error');
       showSendPanel();
     }
   }

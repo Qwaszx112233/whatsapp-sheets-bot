@@ -648,7 +648,7 @@ function checkVacationsAndNotify() {
 function autoVacationReminder() {
   try {
     const result = runVacationEngine_(new Date());
-    console.log(`🏖️ Автоперевірка відпусток: командиру ${result.commanderMessages.length}, бійцям ${result.soldierMessages.length}`);
+    console.log(`[VAC] Автоперевірка відпусток: командиру ${result.commanderMessages.length}, бійцям ${result.soldierMessages.length}`);
     return result;
   } catch (e) {
     console.error('autoVacationReminder error:', e);
@@ -684,7 +684,7 @@ function _veBuildBirthdayCommanderMessage_(data) {
     return _veRenderTemplateOrFallback_(
       BIRTHDAY_ENGINE_CONFIG.COMMANDER_TEMPLATE_3,
       d,
-      `🎂 Нагадування: у ${d.callsign} (${d.fio}) через 3 дні День Народження (${d.birthday}).`
+      ` Нагадування: у ${d.callsign} (${d.fio}) через 3 дні День Народження (${d.birthday}).`
     );
   }
 
@@ -692,14 +692,14 @@ function _veBuildBirthdayCommanderMessage_(data) {
     return _veRenderTemplateOrFallback_(
       BIRTHDAY_ENGINE_CONFIG.COMMANDER_TEMPLATE_2,
       d,
-      `🎂 Нагадування: у ${d.callsign} (${d.fio}) через 2 дні День Народження (${d.birthday}).`
+      ` Нагадування: у ${d.callsign} (${d.fio}) через 2 дні День Народження (${d.birthday}).`
     );
   }
 
   return _veRenderTemplateOrFallback_(
     BIRTHDAY_ENGINE_CONFIG.COMMANDER_TEMPLATE_1,
     d,
-    `🎂 Нагадування: у ${d.callsign} (${d.fio}) завтра День Народження (${d.birthday}).`
+    ` Нагадування: у ${d.callsign} (${d.fio}) завтра День Народження (${d.birthday}).`
   );
 }
 
@@ -718,11 +718,11 @@ function _veBuildBirthdayGreetingMessage_(data) {
 
   const ageLine = d.age ? ` З ${d.age}-річчям!` : ' З Днем Народження!';
   return [
-    `🎂 Вітаю, ${d.name}!`,
+    ` Вітаю, ${d.name}!`,
     '',
     `${ageLine}`,
     `Бажаю здоров'я, витримки, сил і мирного неба.`,
-    `Нехай все буде чітко, рівно і без зайвого головняка. 🇺🇦`
+    `Нехай все буде чітко, рівно і без зайвого головняка. [UA]`
   ].join('\n');
 }
 
@@ -829,7 +829,7 @@ function checkBirthdayReminders() {
 function autoBirthdayReminder() {
   try {
     const result = runBirthdayEngine_(new Date());
-    console.log(`🎂 Автоперевірка ДН: командиру ${result.commanderMessages.length}, іменинникам ${result.birthdayMessages.length}`);
+    console.log(` Автоперевірка ДН: командиру ${result.commanderMessages.length}, іменинникам ${result.birthdayMessages.length}`);
     return result;
   } catch (e) {
     console.error('autoBirthdayReminder error:', e);

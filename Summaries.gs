@@ -195,7 +195,7 @@ function createDetailedDaySummary() {
     saveDetailedSummaryToHistory_(date, people, text);
     createDetailedSheet_(date, people);
     showDetailedSummaryDialog_(date, text);
-  } catch (e) { SpreadsheetApp.getUi().alert('✕ ' + e.message); }
+  } catch (e) { SpreadsheetApp.getUi().alert('(✘) ' + e.message); }
 }
 
 function sendDetailedSummaryToCommander() {
@@ -216,7 +216,7 @@ function sendDetailedSummaryToCommander() {
     if (!phone) {
       const ui = SpreadsheetApp.getUi();
       ui.alert(
-        '✕ Телефон не знайдено',
+        '(✘) Телефон не знайдено',
         `Для ролі "${CONFIG.COMMANDER_ROLE}" не знайдено телефону.\n\n` +
         `Перевірте:\n` +
         `1. В аркуші PHONES є запис з роллю "${CONFIG.COMMANDER_ROLE}" в колонці C\n` +
@@ -228,9 +228,9 @@ function sendDetailedSummaryToCommander() {
     }
 
     const safe = trimToEncoded_(text, CONFIG.MAX_WA_TEXT);
-    showLinkDialogSimple_('📊 Детальне → командиру', `https://wa.me/${phone.replace('+', '')}?text=${encodeURIComponent(safe)}`);
+    showLinkDialogSimple_('[CHART] Детальне → командиру', `https://wa.me/${phone.replace('+', '')}?text=${encodeURIComponent(safe)}`);
   } catch (e) {
-    SpreadsheetApp.getUi().alert('✕ ' + e.message);
+    SpreadsheetApp.getUi().alert('(✘) ' + e.message);
   }
 }
 
@@ -306,19 +306,19 @@ function showDetailedSummaryDialog_(date, text) {
   const safe = HtmlUtils_.escapeHtml(text);
   const html = HtmlService.createHtmlOutput(`
     <div style="font-family:Arial;padding:16px">
-      <h3 style="color:#075e54">📊 Детальне зведення за ${HtmlUtils_.escapeHtml(date)}</h3>
+      <h3 style="color:#075e54">[CHART] Детальне зведення за ${HtmlUtils_.escapeHtml(date)}</h3>
       <div style="margin-bottom:12px">
-        <button onclick="copyText()" style="padding:8px 16px;background:#25D366;color:white;border:none;border-radius:6px;cursor:pointer">📋 Копіювати</button>
+        <button onclick="copyText()" style="padding:8px 16px;background:#25D366;color:white;border:none;border-radius:6px;cursor:pointer">[LIST] Копіювати</button>
       </div>
       <textarea id="t" style="width:100%;height:350px;padding:10px;border:1px solid #ddd;border-radius:8px;" readonly>${safe}</textarea>
       <script>
         function copyText() {
           const t = document.getElementById('t');
           t.select(); t.setSelectionRange(0,999999);
-          navigator.clipboard.writeText(t.value).then(()=>alert('✓ Скопійовано'));
+          navigator.clipboard.writeText(t.value).then(()=>alert('((✔)) Скопійовано'));
         }
       </script>
     </div>
   `).setWidth(700).setHeight(500);
-  SpreadsheetApp.getUi().showModalDialog(html, '📊 Детальне зведення');
+  SpreadsheetApp.getUi().showModalDialog(html, '[CHART] Детальне зведення');
 }

@@ -50,15 +50,17 @@ const SendPanelRepository_ = (function() {
 
   function buildStats(rows) {
     const items = Array.isArray(rows) ? rows : [];
+    const blockedCount = items.filter(function(item) {
+      return normalizeSendPanelStatus_(item.status) !== SendPanelConstants_.STATUS_READY;
+    }).length;
     return {
       totalCount: items.length,
       readyCount: items.filter(function(item) {
         return shouldTreatRowAsReadyToOpen_(item);
       }).length,
       pendingCount: 0,
-      errorCount: items.filter(function(item) {
-        return normalizeSendPanelStatus_(item.status) !== SendPanelConstants_.STATUS_READY;
-      }).length,
+      blockedCount: blockedCount,
+      errorCount: blockedCount,
       sentCount: items.filter(function(item) {
         return item.sent === true;
       }).length

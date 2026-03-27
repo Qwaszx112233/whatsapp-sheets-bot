@@ -4,8 +4,9 @@
 
 function _apiBuildWarningsForSendPanel_(payload) {
   const warnings = [];
-  if (payload && payload.stats && payload.stats.errorCount > 0) {
-    warnings.push(`У SEND_PANEL є рядки з помилками: ${payload.stats.errorCount}`);
+  if (payload && payload.stats && ((payload.stats.blockedCount || payload.stats.errorCount || 0) > 0)) {
+    const blockedCount = payload.stats.blockedCount || payload.stats.errorCount || 0;
+    warnings.push(`У SEND_PANEL є заблоковані рядки: ${blockedCount}`);
   }
   return warnings;
 }

@@ -161,7 +161,7 @@ const Stage4UseCases_ = (function() {
             affectedEntities: [],
             plannedRows: stats.totalCount || 0
           },
-          warnings: stats.errorCount > 0 ? [`У SEND_PANEL є рядки з помилками: ${stats.errorCount}`] : []
+          warnings: (stats.blockedCount || stats.errorCount || 0) > 0 ? [`У SEND_PANEL є заблоковані рядки: ${stats.blockedCount || stats.errorCount || 0}`] : []
         };
       },
       execute: function(input, beforeState, plan) {
@@ -185,7 +185,7 @@ const Stage4UseCases_ = (function() {
           meta: {
             stats: stats
           },
-          warnings: stats.errorCount > 0 ? [`У SEND_PANEL є рядки з помилками: ${stats.errorCount}`] : []
+          warnings: (stats.blockedCount || stats.errorCount || 0) > 0 ? [`У SEND_PANEL є заблоковані рядки: ${stats.blockedCount || stats.errorCount || 0}`] : []
         };
       },
       sync: function(input, beforeState, plan, execution) {
@@ -631,7 +631,7 @@ const Stage4UseCases_ = (function() {
           affectedEntities: [],
           appliedChangesCount: 0,
           skippedChangesCount: 0,
-          warnings: stats.errorCount > 0 ? ['У SEND_PANEL є рядки з помилками: ' + stats.errorCount] : []
+          warnings: (stats.blockedCount || stats.errorCount || 0) > 0 ? ['У SEND_PANEL є заблоковані рядки: ' + (stats.blockedCount || stats.errorCount || 0)] : []
         };
       }
     });

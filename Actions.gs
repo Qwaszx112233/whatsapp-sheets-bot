@@ -18,7 +18,7 @@ function _unwrapActionResult_(result) {
 }
 
 function _showActionError_(e) {
-  SpreadsheetApp.getUi().alert('✕ ' + (e && e.message ? e.message : String(e)));
+  SpreadsheetApp.getUi().alert('(✘) ' + (e && e.message ? e.message : String(e)));
 }
 
 function waShowForSelection() {
@@ -107,7 +107,7 @@ function diagnoseCommanderPhone() {
   try {
     const report = _unwrapActionResult_(apiRunSelectionDiagnostics({}));
     SpreadsheetApp.getUi().alert(
-      '📱 Діагностика',
+      '☏ Діагностика',
       [
         `Аркуш: ${report.sheet}`,
         `Bot sheet: ${report.botSheet}`,

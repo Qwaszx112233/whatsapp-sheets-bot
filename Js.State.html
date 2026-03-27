@@ -221,7 +221,7 @@
           setCurrentPanelData(rows);
 
           if (!silent) {
-            logToConsole(`🔄 SEND_PANEL синхронізовано (${reason})`, 'info');
+            logToConsole(`↻ SEND_PANEL синхронізовано (${reason})`, 'info');
           }
 
           return result;
@@ -230,7 +230,7 @@
         if (attempt < retries) {
           if (!silent) {
             logToConsole(
-              `⏳ SEND_PANEL ще перебудовується, повторна спроба ${attempt + 2}/${retries + 1}`,
+              `⌛︎ SEND_PANEL ще перебудовується, повторна спроба ${attempt + 2}/${retries + 1}`,
               'warning'
             );
           }
@@ -248,7 +248,7 @@
 
         if (!silent) {
           logToConsole(
-            '⁈ Сервер тимчасово повернув порожній SEND_PANEL — залишаю останні непорожні дані',
+            '⚠︎ Сервер тимчасово повернув порожній SEND_PANEL — залишаю останні непорожні дані',
             'warning'
           );
         }

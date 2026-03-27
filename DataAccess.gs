@@ -627,7 +627,7 @@ function collectPayloads_(sheet, ranges) {
       payloads.push(buildPayloadForCell_(sheet, row, col, phonesMap, dictMap));
       if (payloads.length >= CONFIG.MAX_PAYLOADS) {
         limited = true;
-        errors.push(`⁈ Ліміт ${CONFIG.MAX_PAYLOADS} досягнуто`);
+        errors.push(`⚠︎ Ліміт ${CONFIG.MAX_PAYLOADS} досягнуто`);
         return true;
       }
     } catch (e) {
@@ -703,7 +703,7 @@ function buildAggregatedPayloadsForPhone_(phone, items) {
   const dates = unique_(items.map(x => x.reportDateStr));
   const dateLine = dates.length === 1 ? dates[0] : `Дати: ${dates.join(', ')}`;
 
-  const header = [dateLine, '', `📋 Зведення по ${items.length} записах:`, ''].join('\n');
+  const header = [dateLine, '', `[LIST] Зведення по ${items.length} записах:`, ''].join('\n');
   const footer = ['', '*(´ ｡_ ｡｀)*   *⨥*   *(´｡ _｡ ｀)*'].join('\n');
 
   const blocks = items.map(item => {

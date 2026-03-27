@@ -50,7 +50,7 @@ function sendAllFromSidebar(personnelList) {
 
     const readyItems = personnelList.filter(function(item) {
       const status = String(item && item.status || '').toLowerCase();
-      return ((status === 'ready') || status === 'ok' || status.indexOf('✓') === 0) && !!(item && item.link);
+      return ((status === 'ready') || status === 'ok' || status.indexOf('((✔))') === 0) && !!(item && item.link);
     });
 
     if (!readyItems.length) {
@@ -152,7 +152,7 @@ function testCommanderPhone() {
   try {
     const phoneIndex = typeof loadPhonesIndex_ === 'function' ? loadPhonesIndex_() : null;
     const role = CONFIG.COMMANDER_ROLE;
-    let result = `🔍 ПОШУК ТЕЛЕФОНУ КОМАНДИРА
+    let result = `⌕ ПОШУК ТЕЛЕФОНУ КОМАНДИРА
 `;
     result += `============================
 
@@ -160,14 +160,14 @@ function testCommanderPhone() {
     result += `Роль в конфігу: "${role}"
 
 `;
-    result += `📞 Canonical lookup: ${findPhone_({ role: role }) || '✕'}
+    result += ` Canonical lookup: ${findPhone_({ role: role }) || '(✘)'}
 `;
-    result += `📞 byRole[${role}]: ${phoneIndex && phoneIndex.byRole ? (phoneIndex.byRole[role] || phoneIndex.byRole[_normCallsignKey_(role)] || '✕') : '✕'}
+    result += ` byRole[${role}]: ${phoneIndex && phoneIndex.byRole ? (phoneIndex.byRole[role] || phoneIndex.byRole[_normCallsignKey_(role)] || '(✘)') : '(✘)'}
 `;
-    result += `📞 byCallsign[${role}]: ${phoneIndex && phoneIndex.byCallsign ? (phoneIndex.byCallsign[role] || phoneIndex.byCallsign[_normCallsignKey_(role)] || '✕') : '✕'}
+    result += ` byCallsign[${role}]: ${phoneIndex && phoneIndex.byCallsign ? (phoneIndex.byCallsign[role] || phoneIndex.byCallsign[_normCallsignKey_(role)] || '(✘)') : '(✘)'}
 
 `;
-    result += `📋 Можливі кандидати:
+    result += `[LIST] Можливі кандидати:
 `;
 
     let found = 0;
@@ -185,12 +185,12 @@ function testCommanderPhone() {
       result += `  (нічого не знайдено)
 
 `;
-      result += `✕ В листі PHONES немає запису для командира. Додайте роль або позивний "${role}".`;
+      result += `(✘) В листі PHONES немає запису для командира. Додайте роль або позивний "${role}".`;
     }
 
-    ui.alert('📱 Діагностика командира', result, ui.ButtonSet.OK);
+    ui.alert('☏ Діагностика командира', result, ui.ButtonSet.OK);
   } catch (e) {
-    ui.alert('✕ Помилка', String(e && e.message ? e.message : e), ui.ButtonSet.OK);
+    ui.alert('(✘) Помилка', String(e && e.message ? e.message : e), ui.ButtonSet.OK);
   }
 }
 

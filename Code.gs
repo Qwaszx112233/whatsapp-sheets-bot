@@ -207,8 +207,8 @@ function toggleRaportRemindersFromSidebar(enabled) {
       success: true,
       enabled: normalized,
       message: normalized
-        ? '✓ Нагадування про рапорти ввімкнено'
-        : '🔕 Нагадування про рапорти вимкнено'
+        ? '((✔)) Нагадування про рапорти ввімкнено'
+        : '[MUTE] Нагадування про рапорти вимкнено'
     };
   } catch (e) {
     return {
@@ -237,8 +237,8 @@ function onOpen() {
   try {
     highlightActiveMonthTab_(getBotMonthSheetName_());
     SpreadsheetApp.getUi()
-      .createMenu('🧐ПАНЕЛЬ')
-      .addItem('📱 ПАНЕЛЬ', 'showSidebar')
+      .createMenu('B|ПАНЕЛЬ')
+      .addItem('☏ ПАНЕЛЬ', 'showSidebar')
       .addToUi();
   } catch (err) {
     console.error('onOpen error:', err);
@@ -274,7 +274,7 @@ function setupVacationTrigger() {
     return {
       success: true,
       removed: removed,
-      message: `✓ Тригери встановлено:\n• Відпустки — щодня о 9:00\n• Дні Народження — щодня о 8:00\nВидалено старих: ${removed}`
+      message: `((✔)) Тригери встановлено:\n• Відпустки — щодня о 9:00\n• Дні Народження — щодня о 8:00\nВидалено старих: ${removed}`
     };
   } catch (e) {
     return { success: false, error: e.toString() };
@@ -307,7 +307,7 @@ function cleanupDuplicateTriggers(functionName) {
   }
 }
 
-/** Діагностика аркуша PHONES — кнопка "📞 Діагностика" */
+/** Діагностика аркуша PHONES — кнопка " Діагностика" */
 function debugPhones() {
   try {
     const ss = SpreadsheetApp.getActive();
