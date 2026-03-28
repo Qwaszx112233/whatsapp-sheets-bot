@@ -1761,8 +1761,10 @@
     }
 
     .access-banner__head {
-      flex-direction: column;
-      align-items: flex-start;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
     }
 
     .person-card__grid {
@@ -1832,3 +1834,7 @@
     }
   }
 </style>
+
+  #accessBannerText[style*="display: none"] {
+    display: none !important;
+  }

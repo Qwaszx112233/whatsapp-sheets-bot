@@ -28,6 +28,11 @@ const JobRuntimeRepository_ = (function() {
     return sh;
   }
 
+  function ensureSheet() {
+    const sh = _sheet();
+    return { success: true, sheet: sh.getName(), lastRow: sh.getLastRow(), lastColumn: sh.getLastColumn() };
+  }
+
   function append(record) {
     const item = Object.assign({}, record || {});
     const jobName = String(item.jobName || 'unknownJob');
@@ -168,6 +173,7 @@ const JobRuntimeRepository_ = (function() {
   }
 
   return {
+    ensureSheet: ensureSheet,
     append: append,
     getLast: getLast,
     getHistory: getHistory,

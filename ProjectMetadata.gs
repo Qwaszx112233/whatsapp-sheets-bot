@@ -97,6 +97,7 @@ const PROJECT_STAGE4_CANONICAL_API_MAP_ = Object.freeze({
     'apiStage5RunLifecycleRetentionCleanup',
     'apiStage5GetAccessDescriptor',
     'apiStage5ApplyProtections',
+    'apiStage5BootstrapRuntimeAndAlertsSheets',
     'apiStage5BootstrapAccessSheet'
   ]),
   compatibility: Object.freeze([
@@ -239,7 +240,8 @@ const PROJECT_STAGE5_CLIENT_ROUTING_POLICY_ = Object.freeze({
     lifecycleRetentionCleanup: 'apiStage5RunLifecycleRetentionCleanup',
     getAccessDescriptor: 'apiStage5GetAccessDescriptor',
     applyProtections: 'apiStage5ApplyProtections',
-    bootstrapAccessSheet: 'apiStage5BootstrapAccessSheet'
+    bootstrapAccessSheet: 'apiStage5BootstrapAccessSheet',
+    bootstrapRuntimeAndAlertsSheets: 'apiStage5BootstrapRuntimeAndAlertsSheets'
   })
 });
 

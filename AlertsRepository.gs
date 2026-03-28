@@ -16,6 +16,11 @@ const AlertsRepository_ = (function() {
     return sh;
   }
 
+  function ensureSheet() {
+    const sh = _sheet();
+    return { success: true, sheet: sh.getName(), lastRow: sh.getLastRow(), lastColumn: sh.getLastColumn() };
+  }
+
   function appendAlert(record) {
     const item = Object.assign({ severity: 'warning' }, record || {});
     const sh = _sheet();
@@ -30,6 +35,7 @@ const AlertsRepository_ = (function() {
   }
 
   return {
+    ensureSheet: ensureSheet,
     appendAlert: appendAlert
   };
 })();

@@ -99,34 +99,38 @@
 
   function buildAccessBannerMessage_(descriptor) {
     const access = descriptor || STATE.access || {};
-    const parts = [];
+    const reason = String(access.reason || '').trim();
     const note = String(access.note || '').trim();
-    const email = String(access.email || '').trim();
-    if (note) parts.push('Примітка: ' + note);
-    if (email && access.knownUser && !access.fallbackUsed && String(access.source || '').trim() !== 'default') {
-      parts.push(email);
-    }
-    return parts.join(' • ');
+    const source = String(access.source || '').trim();
+    const consoleParts = [];
+    if (reason) consoleParts.push(reason);
+    if (note) consoleParts.push('Примітка: ' + note);
+    if (source) consoleParts.push('Джерело: ' + source);
+    return consoleParts.join(' • ');
   }
 
   function applyAccessPolicyUI() {
     const banner = $id('accessBanner');
     const message = $id('accessBannerText');
     const badge = $id('accessRoleBadge');
+    const title = $id('accessBannerTitle');
     const access = STATE.access || { role: 'viewer', isAdmin: false, knownUser: false, reason: '' };
     const isAdmin = !!access.isAdmin;
     document.querySelectorAll('[data-admin-only="true"]').forEach(function(el) {
       el.style.display = isAdmin ? '' : 'none';
     });
     if (banner && message && badge) {
-      const bannerMessage = buildAccessBannerMessage_(access);
       banner.style.display = 'block';
       banner.classList.remove('is-viewer', 'is-operator', 'is-admin', 'is-sysadmin', 'is-safe-mode');
       banner.classList.add('is-' + String(access.role || 'viewer').toLowerCase());
-      if (!access.knownUser && !access.fallbackUsed) banner.classList.add('is-safe-mode');
-      badge.textContent = getAccessRoleLabel_(access.role);
-      message.textContent = bannerMessage;
-      message.style.display = bannerMessage ? 'block' : 'none';
+      if (!access.knownUser) banner.classList.add('is-safe-mode');
+      const roleLabel = getAccessRoleLabel_(access.role);
+      badge.textContent = roleLabel;
+      if (title) title.textContent = 'Режим доступу :';
+      const consoleMessage = buildAccessBannerMessage_(access);
+      message.textContent = '';
+      message.style.display = 'none';
+      if (consoleMessage) logToConsole('🛡 ' + consoleMessage, access.knownUser ? 'info' : 'warning');
     }
   }
 
@@ -134,13 +138,8 @@
     try {
       const descriptor = await MaintenanceApi.getAccessDescriptor();
       STATE.access = descriptor && descriptor.data ? descriptor.data : { role: 'viewer', isAdmin: false, knownUser: false, reason: '' };
-      if (STATE.access && STATE.access.reason) {
-        const suffix = STATE.access.source ? ' • Джерело: ' + STATE.access.source : '';
-        logToConsole(STATE.access.reason + suffix, STATE.access.isAdmin ? 'info' : 'warn');
-      }
     } catch (error) {
       STATE.access = { role: 'viewer', isAdmin: false, knownUser: false, reason: normalizeError(error) };
-      logToConsole('✕ ' + normalizeError(error), 'error');
     }
     applyAccessPolicyUI();
   }
