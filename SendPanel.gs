@@ -246,7 +246,7 @@ function ensureSendPanelStructure_(panel, botMonth, panelDate) {
     .merge()
     .setValue(`🤖 Активний місяць: ${safeMonth} | Дата панелі: ${safeDate}`)
     .setFontWeight('bold')
-    .setFontSize(14)
+    .setFontSize(12)
     .setHorizontalAlignment('center')
     .setBackground('#fff3cd');
 
