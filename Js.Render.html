@@ -83,12 +83,17 @@
               НАДІСЛАТИ ВСІ (${readyItems.length})
             </button>
           </div>
-          <div class="result-label">Автовідмітка після відкриття</div>
         </div>
       `;
     }
 
-    html += `<div class="result-item"><div class="result-label">Список повідомлень</div></div>`;
+    html += `
+      <div class="result-item">
+        <div class="result-label">
+          Список повідомлень
+        </div>
+      </div>
+    `;
 
     data.forEach((rawItem, index) => {
       const item = rawItem || {};
