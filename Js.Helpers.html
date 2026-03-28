@@ -89,34 +89,44 @@
 
 
   function isAdminRole() {
-    return !!(STATE.access && (STATE.access.isAdmin || STATE.access.isSysAdmin));
+    return !!(STATE.access && STATE.access.isAdmin);
   }
 
-  function getAccessRoleLabel_() {
-    const role = String(STATE.access && STATE.access.role || 'viewer').toLowerCase();
-    switch (role) {
-      case 'sysadmin': return 'Сис. адміністратор';
-      case 'admin': return 'Адміністратор';
-      case 'operator': return 'Оператор';
-      default: return 'Перегляд';
-    }
+  function getAccessRoleLabel_(role) {
+    const map = { viewer: 'Перегляд', operator: 'Оператор', admin: 'Адміністратор', sysadmin: 'Сис. адміністратор' };
+    return map[String(role || 'viewer').trim().toLowerCase()] || 'Перегляд';
+  }
+
+  function buildAccessBannerMessage_(descriptor) {
+    const access = descriptor || STATE.access || {};
+    const parts = [];
+    const reason = String(access.reason || '').trim();
+    const note = String(access.note || '').trim();
+    const source = String(access.source || '').trim();
+    const email = String(access.email || '').trim();
+    if (email) parts.push('Користувач: ' + email);
+    if (reason) parts.push(reason);
+    if (note) parts.push('Примітка: ' + note);
+    if (source) parts.push('Джерело: ' + source);
+    return parts.join(' • ') || 'Роль доступу визначено.';
   }
 
   function applyAccessPolicyUI() {
     const banner = $id('accessBanner');
     const message = $id('accessBannerText');
-    const isAdmin = isAdminRole();
+    const badge = $id('accessRoleBadge');
+    const access = STATE.access || { role: 'viewer', isAdmin: false, knownUser: false, reason: '' };
+    const isAdmin = !!access.isAdmin;
     document.querySelectorAll('[data-admin-only="true"]').forEach(function(el) {
       el.style.display = isAdmin ? '' : 'none';
     });
-    if (banner && message) {
-      const roleLabel = getAccessRoleLabel_();
-      const reason = STATE.access && STATE.access.reason ? String(STATE.access.reason) : '';
+    if (banner && message && badge) {
       banner.style.display = 'block';
-      banner.style.borderColor = isAdmin ? '#16a34a' : '#f59e0b';
-      banner.style.background = isAdmin ? '#ecfdf5' : '#fff7ed';
-      message.style.color = isAdmin ? '#166534' : '#9a3412';
-      message.innerHTML = `<b>${escapeHtml(roleLabel)}</b>${reason ? ` — ${escapeHtml(reason)}` : ''}`;
+      banner.classList.remove('is-viewer', 'is-operator', 'is-admin', 'is-sysadmin', 'is-safe-mode');
+      banner.classList.add('is-' + String(access.role || 'viewer').toLowerCase());
+      if (!access.knownUser) banner.classList.add('is-safe-mode');
+      badge.textContent = getAccessRoleLabel_(access.role);
+      message.textContent = buildAccessBannerMessage_(access);
     }
   }
 

@@ -26,9 +26,12 @@
     </div>
 
     <div class="main-content" id="mainContent">
-      <div id="accessBanner" class="result-item" style="display:block; margin-bottom:10px; border:1px solid #f59e0b; background:#fff7ed;">
-        <div class="result-label">Режим доступу</div>
-        <div id="accessBannerText" style="font-size:0.82rem; color:#9a3412;">Завантаження режиму доступу...</div>
+      <div id="accessBanner" class="access-banner" style="display:none;">
+        <div class="access-banner__head">
+          <div class="access-banner__title">Режим доступу</div>
+          <div id="accessRoleBadge" class="access-banner__badge">Перегляд</div>
+        </div>
+        <div id="accessBannerText" class="access-banner__text"></div>
       </div>
       <div class="menu-section active" id="menuSection">
         <div class="menu-grid">
@@ -70,7 +73,6 @@
           </button>
 
 
-
           <div class="menu-divider" style="grid-column: span 2"></div>
 
           <div class="health-actions" data-admin-only="true" style="grid-column: span 2; display:none;">
@@ -80,7 +82,7 @@
 
               <button class="btn btn-secondary" onclick="SidebarApp.runHealthCheck()" style="padding:6px; font-size:0.72rem;">🩺 Перевірка системи</button>
 
-              <button class="btn btn-secondary" onclick="SidebarApp.handleMenuAction('clearLog')" style="padding:6px; font-size:0.72rem;">🗑 Очистити логи</button>
+              <button class="btn btn-secondary" onclick="SidebarApp.handleMenuAction('clearLog')" style="padding:6px; font-size:0.72rem;">🗑 Очистити лог</button>
 
               <button class="btn btn-secondary" onclick="SidebarApp.handleMenuAction('restartBot')" style="padding:6px; font-size:0.72rem;">♻ Перезапуск бота</button>
 

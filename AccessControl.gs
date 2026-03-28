@@ -4,6 +4,7 @@
 
 const AccessControl_ = (function() {
   const ACCESS_SHEET = appGetCore('ACCESS_SHEET', 'ACCESS');
+  const SYSADMIN_PROP = 'WAPB_ACCESS_SYSADMIN_EMAILS';
   const ADMIN_PROP = 'WAPB_ACCESS_ADMIN_EMAILS';
   const OPERATOR_PROP = 'WAPB_ACCESS_OPERATOR_EMAILS';
   const VIEWER_PROP = 'WAPB_ACCESS_VIEWER_EMAILS';
@@ -16,17 +17,19 @@ const AccessControl_ = (function() {
 
   function normalizeRole_(value) {
     const role = String(value || '').trim().toLowerCase();
-    if (role === 'admin' || role === 'operator' || role === 'viewer' || role === 'sysadmin') return role;
-    if (role === 'system admin' || role === 'system-admin' || role === 'system_admin' || role === 'сисадмин' || role === 'сісадмін' || role === 'сіс адміністратор' || role === 'сис админ' || role === 'sys admin') return 'sysadmin';
+    if (role === 'sysadmin' || role === 'admin' || role === 'operator' || role === 'viewer') return role;
     return 'viewer';
   }
 
   function safeGetUserEmail_() {
-    try {
-      return normalizeEmail_(Session.getActiveUser().getEmail());
-    } catch (_) {
-      return '';
+    const candidates = [];
+    try { candidates.push(Session.getActiveUser().getEmail()); } catch (_) {}
+    try { candidates.push(Session.getEffectiveUser().getEmail()); } catch (_) {}
+    for (let i = 0; i < candidates.length; i++) {
+      const normalized = normalizeEmail_(candidates[i]);
+      if (normalized && normalized.indexOf('@') !== -1) return normalized;
     }
+    return '';
   }
 
   function _getSheet_(createIfMissing) {
@@ -65,12 +68,14 @@ const AccessControl_ = (function() {
 
   function listEmailsByRole(role) {
     const normalizedRole = normalizeRole_(role);
-    const propName = (normalizedRole === 'admin' || normalizedRole === 'sysadmin') ? ADMIN_PROP : (normalizedRole === 'operator' ? OPERATOR_PROP : VIEWER_PROP);
+    const propName = normalizedRole === 'sysadmin'
+      ? SYSADMIN_PROP
+      : (normalizedRole === 'admin' ? ADMIN_PROP : (normalizedRole === 'operator' ? OPERATOR_PROP : VIEWER_PROP));
     return _parseEmailsList_(_getProperties_().getProperty(propName));
   }
 
   function listAdminEmails() {
-    return listEmailsByRole('admin');
+    return listEmailsByRole('sysadmin').concat(listEmailsByRole('admin'));
   }
 
   function _findInSheet_(email) {
@@ -99,6 +104,9 @@ const AccessControl_ = (function() {
   function _findInProperties_(email) {
     const normalizedEmail = normalizeEmail_(email);
     if (!normalizedEmail) return null;
+    if (listEmailsByRole('sysadmin').indexOf(normalizedEmail) !== -1) {
+      return { email: normalizedEmail, role: 'sysadmin', enabled: true, note: '', source: 'scriptProperties' };
+    }
     if (listEmailsByRole('admin').indexOf(normalizedEmail) !== -1) {
       return { email: normalizedEmail, role: 'admin', enabled: true, note: '', source: 'scriptProperties' };
     }
@@ -112,7 +120,7 @@ const AccessControl_ = (function() {
   }
 
   function _configuredEntriesCount_() {
-    let count = listAdminEmails().length + listEmailsByRole('operator').length + listEmailsByRole('viewer').length;
+    let count = listEmailsByRole('sysadmin').length + listEmailsByRole('admin').length + listEmailsByRole('operator').length + listEmailsByRole('viewer').length;
     const sh = _getSheet_(false);
     if (sh && sh.getLastRow() >= 2) {
       count += sh.getLastRow() - 1;
@@ -136,7 +144,6 @@ const AccessControl_ = (function() {
         knownUser: true,
         readOnly: false,
         isAdmin: true,
-        isSysAdmin: true,
         isOperator: true,
         source: 'bootstrap-admin',
         note: '',
@@ -163,7 +170,6 @@ const AccessControl_ = (function() {
       knownUser: knownUser,
       readOnly: readOnly,
       isAdmin: (role === 'admin' || role === 'sysadmin') && enabled,
-      isSysAdmin: role === 'sysadmin' && enabled,
       isOperator: (ROLE_ORDER[role] || 0) >= ROLE_ORDER.operator && enabled,
       source: match ? match.source : 'default',
       note: match && match.note ? String(match.note) : '',

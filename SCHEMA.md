@@ -15,7 +15,7 @@
 | column | meaning |
 |---|---|
 | email | email користувача |
-| role | viewer / operator / admin |
+| role | viewer / operator / admin / sysadmin |
 | enabled | TRUE/FALSE |
 | note | примітка |
 
