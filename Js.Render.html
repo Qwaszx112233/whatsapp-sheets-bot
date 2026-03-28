@@ -113,12 +113,12 @@
         <div class="result-item" style="border-left:3px solid ${statusColor}; padding-left:8px; margin-bottom:8px; ${isSent ? 'opacity:0.92;' : ''}">
           <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
             <div>
-              <div>
-                <b>${escapeHtml(item.fio || '')}</b>
-                (${escapeHtml(formatPhone(item.phone || ''))})
+              <div><b>${escapeHtml(item.fio || '')}</b></div>
+              <div style="font-size:0.82rem; color:var(--text-secondary); margin-top:2px;">
+                ${escapeHtml(formatPhone(item.phone || ''))}
               </div>
-              <div style="font-size:0.75rem; color:var(--text-secondary);">
-                ${escapeHtml(item.code || '')} | ${escapeHtml(item.date || '')}
+              <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:2px;">
+                ${escapeHtml(item.code || '')} ${escapeHtml(item.date || '')}
               </div>
             </div>
             <div>
