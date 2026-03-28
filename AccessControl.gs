@@ -7,7 +7,7 @@ const AccessControl_ = (function() {
   const ADMIN_PROP = 'WAPB_ACCESS_ADMIN_EMAILS';
   const OPERATOR_PROP = 'WAPB_ACCESS_OPERATOR_EMAILS';
   const VIEWER_PROP = 'WAPB_ACCESS_VIEWER_EMAILS';
-  const ROLE_ORDER = Object.freeze({ viewer: 0, operator: 1, admin: 2 });
+  const ROLE_ORDER = Object.freeze({ viewer: 0, operator: 1, admin: 2, sysadmin: 3 });
   const SHEET_HEADERS = Object.freeze(['email', 'role', 'enabled', 'note']);
 
   function normalizeEmail_(value) {
@@ -16,7 +16,8 @@ const AccessControl_ = (function() {
 
   function normalizeRole_(value) {
     const role = String(value || '').trim().toLowerCase();
-    if (role === 'admin' || role === 'operator' || role === 'viewer') return role;
+    if (role === 'admin' || role === 'operator' || role === 'viewer' || role === 'sysadmin') return role;
+    if (role === 'system admin' || role === 'system-admin' || role === 'system_admin' || role === 'сисадмин' || role === 'сісадмін' || role === 'сіс адміністратор' || role === 'сис админ' || role === 'sys admin') return 'sysadmin';
     return 'viewer';
   }
 
@@ -64,7 +65,7 @@ const AccessControl_ = (function() {
 
   function listEmailsByRole(role) {
     const normalizedRole = normalizeRole_(role);
-    const propName = normalizedRole === 'admin' ? ADMIN_PROP : (normalizedRole === 'operator' ? OPERATOR_PROP : VIEWER_PROP);
+    const propName = (normalizedRole === 'admin' || normalizedRole === 'sysadmin') ? ADMIN_PROP : (normalizedRole === 'operator' ? OPERATOR_PROP : VIEWER_PROP);
     return _parseEmailsList_(_getProperties_().getProperty(propName));
   }
 
@@ -130,11 +131,12 @@ const AccessControl_ = (function() {
     if (!match && configuredEntries === 0 && knownUser) {
       return {
         email: userEmail,
-        role: 'admin',
+        role: 'sysadmin',
         enabled: true,
         knownUser: true,
         readOnly: false,
         isAdmin: true,
+        isSysAdmin: true,
         isOperator: true,
         source: 'bootstrap-admin',
         note: '',
@@ -160,7 +162,8 @@ const AccessControl_ = (function() {
       enabled: enabled,
       knownUser: knownUser,
       readOnly: readOnly,
-      isAdmin: role === 'admin' && enabled,
+      isAdmin: (role === 'admin' || role === 'sysadmin') && enabled,
+      isSysAdmin: role === 'sysadmin' && enabled,
       isOperator: (ROLE_ORDER[role] || 0) >= ROLE_ORDER.operator && enabled,
       source: match ? match.source : 'default',
       note: match && match.note ? String(match.note) : '',

@@ -24,3 +24,29 @@ API `apiStage5ApplyProtections({ dryRun: false })` або кнопка в сай
 - ALERTS_LOG
 - ACCESS
 - SEND_PANEL
+
+
+## ACCESS sheet
+
+Лист `ACCESS` використовується для керування ролями доступу.
+
+Структура колонок:
+- `email` — пошта користувача
+- `role` — `viewer`, `operator`, `admin`, `sysadmin`
+- `enabled` — `TRUE` / `FALSE`
+- `note` — довільна примітка
+
+Правила роботи:
+- `viewer` — лише перегляд, без системних кнопок
+- `operator` — робочі дії без maintenance-блоку
+- `admin` — системні дії
+- `sysadmin` — повний системний доступ; у UI поводиться як адміністратор
+- якщо лист `ACCESS` ще не заповнений, перший відомий користувач тимчасово працює як `bootstrap-admin`/`sysadmin`, щоб можна було завершити налаштування
+
+Приклад:
+
+| email | role | enabled | note |
+|---|---|---|---|
+| user@example.com | admin | TRUE | Основний адміністратор |
+| ops@example.com | operator | TRUE | Оператор зміни |
+| viewer@example.com | viewer | TRUE | Лише перегляд |

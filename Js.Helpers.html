@@ -89,7 +89,17 @@
 
 
   function isAdminRole() {
-    return !!(STATE.access && STATE.access.isAdmin);
+    return !!(STATE.access && (STATE.access.isAdmin || STATE.access.isSysAdmin));
+  }
+
+  function getAccessRoleLabel_() {
+    const role = String(STATE.access && STATE.access.role || 'viewer').toLowerCase();
+    switch (role) {
+      case 'sysadmin': return 'Сис. адміністратор';
+      case 'admin': return 'Адміністратор';
+      case 'operator': return 'Оператор';
+      default: return 'Перегляд';
+    }
   }
 
   function applyAccessPolicyUI() {
@@ -100,15 +110,13 @@
       el.style.display = isAdmin ? '' : 'none';
     });
     if (banner && message) {
-      if (isAdmin) {
-        banner.style.display = 'none';
-        message.textContent = '';
-      } else {
-        banner.style.display = 'block';
-        message.textContent = STATE.access && STATE.access.reason
-          ? STATE.access.reason
-          : 'Maintenance-операції доступні лише адміністратору.';
-      }
+      const roleLabel = getAccessRoleLabel_();
+      const reason = STATE.access && STATE.access.reason ? String(STATE.access.reason) : '';
+      banner.style.display = 'block';
+      banner.style.borderColor = isAdmin ? '#16a34a' : '#f59e0b';
+      banner.style.background = isAdmin ? '#ecfdf5' : '#fff7ed';
+      message.style.color = isAdmin ? '#166534' : '#9a3412';
+      message.innerHTML = `<b>${escapeHtml(roleLabel)}</b>${reason ? ` — ${escapeHtml(reason)}` : ''}`;
     }
   }
 
@@ -145,6 +153,8 @@
 
         STATE.consoleInitialized = true;
       }
+
+      await loadAccessDescriptor();
 
       const data = await Stage4Api.getMonths();
 

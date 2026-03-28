@@ -26,9 +26,9 @@
     </div>
 
     <div class="main-content" id="mainContent">
-      <div id="accessBanner" class="result-item" style="display:none; margin-bottom:10px; border:1px solid #f59e0b; background:#fff7ed;">
-        <div class="result-label">🛡️ Режим доступу</div>
-        <div id="accessBannerText" style="font-size:0.82rem; color:#9a3412;"></div>
+      <div id="accessBanner" class="result-item" style="display:block; margin-bottom:10px; border:1px solid #f59e0b; background:#fff7ed;">
+        <div class="result-label">Режим доступу</div>
+        <div id="accessBannerText" style="font-size:0.82rem; color:#9a3412;">Завантаження режиму доступу...</div>
       </div>
       <div class="menu-section active" id="menuSection">
         <div class="menu-grid">
@@ -60,9 +60,6 @@
             <span class="menu-icon">🏃‍♂️‍➡️✈️</span><span class="menu-text">Перемістити бота</span>
           </button>
 
-          <button class="menu-item" data-admin-only="true" onclick="SidebarApp.handleMenuAction('restartBot')" title="Перезапуск бота із очищенням runtime та завислих маркерів">
-            <span class="menu-icon">♻️</span><span class="menu-text">Перезапуск</span>
-          </button>
 
           <button class="menu-item" onclick="SidebarApp.handleMenuAction('vacationReminder')" title="Перевірити відпустки">
             <span class="menu-icon">🏖️</span><span class="menu-text">Відпустки</span>
@@ -72,22 +69,22 @@
             <span class="menu-icon">🎂</span><span class="menu-text">Дні народження</span>
           </button>
 
-          <button class="menu-item" data-admin-only="true" onclick="SidebarApp.handleMenuAction('clearCache')" title="Очистити кеш">
-            <span class="menu-icon">🧹</span><span class="menu-text">Очистити кеш</span>
-          </button>
 
-          <button class="menu-item" data-admin-only="true" onclick="SidebarApp.handleMenuAction('clearLog')" title="Очистити логи">
-            <span class="menu-icon">🗑️</span><span class="menu-text">Очистити логи</span>
-          </button>
 
           <div class="menu-divider" style="grid-column: span 2"></div>
 
-          <div class="health-actions" data-admin-only="true" style="grid-column: span 2;">
+          <div class="health-actions" data-admin-only="true" style="grid-column: span 2; display:none;">
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:8px;">
 
               <button class="btn btn-secondary" onclick="SidebarApp.showPendingRepairs()" style="padding:6px; font-size:0.72rem; grid-column: span 2;">🛠 Потребують виправлення</button>
 
               <button class="btn btn-secondary" onclick="SidebarApp.runHealthCheck()" style="padding:6px; font-size:0.72rem;">🩺 Перевірка системи</button>
+
+              <button class="btn btn-secondary" onclick="SidebarApp.handleMenuAction('clearLog')" style="padding:6px; font-size:0.72rem;">🗑 Очистити логи</button>
+
+              <button class="btn btn-secondary" onclick="SidebarApp.handleMenuAction('restartBot')" style="padding:6px; font-size:0.72rem;">♻ Перезапуск бота</button>
+
+              <button class="btn btn-secondary" onclick="SidebarApp.handleMenuAction('clearCache')" style="padding:6px; font-size:0.72rem;">🧹 Очистити кеш</button>
 
               <button class="btn btn-secondary" onclick="SidebarApp.cleanupTriggers()" style="padding:6px; font-size:0.72rem;">🎏 Перевірка дублів тригерів</button>
 
