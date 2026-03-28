@@ -30,9 +30,7 @@ function ensureAuditTrailSheet_() {
 
 const Stage4AuditTrail_ = (function() {
   function _rowFromEntry(entry) {
-    const e = (typeof SecurityRedaction_ === 'object' && SecurityRedaction_.sanitizeAuditEntry)
-      ? SecurityRedaction_.sanitizeAuditEntry(entry || {})
-      : (entry || {});
+    const e = entry || {};
     return [
       e.timestamp || new Date(),
       e.operationId || '',
