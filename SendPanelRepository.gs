@@ -283,7 +283,7 @@ const SendPanelRepository_ = (function() {
         service: '',
         place: '',
         tasks: item.tasks || '',
-        message: `Автоматично зафіксовано відправку через sidebar: ${item.code}`,
+        message: `Автоматична відправка: ${item.code}`,
         link: item.link || ''
       };
     });
