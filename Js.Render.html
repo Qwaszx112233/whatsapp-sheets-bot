@@ -31,9 +31,9 @@
     }
 
     const stats = result.stats || {};
-    logToConsole(`📋 Панель створено для ${result.date || '?'} (${result.month || '?'})`, 'success');
+    logToConsole(`Панель створено для ${result.date || '?'} (${result.month || '?'})`, 'success');
     logToConsole(
-      `📊 Всього: ${stats.totalCount || rows.length || 0}, Готових: ${stats.readyCount || 0}, Відправлено: ${stats.sentCount || 0}, Недопущено: ${stats.errorCount || 0}`,
+      `Всього: ${stats.totalCount || rows.length || 0}, Готових: ${stats.readyCount || 0}, Відправлено: ${stats.sentCount || 0}, Недопущено: ${stats.errorCount || 0}`,
       'info'
     );
 
@@ -54,12 +54,11 @@
 
     let html = `
       <div class="result-item">
-        <div class="result-label">📋 Статистика</div>
         <div class="result-value">
           <p>Всього записів: <b>${data.length}</b></p>
-          <p>✔ Готово до відправки: <b>${readyItems.length}</b></p>
-          <p>✅ Уже відправлено: <b>${sentItems.length}</b></p>
-          <p>✘ Недопущено: <b>${blockedItems.length}</b></p>
+          <p>Готово: <b>${readyItems.length}</b></p>
+          <p>Відправлено: <b>${sentItems.length}</b></p>
+          <p>Недопущено: <b>${blockedItems.length}</b></p>
         </div>
       </div>
     `;
@@ -70,7 +69,7 @@
           <div class="result-label">⁈ SEND_PANEL порожній у sidebar</div>
           <div class="result-value">
             <p>Лист може містити рядки, але клієнтський стан зараз порожній.</p>
-            <button class="result-link" onclick="SidebarApp.reloadSendPanelFromServer()" style="width:100%; margin-top:8px;">🔄 Перечитати SEND_PANEL</button>
+            <button class="result-link" onclick="SidebarApp.reloadSendPanelFromServer()" style="width:100%; margin-top:8px;">Перечитати SEND_PANEL</button>
           </div>
         </div>
       `;
@@ -79,20 +78,17 @@
     if (readyItems.length > 0) {
       html += `
         <div class="result-item">
-          <div class="result-label">🚀 Автовідмітка після відкриття</div>
           <div class="result-value">
             <button class="result-link" onclick="SidebarApp.startSendingUnsent()" style="width:100%; margin-bottom:8px;">
-              📱 НАДІСЛАТИ ВСІ (${readyItems.length})
+              НАДІСЛАТИ ВСІ (${readyItems.length})
             </button>
-            <p style="font-size:0.8rem; color:var(--text-secondary);">
-              Sidebar бере готову action-ссилку з SEND_PANEL і одразу після відкриття автоматично ставить рядку ознаку відправленого.
-            </p>
           </div>
+          <div class="result-label">Автовідмітка після відкриття</div>
         </div>
       `;
     }
 
-    html += `<div class="result-item"><div class="result-label">📋 Список повідомлень</div></div>`;
+    html += `<div class="result-item"><div class="result-label">Список повідомлень</div></div>`;
 
     data.forEach((rawItem, index) => {
       const item = rawItem || {};
@@ -108,10 +104,10 @@
           : 'var(--error-color)';
 
       const actionText = isSent
-        ? '✅ Відправлено'
+        ? '✔'
         : isReady
-          ? '📱 Готово до відправки'
-          : '✘ Заблоковано';
+          ? '✓'
+          : '✘';
 
       html += `
         <div class="result-item" style="border-left:3px solid ${statusColor}; padding-left:8px; margin-bottom:8px; ${isSent ? 'opacity:0.92;' : ''}">
@@ -138,8 +134,8 @@
 
           ${item.link ? `
             <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;">
-              ${isReady ? `<button class="result-link" onclick="SidebarApp.sendOneFromPanel(${index})" style="font-size:0.7rem; padding:4px 8px; border:none;">📱 Надіслати</button>` : ''}
-              ${isSent ? `<button class="result-link" onclick="SidebarApp.rejectSendFromPanel(${index})" style="font-size:0.7rem; padding:4px 8px; border:none;">↩️ Повернути</button>` : ''}
+              ${isReady ? `<button class="result-link" onclick="SidebarApp.sendOneFromPanel(${index})" style="font-size:0.7rem; padding:4px 8px; border:none;">Надіслати</button>` : ''}
+              ${isSent ? `<button class="result-link" onclick="SidebarApp.rejectSendFromPanel(${index})" style="font-size:0.7rem; padding:4px 8px; border:none;">Повернути</button>` : ''}
               <a href="${escapeAttr(item.link)}" target="${escapeAttr(WA_SENDER_TARGET)}" rel="noopener noreferrer" style="font-size:0.7rem; color:#888; text-decoration:underline;">(відкрити)</a>
             </div>` : ''}
         </div>
@@ -154,7 +150,7 @@
       const item = Array.isArray(STATE.currentPanelData) ? STATE.currentPanelData[index] : null;
       if (!item?.link) return;
       if (item.sent === true) {
-        logToConsole('ℹ️ Рядок уже зафіксований як відправлений', 'info');
+        logToConsole('Відправлені', 'info');
         return;
       }
 
@@ -167,7 +163,7 @@
       }
 
       const result = await ActionDispatcher.run('markPanelRowsAsSentAuto', () => Stage4Api.markAsSent([rowNum]), { showLoader: false });
-      if (!result?.success) throw new Error(result?.error || 'Не вдалося автоматично зафіксувати відправку');
+      if (!result?.success) throw new Error(result?.error || 'Не вдалось зафіксувати відправку');
 
       if (Array.isArray(result.data)) {
         setCurrentPanelData(result.data);
@@ -175,10 +171,10 @@
         await refreshSendPanelDataFromServer({ silent: true });
       }
 
-      logToConsole('✅ Чат відкрито, рядок автоматично позначено як відправлений', 'success');
+      logToConsole('Чат відкрито', 'success');
       showSendPanel();
     } catch (error) {
-      logToConsole(`✕ Помилка відкриття чату: ${normalizeError(error)}`, 'error');
+      logToConsole(`Помилка відкриття чату: ${normalizeError(error)}`, 'error');
       try { await refreshSendPanelDataFromServer({ silent: true }); } catch (_) {}
       showSendPanel();
     }
@@ -203,10 +199,10 @@
         await refreshSendPanelDataFromServer({ silent: true });
       }
 
-      logToConsole('↩️ Рядок повернуто у стан "не відправлено"', 'warning');
+      logToConsole('Рядок повернуто у стан "не відправлено"', 'warning');
       showSendPanel();
     } catch (error) {
-      logToConsole(`✕ Помилка повернення: ${normalizeError(error)}`, 'error');
+      logToConsole(`Помилка повернення: ${normalizeError(error)}`, 'error');
     }
   }
 
@@ -216,7 +212,7 @@
       const queue = getReadyPanelItems(data);
 
       if (!queue.length) {
-        logToConsole('✓ Немає рядків для відправки', 'success');
+        logToConsole('Немає рядків для відправки', 'success');
         return;
       }
 
@@ -230,7 +226,7 @@
 
       const finishBatch = async () => {
         stopSending();
-        logToConsole(`✅ Автоматично зафіксовано ${idx} рядків`, 'success');
+        logToConsole(`Автоматично зафіксовано ${idx} рядків`, 'success');
         showSendPanel();
       };
 
@@ -257,7 +253,7 @@
           idx += 1;
           showProgressBar(queue.length, idx);
         } catch (error) {
-          logToConsole(`✕ Помилка під час серії: ${normalizeError(error)}`, 'error');
+          logToConsole(`Помилка під час серії: ${normalizeError(error)}`, 'error');
           idx += 1;
         }
 
@@ -271,7 +267,7 @@
 
       STATE.sendingInterval = setTimeout(runNextStep, 0);
     } catch (error) {
-      logToConsole(`✕ startSendingUnsent: ${normalizeError(error)}`, 'error');
+      logToConsole(`startSendingUnsent: ${normalizeError(error)}`, 'error');
     }
   }
 
@@ -355,11 +351,11 @@
         setText('resultTitle', 'Зведення дня');
         html = `
           <div class="result-item">
-            <div class="result-label">📊 Зведення дня</div>
+            <div class="result-label">Зведення дня</div>
 
             <div style="display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 12px 0;">
-              <button class="btn btn-primary" onclick="SidebarApp.sendDaySummaryToCommander()">📲 Командиру</button>
-              <button class="btn" onclick="SidebarApp.copyResultText(SidebarApp.STATE.lastSummaryText)">📋 Копіювати</button>
+              <button class="btn btn-primary" onclick="SidebarApp.sendDaySummaryToCommander()">Командиру</button>
+              <button class="btn" onclick="SidebarApp.copyResultText(SidebarApp.STATE.lastSummaryText)">Копіювати</button>
             </div>
 
             <div class="result-message" style="white-space: pre-wrap;">
@@ -374,11 +370,11 @@
         setText('resultTitle', 'Детальне зведення');
         html = `
           <div class="result-item">
-            <div class="result-label">📊 Детальне зведення за ${escapeHtml(data.date || '')}</div>
+            <div class="result-label">Детальне зведення за ${escapeHtml(data.date || '')}</div>
 
             <div style="display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 12px 0;">
-              <button class="btn btn-primary" onclick="SidebarApp.sendDetailedToCommander()">📲 Командиру</button>
-              <button class="btn" onclick="SidebarApp.copyResultText(SidebarApp.STATE.lastDetailedText)">📋 Копіювати</button>
+              <button class="btn btn-primary" onclick="SidebarApp.sendDetailedToCommander()">Командиру</button>
+              <button class="btn" onclick="SidebarApp.copyResultText(SidebarApp.STATE.lastDetailedText)">Копіювати</button>
             </div>
 
             <div class="result-value">Осіб: <b>${data.peopleCount || 0}</b></div>
@@ -395,7 +391,7 @@
         setText('resultTitle', 'Нагадування про відпустки');
         html = `
           <div class="result-item">
-            <div class="result-label" style="color: var(--success-color);">🏖️ Результат перевірки</div>
+            <div class="result-label" style="color: var(--success-color);">Результати</div>
             <div class="result-value">${escapeHtml(data.message || '')}</div>
           </div>
         `;
@@ -405,7 +401,7 @@
       case 'success':
         html = `
           <div class="result-item">
-            <div class="result-label" style="color: var(--success-color);">✓ Успішно</div>
+            <div class="result-label" style="color: var(--success-color);">Успішно</div>
             <div class="result-value">${escapeHtml(data.message || '')}</div>
           </div>
         `;
@@ -415,7 +411,7 @@
         setText('resultTitle', 'Помилка');
         html = `
           <div class="result-item">
-            <div class="result-label" style="color: var(--error-color);">✕ Помилка</div>
+            <div class="result-label" style="color: var(--error-color);">Помилка</div>
             <div class="result-value">${escapeHtml(data.error || 'Невідома помилка')}</div>
           </div>
         `;
@@ -425,7 +421,7 @@
         setText('resultTitle', 'Створення місяця');
         html = `
           <div class="result-item">
-            <div class="result-label" style="color: var(--success-color);">✓ Місяць створено</div>
+            <div class="result-label" style="color: var(--success-color);">Місяць створено</div>
             <div class="result-value">${escapeHtml(data.message || '')}</div>
           </div>
         `;
@@ -457,7 +453,7 @@
     if (Array.isArray(vacData.commanderMessages) && vacData.commanderMessages.length > 0) {
       html += `
         <div class="result-item">
-          <div class="result-label">👨‍✈️ Командиру</div>
+          <div class="result-label">Командиру</div>
           <div class="vacation-alerts__list">
       `;
 
@@ -468,8 +464,8 @@
             <div class="vacation-card__text">${esc(row.message)}</div>
             ${
               row.link
-                ? `<button class="result-link vacation-card__btn" onclick="SidebarApp.sendVacationMessage('${escJs(row.link)}')">📱 Відправити</button>`
-                : `<div class="vacation-card__empty">⁈ Немає посилання</div>`
+                ? `<button class="result-link vacation-card__btn" onclick="SidebarApp.sendVacationMessage('${escJs(row.link)}')">Відправити</button>`
+                : `<div class="vacation-card__empty">Немає посилання</div>`
             }
           </div>
         `;
@@ -484,7 +480,7 @@
     if (Array.isArray(vacData.soldierMessages) && vacData.soldierMessages.length > 0) {
       html += `
         <div class="result-item">
-          <div class="result-label">🪖 Бійцям</div>
+          <div class="result-label">Для ОС</div>
           <div class="vacation-alerts__list">
       `;
 
@@ -498,8 +494,8 @@
             <div class="vacation-card__text">${esc(row.message || '')}</div>
             ${
               row.link
-                ? `<button class="result-link vacation-card__btn" onclick="SidebarApp.sendVacationMessage('${escJs(row.link)}')">📱 Відправити</button>`
-                : `<div class="vacation-card__empty">⁈ Немає телефону</div>`
+                ? `<button class="result-link vacation-card__btn" onclick="SidebarApp.sendVacationMessage('${escJs(row.link)}')">Відправити</button>`
+                : `<div class="vacation-card__empty">Немає телефону</div>`
             }
           </div>
         `;
@@ -517,12 +513,12 @@
 
   function sendVacationMessage(link) {
     if (!link) {
-      logToConsole('✕ Немає посилання для відправки', 'error');
+      logToConsole('Немає посилання для відправки', 'error');
       return;
     }
 
     if (!STATE.DIAG_TEST_MODE) openLinkSafe(link);
-    logToConsole('📱 WhatsApp відкрито', 'success');
+    logToConsole('WhatsApp відкрито', 'success');
   }
 
   // =========================
@@ -553,8 +549,8 @@
         <div class="calendar-header">
           <div class="calendar-month-year">${monthNames[month]} ${year}</div>
           <div class="calendar-nav">
-            <button class="calendar-nav-btn" onclick="SidebarApp.changeMonth(-1, '${action}')">←</button>
-            <button class="calendar-nav-btn" onclick="SidebarApp.changeMonth(1, '${action}')">→</button>
+            <button class="calendar-nav-btn" onclick="SidebarApp.changeMonth(-1, '${action}')">↢</button>
+            <button class="calendar-nav-btn" onclick="SidebarApp.changeMonth(1, '${action}')">↣</button>
           </div>
         </div>
 
@@ -592,7 +588,7 @@
 
         <div class="calendar-actions">
           <button class="result-link" onclick="SidebarApp.processSelectedDate('${action}')" ${!STATE.selectedDate ? 'disabled' : ''}>
-            ${action === 'daySummary' ? '📊 Отримати зведення' : '📊 Детальне зведення'}
+            ${action === 'daySummary' ? 'Отримати зведення' : 'Детальне зведення'}
           </button>
         </div>
       </div>
@@ -609,12 +605,12 @@
   function selectDate(dateStr, action) {
     STATE.selectedDate = dateStr;
     renderCalendar(action);
-    logToConsole(`📅 Обрано дату: ${formatDateForDisplay(dateStr)}`, 'info');
+    logToConsole(`Обрано дату: ${formatDateForDisplay(dateStr)}`, 'info');
   }
 
   async function processSelectedDate(action) {
     if (!STATE.selectedDate) {
-      logToConsole('⁈ Оберіть дату в календарі', 'warning');
+      logToConsole('Оберіть дату в календарі', 'warning');
       return;
     }
 
@@ -658,7 +654,7 @@
           showMenu();
         }
       } catch (error) {
-        logToConsole(`✕ ${normalizeError(error)}`, 'error');
+        logToConsole(`${normalizeError(error)}`, 'error');
         showMenu();
       }
 
@@ -684,17 +680,17 @@
     setHtml('resultContent', `
       <div class="result-item month-switcher-card">
         <div class="month-switcher-hint">Виберіть місяць, на який потрібно перемкнути активний бот.</div>
-        <div class="month-switcher-badge">📅 Активний місяць: ${escapeHtml(STATE.currentMonth || '—')}</div>
+        <div class="month-switcher-badge">Активний місяць: ${escapeHtml(STATE.currentMonth || '—')}</div>
 
         <label class="month-switcher-field" for="monthSelect">
-          <span class="month-switcher-field__label">🗂️ Виберіть місяць</span>
+          <span class="month-switcher-field__label">Виберіть місяць</span>
           <span class="month-switcher-select-wrap">
             <select id="monthSelect" class="month-switcher-select">${options}</select>
           </span>
         </label>
 
         <div class="month-switcher-actions">
-          <button type="button" class="result-link" onclick="SidebarApp.switchToSelectedMonth()">✓ Перемкнути</button>
+          <button type="button" class="result-link" onclick="SidebarApp.switchToSelectedMonth()">Перемкнути</button>
           <button type="button" class="result-link result-link--secondary" onclick="SidebarApp.showMenu()">Скасувати</button>
         </div>
       </div>
@@ -722,28 +718,28 @@
 
   async function clearPhoneCache() {
     assertAdminAction_('clearPhoneCache');
-    if (!confirm('🧹 Очистити кеш телефонів?')) return;
+    if (!confirm('Очистити кеш телефонів?')) return;
 
-    logToConsole('🧹 Очищення кешу телефонів...', 'info');
+    logToConsole('Очищення кешу телефонів...', 'info');
 
     try {
       const result = await ActionDispatcher.run('clearPhoneCache', () => MaintenanceApi.clearPhoneCache());
       if (!result?.success) {
-        showToast('✕ ' + (result?.error || 'Помилка'));
+        showToast('' + (result?.error || 'Помилка'));
         return;
       }
 
-      showToast('✓ Кеш очищено');
-      showStandardResult('🧹 Очищення кешу');
+      showToast('Кеш очищено');
+      showStandardResult('Очищення кешу');
 
       setHtml('resultContent', `
         <div class="result-item">
-          <div class="result-label" style="color: var(--success-color);">✓ Успішно</div>
+          <div class="result-label" style="color: var(--success-color);">Успішно</div>
           <div class="result-value">${escapeHtml(result.message || 'Кеш телефонів очищено')}</div>
         </div>
       `);
     } catch (error) {
-      showToast('✕ ' + normalizeError(error));
+      showToast('' + normalizeError(error));
     }
   }
 
@@ -751,18 +747,18 @@
     assertAdminAction_('setupTrigger');
     if (!confirm('Створити щоденні тригери для відпусток і ДН?')) return;
 
-    logToConsole('⏰ Створення тригера...', 'info');
+    logToConsole('Створення тригера...', 'info');
 
     try {
       const result = await ActionDispatcher.run('setupVacationTriggers', () => MaintenanceApi.setupVacationTriggers());
 
       if (result?.success) {
-        showToast('✓ Тригер створено');
-        showStandardResult('⏰ Щоденні тригери');
+        showToast('Тригер створено');
+        showStandardResult('Щоденні тригери');
 
         setHtml('resultContent', `
           <div class="result-item">
-            <div class="result-label" style="color: var(--success-color);">✓ Успішно</div>
+            <div class="result-label" style="color: var(--success-color);">Успішно</div>
             <div class="result-value">
               <p>${escapeHtml(result.message || '').split('\n').join('<br>')}</p>
               <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:8px;">
@@ -772,10 +768,10 @@
           </div>
         `);
       } else {
-        showToast('✕ ' + (result?.error || 'Помилка'));
+        showToast('' + (result?.error || 'Помилка'));
       }
     } catch (error) {
-      showToast('✕ ' + normalizeError(error));
+      showToast('' + normalizeError(error));
     }
   }
 
@@ -783,7 +779,7 @@
     assertAdminAction_('cleanupTriggers');
     if (!confirm('Очистити дублікати тригерів?')) return;
 
-    logToConsole('🧹 Очищення дублів тригерів...', 'info');
+    logToConsole('Очищення дублів тригерів...', 'info');
 
     try {
       const result = await ActionDispatcher.run('cleanupDuplicateTriggers', () => MaintenanceApi.cleanupDuplicateTriggers());
@@ -791,36 +787,36 @@
       if (result?.ok) {
         const statusMessage =
           result.removed === 0
-            ? '✓ Дублів не знайдено. Все добре!'
-            : `✓ Видалено дублів: ${result.removed} (було: ${result.found})`;
+            ? 'Дублів не знайдено. Все добре!'
+            : `Видалено дублів: ${result.removed} (було: ${result.found})`;
 
         showToast(statusMessage);
-        showStandardResult('🧹 Очищення дублів тригерів');
+        showStandardResult('Очищення дублів тригерів');
 
         setHtml('resultContent', `
           <div class="result-item">
-            <div class="result-label" style="color: var(--success-color);">✓ Результат</div>
+            <div class="result-label" style="color: var(--success-color);">Результат</div>
             <div class="result-value">${escapeHtml(statusMessage)}</div>
           </div>
         `);
       } else {
-        showToast('✕ ' + (result?.error || 'Помилка'));
+        showToast('' + (result?.error || 'Помилка'));
       }
     } catch (error) {
-      showToast('✕ ' + normalizeError(error));
+      showToast('' + normalizeError(error));
     }
   }
 
 
   async function debugPhones() {
     assertAdminAction_('debugPhones');
-    logToConsole('📞 Діагностика PHONES...', 'info');
-    showStandardResult('📞 Діагностика PHONES');
+    logToConsole('Діагностика PHONES...', 'info');
+    showStandardResult('Діагностика PHONES');
 
     setHtml('resultContent', `
       <div class="result-item">
-        <div class="result-label">📞 Діагностика PHONES</div>
-        <div class="result-value">⏳ Аналізую аркуш PHONES...</div>
+        <div class="result-label">Діагностика PHONES</div>
+        <div class="result-value">Аналізую аркуш PHONES...</div>
       </div>
     `);
 
@@ -843,7 +839,7 @@
                   <div style="padding:8px; border:1px solid var(--border-color); border-radius:10px; background:var(--bg-glass);">
                     <div><strong>#${Number(item.row || 0)}</strong> ${escapeHtml(item.fio || '—')}</div>
                     <div style="font-size:0.82rem; color:var(--text-secondary); margin-top:4px;">
-                      📱 ${escapeHtml(formatPhone(item.phone || '—'))}
+                      ${escapeHtml(formatPhone(item.phone || '—'))}
                       ${item.role ? `<br>🏷 ${escapeHtml(item.role)}` : ''}
                       ${item.birthday ? `<br>🎂 ${escapeHtml(item.birthday)}` : ''}
                     </div>
@@ -862,7 +858,7 @@
 
       setHtml('resultContent', `
         <div class="result-item">
-          <div class="result-label" style="color: var(--success-color);">✓ Результат</div>
+          <div class="result-label" style="color: var(--success-color);">Результат</div>
           <div class="result-value">${escapeHtml(result.message || 'Діагностику PHONES виконано')}</div>
         </div>
 
@@ -885,18 +881,18 @@
         ${rowsHtml}
       `);
 
-      showToast('✓ Діагностику PHONES завершено');
-      logToConsole(`📞 Діагностика PHONES завершена: ${Number(stats.total || contacts.length || 0)} записів`, 'success');
+      showToast('Діагностику PHONES завершено');
+      logToConsole(`Діагностика PHONES завершена: ${Number(stats.total || contacts.length || 0)} записів`, 'success');
     } catch (error) {
       const message = normalizeError(error);
       setHtml('resultContent', `
         <div class="result-item">
-          <div class="result-label" style="color: var(--danger-color);">✕ Помилка</div>
+          <div class="result-label" style="color: var(--danger-color);">Помилка</div>
           <div class="result-value">${escapeHtml(message)}</div>
         </div>
       `);
       showToast('✕ ' + message);
-      logToConsole('✕ Діагностика PHONES: ' + message, 'error');
+      logToConsole('Діагностика PHONES: ' + message, 'error');
     }
   }
 
@@ -904,16 +900,16 @@
   async function applyProtections() {
     assertAdminAction_('applyProtections');
     if (!confirm('Застосувати захист до службових листів?')) return;
-    logToConsole('🛡 Застосування захисту до службових листів...', 'info');
-    showStandardResult('🛡 Захист службових листів');
-    setHtml('resultContent', '<div class="result-item"><div class="result-value">⏳ Підготовка захисту...</div></div>');
+    logToConsole('Застосування захисту до службових листів...', 'info');
+    showStandardResult('Захист службових листів');
+    setHtml('resultContent', '<div class="result-item"><div class="result-value">Підготовка захисту...</div></div>');
     try {
       const result = await ActionDispatcher.run('applyProtections', () => MaintenanceApi.applyProtections({ dryRun: false }), { successMessage: '' });
       const protectedSheets = Array.isArray(result?.protectedSheets) ? result.protectedSheets : (Array.isArray(result?.data?.protectedSheets) ? result.data.protectedSheets : []);
       const warnings = Array.isArray(result?.warnings) ? result.warnings : (Array.isArray(result?.data?.warnings) ? result.data.warnings : []);
       setHtml('resultContent', `
         <div class="result-item">
-          <div class="result-label" style="color: var(--success-color);">✓ Результат</div>
+          <div class="result-label" style="color: var(--success-color);">Результат</div>
           <div class="result-value">${escapeHtml(result?.message || 'Захист застосовано')}</div>
         </div>
         <div class="result-item">
@@ -922,29 +918,29 @@
         </div>
         ${warnings.length ? `<div class="result-item"><div class="result-label">Попередження</div><div class="result-value">${warnings.map(escapeHtml).join('<br>')}</div></div>` : ''}
       `);
-      showToast('✓ Захист службових листів застосовано');
+      showToast('Захист службових листів застосовано');
     } catch (error) {
       setHtml('resultContent', `<div class="result-item"><div class="result-value">✕ ${escapeHtml(normalizeError(error))}</div></div>`);
-      showToast('✕ Не вдалося застосувати захист');
+      showToast('Не вдалося застосувати захист');
     }
   }
 
 
 async function restartBot() {
   assertAdminAction_('restartBot');
-  if (!confirm('Повністю перезапустити бота?\n\nБудуть очищені активні runtime-маркери та lifecycle active operations.')) return;
-  logToConsole('♻️ Перезапуск бота...', 'info');
+  if (!confirm('Повністю перезапустити бота?\n\nБудуть очищені активні маркери та активні операції життєвого циклу.')) return;
+  logToConsole('Перезапуск бота...', 'info');
   try {
     const result = await ActionDispatcher.run('restartBot', () => MaintenanceApi.restartBot(), { successMessage: '' });
     if (!result?.success) {
-      showToast('✕ ' + (result?.error || 'Помилка'));
+      showToast('' + (result?.error || 'Помилка'));
       return;
     }
-    showToast('✓ ' + (result.message || 'Бота перезапущено'));
-    showStandardResult('♻️ Перезапуск бота');
+    showToast('' + (result.message || 'Бот перезапущено'));
+    showStandardResult('Перезапуск бота');
     setHtml('resultContent', `
       <div class="result-item">
-        <div class="result-label" style="color: var(--success-color);">✓ Успішно</div>
+        <div class="result-label" style="color: var(--success-color);">Успішно</div>
         <div class="result-value">${escapeHtml(result.message || 'Бота перезапущено')}</div>
       </div>
     `);
@@ -958,8 +954,8 @@ function renderPendingRepairsTable_(items) {
   if (!Array.isArray(items) || !items.length) {
     return `
       <div class="result-item">
-        <div class="result-label">✓ Операції, що потребують виправлення</div>
-        <div class="result-value">Немає операцій, що потребують виправлення.</div>
+        <div class="result-label">Операції, що потрібно виправити</div>
+        <div class="result-value">Немає операцій, що потрібно виправити.</div>
       </div>
     `;
   }
@@ -975,8 +971,8 @@ function renderPendingRepairsTable_(items) {
             <div style="font-size:11px; color:var(--text-secondary); margin-top:4px;">${escapeHtml(formatOperationDate(item.startedAt || ''))}</div>
             ${item.errorMessage ? `<div style="margin-top:6px; color:var(--error-color); font-size:11px;">${escapeHtml(translateLifecycleText(item.errorMessage))}</div>` : ''}
             <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
-              <button class="btn btn-secondary" onclick="SidebarApp.showOperationDetails('${escapeJsString(item.operationId || '')}')">🔎 Деталі</button>
-              <button class="btn btn-primary" onclick="SidebarApp.runRepair('${escapeJsString(item.operationId || '')}')">🛠 Виправити</button>
+              <button class="btn btn-secondary" onclick="SidebarApp.showOperationDetails('${escapeJsString(item.operationId || '')}')">Деталі</button>
+              <button class="btn btn-primary" onclick="SidebarApp.runRepair('${escapeJsString(item.operationId || '')}')">Виправити</button>
             </div>
           </div>
         `).join('')}
@@ -987,22 +983,22 @@ function renderPendingRepairsTable_(items) {
 
 async function showPendingRepairs() {
   assertAdminAction_('pendingRepairs');
-  logToConsole('🛠 Завантаження операцій, що потребують виправлення...', 'info');
-  showStandardResult('🛠 Операції, що потребують виправлення');
-  setHtml('resultContent', '<div class="result-item"><div class="result-value">⏳ Завантаження...</div></div>');
+  logToConsole('Завантаження операцій, що потрібно виправити...', 'info');
+  showStandardResult('Операції, що потрібно виправити');
+  setHtml('resultContent', '<div class="result-item"><div class="result-value">Завантаження...</div></div>');
   try {
     const result = await ActionDispatcher.run('listPendingRepairs', () => MaintenanceApi.listPendingRepairs(), { successMessage: '' });
     const items = result?.operations || result?.data?.operations || [];
     const skippedWithoutOperationId = Number(result?.skippedWithoutOperationId || result?.data?.skippedWithoutOperationId || 0);
     let html = renderPendingRepairsTable_(items);
     if (skippedWithoutOperationId > 0) {
-      html += `<div class="result-item"><div class="result-label">ℹ️ Пропущені записи</div><div class="result-value">${escapeHtml(String(skippedWithoutOperationId))} запис(ів) без коректного operationId не показано в списку repair.</div></div>`;
+      html += `<div class="result-item"><div class="result-label">Пропущені записи</div><div class="result-value">${escapeHtml(String(skippedWithoutOperationId))} запис(ів) без коректного operationId не показано в списку repair.</div></div>`;
     }
     setHtml('resultContent', html);
-    showToast(items.length ? `⁈ Потребують виправлення: ${items.length}` : '✓ Операцій для виправлення немає');
+    showToast(items.length ? `Потрібно виправити: ${items.length}` : 'Операцій для виправлення немає');
   } catch (error) {
     setHtml('resultContent', `<div class="result-item"><div class="result-value">✕ ${escapeHtml(normalizeError(error))}</div></div>`);
-    showToast('✕ Не вдалося завантажити список операцій для виправлення');
+    showToast('Не вдалося завантажити список');
   }
 }
 
@@ -1010,12 +1006,12 @@ async function showOperationDetails(operationId) {
   assertAdminAction_('operationDetails');
   const opId = String(operationId || '').trim();
   if (!opId) {
-    setHtml('resultContent', '<div class="result-item"><div class="result-value">✕ Не передано operationId</div></div>');
-    showToast('✕ Не знайдено operationId');
+    setHtml('resultContent', '<div class="result-item"><div class="result-value">Не передано operationId</div></div>');
+    showToast('Не знайдено operationId');
     return;
   }
-  showStandardResult('🔎 Деталі операції');
-  setHtml('resultContent', '<div class="result-item"><div class="result-value">⏳ Завантаження деталей...</div></div>');
+  showStandardResult('Деталі операції');
+  setHtml('resultContent', '<div class="result-item"><div class="result-value">Завантаження деталей...</div></div>');
   try {
     const result = await ActionDispatcher.run('getOperationDetails', () => MaintenanceApi.getOperationDetails(opId), { successMessage: '' });
     const details = result?.operation ? result : (result?.data || {});
@@ -1060,21 +1056,21 @@ async function runRepair(operationId) {
   assertAdminAction_('runRepair');
   const opId = String(operationId || '').trim();
   if (!opId) {
-    setHtml('resultContent', '<div class="result-item"><div class="result-value">✕ Не передано operationId для repair</div></div>');
-    showToast('✕ Не знайдено operationId');
+    setHtml('resultContent', '<div class="result-item"><div class="result-value">Не передано operationId для repair</div></div>');
+    showToast('Не знайдено operationId');
     return;
   }
   if (!confirm('Запустити виправлення для цієї операції?')) return;
-  showStandardResult('🛠 Запуск виправлення');
-  setHtml('resultContent', '<div class="result-item"><div class="result-value">⏳ Запускаю виправлення...</div></div>');
+  showStandardResult('Запуск виправлення');
+  setHtml('resultContent', '<div class="result-item"><div class="result-value">Запускаю виправлення...</div></div>');
   try {
     const result = await ActionDispatcher.run('runRepair', () => MaintenanceApi.runRepair(opId), { successMessage: '' });
     if (result?.success) {
-      showToast('✓ Виправлення виконано');
+      showToast('Виправлення виконано');
       await showOperationDetails(result.operationId || opId);
     } else {
       setHtml('resultContent', `<div class="result-item"><div class="result-value">✕ ${escapeHtml(translateLifecycleText(result?.error || result?.message || 'Repair failed'))}</div></div>`);
-      showToast('✕ Виправлення завершилося з помилкою');
+      showToast('Виправлення завершилося з помилкою');
     }
   } catch (error) {
     setHtml('resultContent', `<div class="result-item"><div class="result-value">✕ ${escapeHtml(normalizeError(error))}</div></div>`);
