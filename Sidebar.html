@@ -27,10 +27,6 @@
 
     <div class="main-content" id="mainContent">
       <div id="accessBanner" class="access-banner" style="display:none;">
-        <div class="access-banner__head">
-          <div id="accessBannerTitle" class="access-banner__title">Режим доступу :</div>
-          <div id="accessRoleBadge" class="access-banner__badge">Перегляд</div>
-        </div>
         <div id="accessBannerText" class="access-banner__text"></div>
       </div>
       <div class="menu-section active" id="menuSection">
@@ -63,7 +59,6 @@
             <span class="menu-icon">🏃‍♂️‍➡️✈️</span><span class="menu-text">Перемістити бота</span>
           </button>
 
-
           <button class="menu-item" onclick="SidebarApp.handleMenuAction('vacationReminder')" title="Перевірити відпустки">
             <span class="menu-icon">🏖️</span><span class="menu-text">Відпустки</span>
           </button>
@@ -80,26 +75,25 @@
 
               <button class="btn btn-secondary" onclick="SidebarApp.showPendingRepairs()" style="padding:6px; font-size:0.72rem; grid-column: span 2;">🛠 Потребують виправлення</button>
 
-              <button class="btn btn-secondary" onclick="SidebarApp.runHealthCheck()" style="padding:6px; font-size:0.72rem;">🩺 Перевірка системи</button>
+              <button class="btn btn-secondary" onclick="SidebarApp.handleMenuAction('applyProtections')" style="padding:6px; font-size:0.72rem; grid-column: span 2;">🛡 Захистити службові листи</button>
 
-              <button class="btn btn-secondary" onclick="SidebarApp.handleMenuAction('clearLog')" style="padding:6px; font-size:0.72rem;">🗑 Очистити лог</button>
+              <button class="btn btn-secondary" onclick="SidebarApp.runHealthCheck()" style="padding:6px; font-size:0.72rem;">🩺 Перевірка системи</button>
 
               <button class="btn btn-secondary" onclick="SidebarApp.handleMenuAction('restartBot')" style="padding:6px; font-size:0.72rem;">♻ Перезапуск бота</button>
 
               <button class="btn btn-secondary" onclick="SidebarApp.handleMenuAction('clearCache')" style="padding:6px; font-size:0.72rem;">🧹 Очистити кеш</button>
 
-              <button class="btn btn-secondary" onclick="SidebarApp.cleanupTriggers()" style="padding:6px; font-size:0.72rem;">🎏 Перевірка дублів тригерів</button>
+              <button class="btn btn-secondary" onclick="SidebarApp.handleMenuAction('clearLog')" style="padding:6px; font-size:0.72rem;">🗑 Очистити лог</button>
+
+              <button class="btn btn-secondary" onclick="SidebarApp.clearPhoneCache()" style="padding:6px; font-size:0.72rem;">🧹 Очистити кеш тел.</button>
 
               <button class="btn btn-secondary" onclick="SidebarApp.debugPhones()" style="padding:6px; font-size:0.72rem;">📞 Діагностика тел.</button>
 
-              <button class="btn btn-secondary" onclick="SidebarApp.clearPhoneCache()" style="padding:6px; font-size:0.72rem;">🧹 Очистити кеш тел.</button>
+              <button class="btn btn-secondary" onclick="SidebarApp.cleanupTriggers()" style="padding:6px; font-size:0.72rem;">🎏 Перевірка дублів тригерів</button>
 
               <button class="btn btn-secondary" onclick="SidebarApp.setupTrigger()" style="padding:6px; font-size:0.72rem;">⏰ Створити тригер</button>
 
               <button class="btn btn-secondary" onclick="SidebarApp.copyHealthReport()" style="padding:6px; font-size:0.72rem;">📋 Копія звіту</button>
-
-              <button class="btn btn-secondary" onclick="SidebarApp.handleMenuAction('applyProtections')" style="padding:6px; font-size:0.72rem; grid-column: span 2;">🛡 Захистити службові листи</button>
-
             </div>
           </div>
         </div>
