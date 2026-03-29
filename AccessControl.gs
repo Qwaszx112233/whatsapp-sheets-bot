@@ -209,8 +209,15 @@ const AccessControl_ = (function() {
   }
 
   function _applyRoleValidation_(sh) {
-    const maxRows = Math.max(sh.getMaxRows(), 2);
-    sh.getRange(2, 2, maxRows - 1, 1).setDataValidation(_buildRoleValidationRule_());
+    const startRow = 2;
+    const endRow = 40;
+    const roleCol = 2;
+    const rule = _buildRoleValidationRule_();
+    sh.getRange(startRow, roleCol, endRow - startRow + 1, 1).setDataValidation(rule);
+    const maxRows = sh.getMaxRows();
+    if (maxRows > endRow) {
+      sh.getRange(endRow + 1, roleCol, maxRows - endRow, 1).clearDataValidations();
+    }
   }
 
   function _syncRoleNoteForRow_(sh, rowNumber, clearWhenEmpty) {
@@ -233,7 +240,9 @@ const AccessControl_ = (function() {
     const headerMap = _getHeaderMap_(sh);
     const roleCol = headerMap.role || 2;
     const noteCol = headerMap.note || 4;
-    const rowCount = sh.getLastRow() - 1;
+    const lastRow = Math.min(sh.getLastRow(), 40);
+    const rowCount = Math.max(lastRow - 1, 0);
+    if (!rowCount) return;
     const roles = sh.getRange(2, roleCol, rowCount, 1).getValues();
     const notesRange = sh.getRange(2, noteCol, rowCount, 1);
     const existingNotes = notesRange.getValues();
@@ -270,7 +279,7 @@ const AccessControl_ = (function() {
     if (!sh || sh.getName() !== ACCESS_SHEET) return;
     const row = range.getRow();
     const column = range.getColumn();
-    if (row < 2) return;
+    if (row < 2 || row > 40) return;
     if (column === 2 && range.getNumColumns() === 1 && range.getNumRows() === 1) {
       const rawRole = String(range.getValue() || '').trim();
       if (rawRole) range.setValue(normalizeRole_(rawRole));
