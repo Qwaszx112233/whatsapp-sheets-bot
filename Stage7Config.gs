@@ -25,7 +25,6 @@
 
 var APP_CONFIG = (typeof APP_CONFIG !== 'undefined') ? APP_CONFIG : null;
 var STAGE7_CONFIG = (typeof STAGE7_CONFIG !== 'undefined') ? STAGE7_CONFIG : null;
-var STAGE7_CONFIG = (typeof STAGE7_CONFIG !== 'undefined') ? STAGE7_CONFIG : null;
 var STAGE7A_CONFIG = (typeof STAGE7A_CONFIG !== 'undefined') ? STAGE7A_CONFIG : null;
 
 function buildAppConfig_() {
@@ -274,13 +273,6 @@ STAGE7A_CONFIG = getStage6AConfig_();
 // ==========================================================
 // ФУНКЦІЇ ДОСТУПУ ДЛЯ СУМІСНОСТІ
 // ==========================================================
-
-function stage7GetFeatureFlag_(flagName, defaultValue) {
-  if (!flagName) return !!defaultValue;
-  const flags = STAGE7_CONFIG.FEATURE_FLAGS || {};
-  if (Object.prototype.hasOwnProperty.call(flags, flagName)) return !!flags[flagName];
-  return !!defaultValue;
-}
 
 function stage7GetFeatureFlag_(flagName, defaultValue) {
   if (!flagName) return !!defaultValue;
