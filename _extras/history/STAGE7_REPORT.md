@@ -54,8 +54,8 @@
 - `CHECKPOINTS`
 
 ## Важливі примітки
-- Stage 4 compatibility facade збережено.
-- Stage 5 maintenance naming збережено.
+- Stage 7 compatibility facade збережено.
+- Stage 7 maintenance naming збережено.
 - Бізнес-логіка доменних сценаріїв не переписувалась; hardening накладено поверх baseline.
 - Dry-run сценарії не забивають service sheets як реальні committed execution records.
 
@@ -65,7 +65,7 @@
 
 
 ## Що додатково увійшло в merged 7.1 поверх первинного 7.1
-- За основу взято Stage 7 lifecycle / repair / stale-detector шар і збережено стабільний sidebar/runtime baseline зі Stage 6 Final lineage.
+- За основу взято Stage 7 lifecycle / repair / stale-detector шар і збережено стабільний sidebar/runtime baseline зі Stage 7 Final lineage.
 - Виправлено execution bug у maintenance-сценарії `restartBot`, де callback використовував `context` поза власною сигнатурою.
 - Посилено policy заморожування фінальних lifecycle-записів: статус фінальної операції більше не можна потай переписати через `transitionStatus(...)`.
 - `saveCheckpoint(...)` тепер оновлює не лише `OPS_LOG`, а й active heartbeat / expiry, щоб довгі операції не виглядали мертвими між батчами.

@@ -50,16 +50,16 @@ They were absent.
 ---
 
 ### 3) Critical: canonical layer map and API maps were missing
-**Problem:** The metadata file did not publish canonical layer pointers, historical Stage 4 API maps, Stage 5 public API maps, or routing maps.
+**Problem:** The metadata file did not publish canonical layer pointers, historical Stage 7 API maps, Stage 7 public API maps, or routing maps.
 
 **Impact:** Structural diagnostics reported empty/missing canonical maps even though the actual files and entrypoints were present.
 
 **Fix applied:** Added:
 - canonical layer map
-- Stage 4 canonical API map
-- Stage 5 public API map
-- Stage 4 flat client routing policy
-- Stage 5 grouped client routing policy
+- Stage 7 canonical API map
+- Stage 7 public API map
+- Stage 7 flat client routing policy
+- Stage 7 grouped client routing policy
 - canonical maintenance policy
 
 ---
@@ -77,17 +77,17 @@ These files/directories were missing from the uploaded archive.
 **Fix applied:** Added:
 - `RUNBOOK.md`
 - `COMMANDS_TERMINAL.md`
-- `docs/reference/PUBLIC_API_STAGE5.md`
-- `docs/reference/CHANGELOG_STAGE5.md`
-- `docs/reference/STAGE5_REPORT.md`
-- `docs/reference/STAGE6A_REPORT.md`
+- `docs/reference/PUBLIC_API_STAGE7.md`
+- `docs/reference/CHANGELOG_STAGE7.md`
+- `docs/reference/STAGE7_REPORT.md`
+- `docs/reference/STAGE7A_REPORT.md`
 - `docs/reference/SPREADSHEET_ACTION_API.md`
 - `docs/reference/JOBS_RUNTIME.md`
 - `docs/reference/SUNSET_POLICY.md`
-- `docs/archive/PUBLIC_API_STAGE4.md`
-- `docs/archive/CHANGELOG_STAGE4.md`
-- `docs/archive/STAGE4_REPORT.md`
-- `docs/archive/STAGE6A_TRANSITION_NOTES.md`
+- `docs/archive/PUBLIC_API_STAGE7.md`
+- `docs/archive/CHANGELOG_STAGE7.md`
+- `docs/archive/STAGE7_REPORT.md`
+- `docs/archive/STAGE7A_TRANSITION_NOTES.md`
 
 ---
 

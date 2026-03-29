@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
-const root = process.cwd();
+const root = path.resolve(__dirname, '..', '..');
 const files = fs.readdirSync(root).filter(name => /\.(gs|html)$/.test(name));
 let ok = 0;
 let fail = 0;

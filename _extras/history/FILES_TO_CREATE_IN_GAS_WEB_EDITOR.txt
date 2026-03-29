@@ -56,11 +56,11 @@ SidebarServer.gs
 SmokeTests.gs
 SpreadsheetActionsApi.gs
 SpreadsheetProtection.gs
-Stage3ServerApi.gs
-Stage4Config.gs
-Stage4MaintenanceApi.gs
-Stage4ServerApi.gs
-Stage5MaintenanceApi.gs
+Stage7ServerApi.gs
+Stage7Config.gs
+Stage7MaintenanceApi.gs
+Stage7ServerApi.gs
+Stage7MaintenanceApi.gs
 Styles.html
 Summaries.gs
 SummaryRepository.gs

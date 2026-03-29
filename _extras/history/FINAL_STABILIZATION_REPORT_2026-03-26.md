@@ -109,14 +109,14 @@
 - `loadPhonesMap_()`
 - `findPhoneByRole_()`
 - `loadPhonesProfiles_()`
-- existing sidebar / stage3 / maintenance compatibility wrappers already registered in the project
+- existing sidebar / stage7 / maintenance compatibility wrappers already registered in the project
 - single-brace template syntax `{name}`
 
 ### Left temporarily
 - `setupVacationTrigger()`
 - `cleanupDuplicateTriggers()`
 - `debugPhones()`
-- existing Stage 3 / sidebar compatibility wrappers registered in `DeprecatedRegistry.gs`
+- existing Stage 7 / sidebar compatibility wrappers registered in `DeprecatedRegistry.gs`
 
 Reason: these are still wired through diagnostics, maintenance flows, routing policy, or compatibility registries and therefore were retained intentionally rather than deleted blindly.
 
