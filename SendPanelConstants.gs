@@ -16,7 +16,7 @@ const SendPanelConstants_ = Object.freeze({
   ACTION_READY_LABEL: 'НАДІСЛАТИ',
   ACTION_SENT_LABEL: 'ВІДПРАВЛЕНО',
   ACTION_BLOCKED_LABEL: '',
-  WA_SENDER_TARGET: '_blank',
+  WA_SENDER_TARGET: 'WA_SENDER_WINDOW',
   METADATA_MONTH_CELL: 'H1',
   METADATA_DATE_CELL: 'H2'
 });

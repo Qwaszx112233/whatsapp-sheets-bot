@@ -134,9 +134,9 @@
 
           ${item.link ? `
             <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;">
-              ${isReady ? `<button class="result-link" onclick="SidebarApp.sendOneFromPanel(${index})" style="font-size:0.7rem; padding:4px 8px; border:none;">Надіслати</button>` : ''}
-              ${isSent ? `<button class="result-link" onclick="SidebarApp.rejectSendFromPanel(${index})" style="font-size:0.7rem; padding:4px 8px; border:none;">Повернути</button>` : ''}
-              <a href="${escapeAttr(item.link)}" target="_blank" rel="noopener noreferrer" style="font-size:0.7rem; color:#888; text-decoration:underline;">(відкрити)</a>
+              ${isReady ? `<button type="button" class="result-link" onclick="SidebarApp.sendOneFromPanel(${index})" style="font-size:0.7rem; padding:4px 8px; border:none;">Надіслати</button>` : ''}
+              ${isSent ? `<button type="button" class="result-link" onclick="SidebarApp.rejectSendFromPanel(${index})" style="font-size:0.7rem; padding:4px 8px; border:none;">Повернути</button>` : ''}
+              <a href="${escapeAttr(item.link)}" target="WA_SENDER_WINDOW" rel="noopener noreferrer" style="font-size:0.7rem; color:#888; text-decoration:underline;">(відкрити)</a>
             </div>` : ''}
         </div>
       `;
@@ -146,6 +146,12 @@
   }
 
   async function sendOneFromPanel(index) {
+    if (STATE._panelSingleSendLock) {
+      logToConsole('Відправка вже виконується — зачекай', 'warning');
+      return;
+    }
+
+    STATE._panelSingleSendLock = true;
     try {
       const item = Array.isArray(STATE.currentPanelData) ? STATE.currentPanelData[index] : null;
       if (!item?.link) return;
@@ -177,6 +183,10 @@
       logToConsole(`Помилка відкриття чату: ${normalizeError(error)}`, 'error');
       try { await refreshSendPanelDataFromServer({ silent: true }); } catch (_) {}
       showSendPanel();
+    } finally {
+      setTimeout(function() {
+        STATE._panelSingleSendLock = false;
+      }, 350);
     }
   }
 
@@ -207,6 +217,12 @@
   }
 
   function startSendingUnsent() {
+    if (STATE._panelBatchSendLock) {
+      logToConsole('Серія відправки вже запущена', 'warning');
+      return;
+    }
+
+    STATE._panelBatchSendLock = true;
     try {
       const data = Array.isArray(STATE.currentPanelData) ? STATE.currentPanelData : [];
       const queue = getReadyPanelItems(data);
@@ -224,14 +240,22 @@
       if (!STATE.DIAG_TEST_MODE) primeWhatsAppSenderTab();
       STATE._sendingCancelled = false;
 
+      const releaseBatchLock = function() {
+        STATE._panelBatchSendLock = false;
+      };
+
       const finishBatch = async () => {
         stopSending();
+        releaseBatchLock();
         logToConsole(`Автоматично зафіксовано ${idx} рядків`, 'success');
         showSendPanel();
       };
 
       const runNextStep = async () => {
-        if (STATE._sendingCancelled) return;
+        if (STATE._sendingCancelled) {
+          releaseBatchLock();
+          return;
+        }
 
         if (idx >= queue.length) {
           await finishBatch();
@@ -257,7 +281,10 @@
           idx += 1;
         }
 
-        if (STATE._sendingCancelled) return;
+        if (STATE._sendingCancelled) {
+          releaseBatchLock();
+          return;
+        }
         if (idx >= queue.length) {
           await finishBatch();
         } else {
@@ -267,6 +294,7 @@
 
       STATE.sendingInterval = setTimeout(runNextStep, 0);
     } catch (error) {
+      STATE._panelBatchSendLock = false;
       logToConsole(`startSendingUnsent: ${normalizeError(error)}`, 'error');
     }
   }

@@ -1,7 +1,17 @@
 /************ ПАНЕЛЬ ВІДПРАВКИ ************/
 
 var SEND_PANEL_STATE_STORE_PREFIX_ = 'SEND_PANEL_SENT_V2|';
-var SEND_PANEL_WHATSAPP_TARGET_ = '_blank';
+var SEND_PANEL_WHATSAPP_TARGET_ = 'WA_SENDER_WINDOW';
+
+
+function getSendPanelWhatsAppTarget_() {
+  try {
+    if (typeof SendPanelConstants_ !== 'undefined' && SendPanelConstants_ && SendPanelConstants_.WA_SENDER_TARGET) {
+      return String(SendPanelConstants_.WA_SENDER_TARGET).trim() || 'WA_SENDER_WINDOW';
+    }
+  } catch (_) {}
+  return String(SEND_PANEL_WHATSAPP_TARGET_ || 'WA_SENDER_WINDOW').trim() || 'WA_SENDER_WINDOW';
+}
 
 function extractHyperlinkUrl_(formula) {
   const m = String(formula || '').match(/HYPERLINK\("([^"]+)"/i);
@@ -707,6 +717,10 @@ function showSendPanelDialog_(items) {
     const WA_TARGET = ${safeTarget};
     let currentIndex = 0;
     let waWindow = null;
+    let openInProgress = false;
+    let lastOpenedUrl = '';
+    let lastOpenedAt = 0;
+    const WA_SENDER_TARGET = 'WA_SENDER_WINDOW';
 
     const progressEl = document.getElementById('progress');
     const metaEl = document.getElementById('meta');
@@ -770,7 +784,8 @@ function showSendPanelDialog_(items) {
           log('🟢 Вкладка WhatsApp уже підготовлена');
           return;
         }
-        waWindow = window.open('https://web.whatsapp.com/', '_blank', 'noopener,noreferrer');
+        waWindow = window.open('https://web.whatsapp.com/', WA_SENDER_TARGET, 'noopener,noreferrer')
+          || window.open('https://web.whatsapp.com/', '_blank', 'noopener,noreferrer');
         if (waWindow) {
           log('🟢 Вкладка WhatsApp підготовлена');
         } else {
@@ -787,14 +802,31 @@ function showSendPanelDialog_(items) {
         log('✓ Черга порожня');
         return;
       }
+      if (openInProgress) {
+        log('⏳ Відкриття вже виконується, зачекай');
+        return;
+      }
 
+      const now = Date.now();
+      if (lastOpenedUrl === item.url && (now - lastOpenedAt) < 1500) {
+        log('⏳ Повторне відкриття того самого посилання заблоковано');
+        return;
+      }
+
+      openInProgress = true;
       try {
         if (waWindow && !waWindow.closed) {
           waWindow.location.replace(item.url);
           waWindow.focus();
         } else {
-          waWindow = window.open(item.url, '_blank', 'noopener,noreferrer');
+          waWindow = window.open(item.url, WA_SENDER_TARGET, 'noopener,noreferrer')
+            || window.open(item.url, '_blank', 'noopener,noreferrer');
+          if (waWindow) {
+            try { waWindow.focus(); } catch (_) {}
+          }
         }
+        lastOpenedUrl = item.url;
+        lastOpenedAt = now;
         log('📱 Відкрито у вкладці WhatsApp: ' + (item.fio || 'без імені'));
 
         google.script.run
@@ -809,6 +841,8 @@ function showSendPanelDialog_(items) {
           .markSendPanelSent_(item.row);
       } catch (e) {
         log('✕ Не вдалося відкрити повідомлення: ' + (e && e.message ? e.message : e));
+      } finally {
+        setTimeout(function(){ openInProgress = false; }, 350);
       }
     }
 

@@ -285,35 +285,56 @@
       if (!link) return null;
       if (STATE.DIAG_TEST_MODE) return { closed: false, focus() {} };
 
+      const guard = STATE._linkOpenGuard || { url: '', openedAt: 0 };
+      const now = Date.now();
+      if (guard.url === link && (now - Number(guard.openedAt || 0)) < 1500) {
+        return STATE.waSenderWindow && !STATE.waSenderWindow.closed ? STATE.waSenderWindow : null;
+      }
+
       const existing = primeWhatsAppSenderTab();
       if (existing && !existing.closed) {
         try {
           existing.location.replace(link);
+          existing.focus();
           STATE.waSenderWindow = existing;
+          STATE._linkOpenGuard = { url: link, openedAt: now };
           return existing;
         } catch (_) {}
       }
 
-      const opened = window.open(link, '_blank', 'noopener,noreferrer');
+      const targetName = String(STATE.waSenderWindowName || WA_SENDER_TARGET || 'WA_SENDER_WINDOW');
+      const opened = window.open(link, targetName, 'noopener,noreferrer')
+        || window.open(link, '_blank', 'noopener,noreferrer');
       if (opened) {
+        try { opened.focus(); } catch (_) {}
         STATE.waSenderWindow = opened;
+        STATE._linkOpenGuard = { url: link, openedAt: now };
         return opened;
       }
 
       const anchor = document.createElement('a');
       anchor.href = link;
-      anchor.target = '_blank';
+      anchor.target = targetName;
       anchor.rel = 'noopener noreferrer';
       anchor.style.display = 'none';
       document.body.appendChild(anchor);
       anchor.click();
       document.body.removeChild(anchor);
+      STATE._linkOpenGuard = { url: link, openedAt: now };
       return null;
     } catch (error) {
       console.error('openLinkSafe error:', error);
       try {
-        const fallback = window.open(String(url || '').trim(), '_blank', 'noopener,noreferrer');
-        if (fallback) STATE.waSenderWindow = fallback;
+        const fallbackUrl = String(url || '').trim();
+        if (!fallbackUrl) return null;
+        const targetName = String(STATE.waSenderWindowName || WA_SENDER_TARGET || 'WA_SENDER_WINDOW');
+        const fallback = window.open(fallbackUrl, targetName, 'noopener,noreferrer')
+          || window.open(fallbackUrl, '_blank', 'noopener,noreferrer');
+        if (fallback) {
+          try { fallback.focus(); } catch (_) {}
+          STATE.waSenderWindow = fallback;
+          STATE._linkOpenGuard = { url: fallbackUrl, openedAt: Date.now() };
+        }
         return fallback;
       } catch (_) {
         return null;
