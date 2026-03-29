@@ -1,440 +1,357 @@
 /**
- * WorkflowOrchestrator.gs — lifecycle orchestration for Stage 7 reliability hardening.
+ * AccessEnforcement.gs — viewer self-card restrictions, summary restrictions,
+ * send-panel restrictions, and access violation alerts.
  */
 
-function buildStage4Response_(success, message, error, result, changes, meta, diagnostics, context, warnings) {
-  const safeMeta = meta || {};
-  const safeDiagnostics = diagnostics || null;
-  const normalizedWarnings = Array.isArray(warnings) ? warnings.filter(Boolean).map(String) : [];
+var AccessEnforcement_ = AccessEnforcement_ || (function() {
+  const ROLE_ORDER = { guest: 0, viewer: 1, operator: 2, maintainer: 3, admin: 4, sysadmin: 5, owner: 6 };
+
+  function _nowText_() {
+    return Utilities.formatDate(new Date(), Session.getScriptTimeZone() || 'Etc/GMT', 'yyyy-MM-dd HH:mm:ss');
+  }
+
+  function _normCallsign_(value) {
+    return String(value || '').trim().toUpperCase();
+  }
+
+  function _descriptor_() {
+    return (typeof AccessControl_ === 'object' && AccessControl_.describe)
+      ? AccessControl_.describe()
+      : { role: 'guest', isAdmin: false, isOperator: false, enabled: true, registered: false, source: 'fallback', personCallsign: '' };
+  }
+
+  function _roleLabel_(role) {
+    var map = { guest: 'Гість', viewer: 'Перегляд', operator: 'Оператор', maintainer: 'Редактор', admin: 'Адмін', sysadmin: 'Сис. адмін', owner: 'Власник' };
+    return map[String(role || 'guest').trim().toLowerCase()] || 'Гість';
+  }
+
+  function _roleAtLeast_(role, requiredRole) {
+    return (ROLE_ORDER[String(role || 'guest').trim().toLowerCase()] || 0) >= (ROLE_ORDER[String(requiredRole || 'guest').trim().toLowerCase()] || 0);
+  }
+
+  function _notificationEmails_() {
+    if (typeof AccessControl_ !== 'object' || !AccessControl_.listNotificationEmails) return [];
+    return AccessControl_.listNotificationEmails();
+  }
+
+  function _appendAlert_(record) {
+    if (typeof AlertsRepository_ !== 'object' || !AlertsRepository_.appendAlert) return;
+    AlertsRepository_.appendAlert(record || {});
+  }
+
+  function _appendAudit_(message, record) {
+    if (typeof Stage4AuditTrail_ !== 'object' || !Stage4AuditTrail_.record) return;
+    Stage4AuditTrail_.record({
+      timestamp: new Date(),
+      operationId: 'security-' + stage4UniqueId_('access'),
+      scenario: 'security.accessViolation',
+      level: 'SECURITY',
+      status: 'BLOCKED',
+      initiator: record.displayName || record.email || record.currentKey || 'unknown',
+      dryRun: false,
+      partial: false,
+      affectedSheets: [appGetCore('ALERTS_SHEET', 'ALERTS_LOG'), STAGE4_CONFIG.AUDIT_SHEET, CONFIG.LOG_SHEET],
+      affectedEntities: [record.personCallsign || record.displayName || record.email || record.currentKey || 'unknown'],
+      appliedChangesCount: 1,
+      skippedChangesCount: 0,
+      payload: record,
+      diagnostics: { type: 'access-violation', source: record.source || '', action: record.action || '' },
+      message: message || '',
+      error: ''
+    });
+  }
+
+  function _appendLegacyLog_(message, record) {
+    if (typeof Stage4AuditTrail_ === 'object' && Stage4AuditTrail_.writeCompactLegacyLog) {
+      Stage4AuditTrail_.writeCompactLegacyLog({
+        timestamp: new Date(),
+        level: 'SECURITY',
+        scenario: record.action || 'accessViolation',
+        message: message || '',
+        affectedSheets: [appGetCore('ALERTS_SHEET', 'ALERTS_LOG')],
+        affectedEntities: [record.personCallsign || record.displayName || record.email || record.currentKey || 'unknown'],
+        context: { dateStr: _todayStr_() }
+      });
+    }
+  }
+
+  function _sendMail_(subject, body) {
+    var recipients = _notificationEmails_();
+    if (!recipients.length) return { sent: false, recipients: [] };
+    MailApp.sendEmail(recipients.join(','), subject, body);
+    return { sent: true, recipients: recipients };
+  }
+
+  function reportViolation(actionName, details, descriptorOpt) {
+    var descriptor = descriptorOpt || _descriptor_();
+    var action = String(actionName || 'unknownAction').trim() || 'unknownAction';
+    var info = Object.assign({}, details || {});
+    var role = String(descriptor.role || 'guest').trim().toLowerCase() || 'guest';
+    var message = 'Спроба доступу без прав: ' + action + ' (' + _roleLabel_(role) + ')';
+    var record = {
+      timestamp: _nowText_(),
+      type: 'access_violation',
+      severity: 'critical',
+      action: action,
+      outcome: 'blocked',
+      role: role,
+      roleLabel: _roleLabel_(role),
+      displayName: descriptor.displayName || '',
+      source: descriptor.source || '',
+      registered: !!descriptor.registered,
+      enabled: descriptor.enabled !== false,
+      email: descriptor.email || '',
+      currentKey: descriptor.currentKey || '',
+      personCallsign: descriptor.personCallsign || '',
+      details: info
+    };
+
+    _appendAlert_({
+      timestamp: new Date(),
+      type: 'access_violation',
+      severity: record.severity,
+      action: action,
+      outcome: record.outcome,
+      role: role,
+      displayName: record.displayName,
+      userKey: record.currentKey,
+      email: record.email,
+      source: record.source,
+      message: message,
+      details: record
+    });
+    _appendAudit_(message, record);
+    _appendLegacyLog_(message, record);
+
+    var body = [
+      'WAPB SECURITY ALERT',
+      '===================',
+      'Час: ' + record.timestamp,
+      'Подія: ' + action,
+      'Підсумок: заблоковано / відхилено',
+      'Роль: ' + record.roleLabel,
+      'Display name: ' + (record.displayName || 'не визначено'),
+      'Джерело доступу: ' + (record.source || 'не визначено'),
+      'Зареєстровано: ' + (record.registered ? 'так' : 'ні'),
+      'Email: ' + (record.email || 'не визначено'),
+      'User key: ' + (record.currentKey || 'не визначено'),
+      'Прив\'язаний позивний: ' + (record.personCallsign || 'не задано'),
+      '',
+      'Деталі:',
+      stage4SafeStringify_(info || {}, 9000)
+    ].join('\n');
+
+    var mailResult = { sent: false, recipients: [] };
+    try {
+      mailResult = _sendMail_('WAPB SECURITY ALERT: ' + action, body);
+    } catch (error) {
+      _appendAlert_({
+        timestamp: new Date(),
+        type: 'access_violation_mail_error',
+        severity: 'error',
+        action: action,
+        outcome: 'mail_error',
+        role: role,
+        displayName: record.displayName,
+        userKey: record.currentKey,
+        email: record.email,
+        source: record.source,
+        message: 'Не вдалося надіслати email-сповіщення про порушення доступу',
+        details: {
+          error: error && error.message ? error.message : String(error),
+          original: record
+        }
+      });
+    }
+
+    return {
+      success: true,
+      message: message,
+      alertLogged: true,
+      emailSent: !!mailResult.sent,
+      recipients: mailResult.recipients || [],
+      data: record
+    };
+  }
+
+  function canOpenPersonCard(descriptor, callsign) {
+    var access = descriptor || _descriptor_();
+    var target = _normCallsign_(callsign);
+    if (!target) return false;
+    if (access.enabled === false) return false;
+    if (_roleAtLeast_(access.role, 'operator')) return true;
+    if (String(access.role || 'guest').toLowerCase() !== 'viewer') return false;
+    var own = _normCallsign_(access.personCallsign || '');
+    return !!own && own === target;
+  }
+
+  function assertCanOpenPersonCard(callsign, dateStr, descriptorOpt) {
+    var descriptor = descriptorOpt || _descriptor_();
+    if (canOpenPersonCard(descriptor, callsign)) return descriptor;
+    reportViolation('openPersonCardDenied', {
+      requestedCallsign: String(callsign || ''),
+      requestedDate: String(dateStr || ''),
+      violation: 'viewer-card-access'
+    }, descriptor);
+    throw new Error('Недостатньо прав для відкриття цієї картки.');
+  }
+
+  function canUseDaySummary(descriptor) {
+    var access = descriptor || _descriptor_();
+    return !!(access.enabled !== false && _roleAtLeast_(access.role, 'viewer'));
+  }
+
+  function assertCanUseDaySummary(dateStr, descriptorOpt) {
+    var descriptor = descriptorOpt || _descriptor_();
+    if (canUseDaySummary(descriptor)) return descriptor;
+    reportViolation('daySummaryDenied', {
+      requestedDate: String(dateStr || ''),
+      violation: 'day-summary-access'
+    }, descriptor);
+    throw new Error('Недостатньо прав для короткого зведення.');
+  }
+
+  function canUseDetailedSummary(descriptor) {
+    var access = descriptor || _descriptor_();
+    return !!(access.enabled !== false && _roleAtLeast_(access.role, 'operator'));
+  }
+
+  function assertCanUseDetailedSummary(dateStr, descriptorOpt) {
+    var descriptor = descriptorOpt || _descriptor_();
+    if (canUseDetailedSummary(descriptor)) return descriptor;
+    reportViolation('detailedSummaryDenied', {
+      requestedDate: String(dateStr || ''),
+      violation: 'viewer-detailed-summary-access'
+    }, descriptor);
+    throw new Error('Недостатньо прав для детального зведення.');
+  }
+
+  function canUseWorkingActions(descriptor) {
+    var access = descriptor || _descriptor_();
+    return !!(access.enabled !== false && _roleAtLeast_(access.role, 'operator'));
+  }
+
+  function assertCanUseWorkingActions(actionName, details, descriptorOpt) {
+    var descriptor = descriptorOpt || _descriptor_();
+    if (canUseWorkingActions(descriptor)) return descriptor;
+    reportViolation(String(actionName || 'workingActionDenied'), Object.assign({ violation: 'working-action-access' }, details || {}), descriptor);
+    throw new Error('Недостатньо прав для робочої дії.');
+  }
+
+  function canUseSendPanel(descriptor) {
+    var access = descriptor || _descriptor_();
+    return !!(access.enabled !== false && _roleAtLeast_(access.role, 'operator'));
+  }
+
+  function assertCanUseSendPanel(actionName, details, descriptorOpt) {
+    var descriptor = descriptorOpt || _descriptor_();
+    if (canUseSendPanel(descriptor)) return descriptor;
+    reportViolation(String(actionName || 'sendPanelDenied'), Object.assign({ violation: 'send-panel-access' }, details || {}), descriptor);
+    throw new Error('Недостатньо прав для SEND_PANEL.');
+  }
+
+  function describeEditActorByEmail(email) {
+    var normalized = (typeof AccessControl_ === 'object' && AccessControl_.normalizeEmail)
+      ? AccessControl_.normalizeEmail(email)
+      : String(email || '').trim().toLowerCase();
+    var row = (typeof AccessControl_ === 'object' && AccessControl_.getAccessRowByEmail)
+      ? AccessControl_.getAccessRowByEmail(normalized)
+      : null;
+    if (!row) {
+      return {
+        email: normalized,
+        role: 'guest',
+        enabled: true,
+        knownUser: !!normalized,
+        registered: false,
+        isAdmin: false,
+        isOperator: false,
+        isMaintainer: false,
+        source: normalized ? 'ACCESS-email-unregistered' : 'edit-user-unavailable',
+        personCallsign: '',
+        displayName: ''
+      };
+    }
+    var role = String(row.role || 'guest').toLowerCase();
+    return {
+      email: normalized || row.email || '',
+      role: role,
+      enabled: row.enabled !== false,
+      knownUser: !!normalized,
+      registered: true,
+      isAdmin: _roleAtLeast_(role, 'admin') && row.enabled !== false,
+      isOperator: _roleAtLeast_(role, 'operator') && row.enabled !== false,
+      isMaintainer: _roleAtLeast_(role, 'maintainer') && row.enabled !== false,
+      source: row.source || 'ACCESS',
+      personCallsign: row.personCallsign || '',
+      displayName: row.displayName || ''
+    };
+  }
+
   return {
-    success: !!success,
-    message: String(message || ''),
-    error: error ? String(error) : null,
-    data: {
-      result: result === undefined ? null : result,
-      changes: Array.isArray(changes) ? changes : [],
-      meta: safeMeta,
-      diagnostics: safeDiagnostics
-    },
-    context: context || null,
-    warnings: normalizedWarnings,
-    operationId: safeMeta.operationId || null,
-    scenario: safeMeta.scenario || (context && context.scenario) || null,
-    dryRun: !!safeMeta.dryRun,
-    affectedSheets: stage4AsArray_(safeMeta.affectedSheets),
-    affectedEntities: stage4AsArray_(safeMeta.affectedEntities),
-    appliedChangesCount: Number(safeMeta.appliedChangesCount || 0),
-    skippedChangesCount: Number(safeMeta.skippedChangesCount || 0),
-    partial: !!safeMeta.partial,
-    retrySafe: safeMeta.retrySafe !== false,
-    lockUsed: !!safeMeta.lockUsed,
-    lockRequired: !!safeMeta.lockRequired,
-    diagnostics: safeDiagnostics
+    reportViolation: reportViolation,
+    canOpenPersonCard: canOpenPersonCard,
+    assertCanOpenPersonCard: assertCanOpenPersonCard,
+    canUseDaySummary: canUseDaySummary,
+    assertCanUseDaySummary: assertCanUseDaySummary,
+    canUseDetailedSummary: canUseDetailedSummary,
+    assertCanUseDetailedSummary: assertCanUseDetailedSummary,
+    canUseWorkingActions: canUseWorkingActions,
+    assertCanUseWorkingActions: assertCanUseWorkingActions,
+    canUseSendPanel: canUseSendPanel,
+    assertCanUseSendPanel: assertCanUseSendPanel,
+    describeEditActorByEmail: describeEditActorByEmail
   };
+})();
+
+function stage7ReportAccessViolation(actionName, details) {
+  return AccessEnforcement_.reportViolation(actionName, details || {});
 }
 
-const WorkflowOrchestrator_ = (function() {
-  function _acquireLock(lockRequired, timeoutMs) {
-    if (!lockRequired) return null;
-    const lock = LockService.getDocumentLock();
-    lock.waitLock(Math.max(Number(timeoutMs) || STAGE4_CONFIG.LOCK_TIMEOUT_MS, 1000));
-    return lock;
-  }
+function stage7SecurityAuditOnEdit(e) {
+  try {
+    var sheet = e && e.range ? e.range.getSheet() : null;
+    var sheetName = sheet ? sheet.getName() : '';
+    var userEmail = '';
+    try { userEmail = e && e.user && e.user.getEmail ? String(e.user.getEmail() || '') : ''; } catch (_) {}
+    var actor = AccessEnforcement_.describeEditActorByEmail(userEmail);
+    var protectedSheets = ['ACCESS', 'ALERTS_LOG', 'JOB_RUNTIME_LOG', 'AUDIT_LOG', 'OPS_LOG', 'ACTIVE_OPERATIONS', 'CHECKPOINTS'];
+    var editedProtectedSheet = protectedSheets.indexOf(sheetName) !== -1;
+    if (!editedProtectedSheet) return;
 
-  function _releaseLock(lock) {
-    if (!lock) return;
-    try { lock.releaseLock(); } catch (_) {}
-  }
-
-  function _routeDescriptor(cfg, scenario) {
-    if (cfg && cfg.routeName && typeof getStage6ARouteByName_ === 'function') {
-      return getStage6ARouteByName_(cfg.routeName);
+    var allow = false;
+    if (sheetName === 'ACCESS') {
+      allow = !!actor.isAdmin;
+    } else {
+      allow = ['sysadmin', 'owner'].indexOf(String(actor.role || '').toLowerCase()) !== -1 && actor.enabled !== false;
     }
-    if (cfg && cfg.publicApiMethod && typeof getStage6ARouteByApiMethod_ === 'function') {
-      return getStage6ARouteByApiMethod_(cfg.publicApiMethod);
-    }
-    return null;
-  }
 
-  function _buildDuplicateResponse_(scenario, operationId, dryRun, route, lock, lockRequired, startedAt, diagnostics, context, warnings, lifecycle) {
-    const previous = lifecycle && lifecycle.previous || {};
-    const meta = {
-      stage: STAGE4_CONFIG.VERSION,
-      hardeningStage: '7',
-      scenario: scenario,
-      operationId: operationId,
-      route: route,
-      affectedSheets: [],
-      affectedEntities: [],
-      appliedChangesCount: 0,
-      skippedChangesCount: 1,
-      dryRun: dryRun,
-      partial: false,
-      retrySafe: false,
-      lockUsed: !!lock,
-      lockRequired: !!lockRequired,
-      durationMs: new Date().getTime() - startedAt.getTime(),
-      lifecycle: lifecycle ? { fingerprint: lifecycle.fingerprint || '', reason: lifecycle.reason || '' } : null,
-      idempotency: {
-        fingerprint: lifecycle && lifecycle.fingerprint || '',
-        reason: lifecycle && lifecycle.reason || '',
-        previousOperationId: previous && previous.OperationId ? String(previous.OperationId) : '',
-        previousFinishedAt: previous && previous.TimestampFinished ? String(previous.TimestampFinished) : ''
-      }
-    };
-    return buildStage4Response_(true, 'Повторний запуск безпечно подавлено', null, null, [], meta, diagnostics, context, warnings.concat(['Сценарій уже виконувався або щойно був успішно завершений']));
-  }
+    if (allow && actor.registered) return;
+    AccessEnforcement_.reportViolation('sheetEditDeniedOrSuspicious', {
+      sheet: sheetName,
+      a1Notation: e && e.range && e.range.getA1Notation ? e.range.getA1Notation() : '',
+      oldValue: e && typeof e.oldValue !== 'undefined' ? e.oldValue : '',
+      newValue: e && typeof e.value !== 'undefined' ? e.value : '',
+      editedProtectedSheet: editedProtectedSheet,
+      editorEmailFromEvent: userEmail || ''
+    }, actor);
+  } catch (_) {}
+}
 
-  function run(spec) {
-    const cfg = spec || {};
-    const rawScenario = String(cfg.scenario || 'unknownScenario');
-    let payload = Object.assign({}, cfg.payload || {});
-    const startedAt = new Date();
-    const warnings = [];
-    const diagnostics = {
-      stage: STAGE4_CONFIG.VERSION,
-      hardeningStage: '7',
-      scenario: rawScenario,
-      startedAt: startedAt.toISOString(),
-      lifecycle: []
-    };
-
-    const dryRun = !!payload.dryRun;
-    const route = _routeDescriptor(cfg, rawScenario);
-    const lockRequired = cfg.lock !== false && !!cfg.write;
-    const retrySafe = cfg.retrySafe !== false;
-    let operationId = (typeof OperationRepository_ === 'object')
-      ? OperationRepository_.makeOperationId(rawScenario, payload, payload.operationId)
-      : String(payload.operationId || stage4UniqueId_(rawScenario));
-
-    let context = Object.assign({
-      stage: STAGE4_CONFIG.VERSION,
-      hardeningStage: diagnostics.hardeningStage,
-      scenario: rawScenario,
-      operationId: operationId,
-      dryRun: dryRun,
-      routeName: route && route.routeName ? route.routeName : '',
-      publicApiMethod: route && route.publicApiMethod ? route.publicApiMethod : ''
-    }, cfg.context || {});
-
-    let lock = null;
-    let beforeState = null;
-    let plan = null;
-    let execution = null;
-    let sync = null;
-    let verification = null;
-    let lifecycle = null;
-
-    try {
-      diagnostics.lifecycle.push('payload.accepted');
-
-      if (typeof cfg.validate === 'function') {
-        const validated = cfg.validate(payload, context) || {};
-        if (validated.payload && typeof validated.payload === 'object') payload = validated.payload;
-        warnings.push.apply(warnings, stage4MergeWarnings_(validated.warnings));
-        diagnostics.lifecycle.push('payload.validated');
-      }
-
-      operationId = (typeof OperationRepository_ === 'object')
-        ? OperationRepository_.makeOperationId(rawScenario, payload, payload.operationId)
-        : operationId;
-      context.operationId = operationId;
-
-      lock = _acquireLock(lockRequired, cfg.lockTimeoutMs);
-      diagnostics.lock = !!lock;
-      diagnostics.lockRequired = !!lockRequired;
-      if (lock) diagnostics.lifecycle.push('lock.acquired');
-
-      if (cfg.write && typeof OperationRepository_ === 'object') {
-        lifecycle = OperationRepository_.beginExecution({
-          scenario: rawScenario,
-          rawScenario: rawScenario,
-          payload: payload,
-          operationId: operationId,
-          dryRun: dryRun,
-          parentOperationId: payload.parentOperationId || '',
-          initiator: payload.initiator || (payload.trigger ? 'trigger' : 'manual'),
-          runSource: payload.source || (payload.trigger ? 'trigger' : 'manual'),
-          lockHolder: lock ? 'document-lock' : ''
-        });
-        diagnostics.idempotencyFingerprint = lifecycle.fingerprint || '';
-        diagnostics.lifecycle.push('lifecycle.preflight');
-        if (lifecycle.suppressed) {
-          diagnostics.lifecycle.push('idempotency.fingerprint.suppressed');
-          return _buildDuplicateResponse_(rawScenario, operationId, dryRun, route, lock, lockRequired, startedAt, diagnostics, context, warnings, lifecycle);
-        }
-        operationId = lifecycle.operationId || operationId;
-        context.operationId = operationId;
-        context.parentOperationId = lifecycle.parentOperationId || payload.parentOperationId || '';
-        context.fingerprint = lifecycle.fingerprint || '';
-      }
-
-      if (typeof cfg.readBefore === 'function') {
-        if (cfg.write && !dryRun && typeof OperationRepository_ === 'object') OperationRepository_.heartbeat(operationId, 'before-read');
-        beforeState = cfg.readBefore(payload, context);
-        diagnostics.lifecycle.push('state.read');
-        if (cfg.write && !dryRun && typeof OperationRepository_ === 'object') {
-          OperationRepository_.saveCheckpoint({
-            operationId: operationId,
-            checkpointIndex: 10,
-            processedUpTo: 'state.read',
-            checkpointPayload: { scenario: rawScenario },
-            verificationSnapshot: { ok: true }
-          });
-        }
-      }
-
-      if (typeof cfg.plan === 'function') {
-        if (cfg.write && !dryRun && typeof OperationRepository_ === 'object') OperationRepository_.heartbeat(operationId, 'before-plan');
-        plan = cfg.plan(payload, beforeState, context) || {};
-        warnings.push.apply(warnings, stage4MergeWarnings_(plan.warnings));
-        diagnostics.lifecycle.push('plan.built');
-        if (cfg.write && !dryRun && typeof OperationRepository_ === 'object') {
-          OperationRepository_.saveCheckpoint({
-            operationId: operationId,
-            checkpointIndex: 20,
-            processedUpTo: 'plan.built',
-            checkpointPayload: { meta: plan.meta || null },
-            verificationSnapshot: { ok: true }
-          });
-        }
-      }
-
-      if (typeof cfg.execute === 'function') {
-        if (cfg.write && !dryRun && typeof OperationRepository_ === 'object') OperationRepository_.heartbeat(operationId, 'before-execute');
-        execution = cfg.execute(payload, beforeState, plan, context) || {};
-      } else {
-        execution = { result: null, changes: [], warnings: [] };
-      }
-      warnings.push.apply(warnings, stage4MergeWarnings_(execution.warnings));
-      diagnostics.lifecycle.push(dryRun ? 'execute.dryRun' : 'execute.applied');
-
-      if (cfg.write && !dryRun && typeof OperationRepository_ === 'object') {
-        OperationRepository_.saveCheckpoint({
-          operationId: operationId,
-          checkpointIndex: 50,
-          processedUpTo: 'execute.complete',
-          lastProcessedEntity: stage4AsArray_(execution.affectedEntities)[0] || '',
-          lastProcessedRow: stage4AsArray_(payload.rowNumbers)[0] || '',
-          checkpointPayload: {
-            appliedChangesCount: Number(execution.appliedChangesCount || 0),
-            skippedChangesCount: Number(execution.skippedChangesCount || 0)
-          },
-          verificationSnapshot: { success: execution.success !== false }
-        });
-      }
-
-      if (typeof cfg.sync === 'function') {
-        sync = cfg.sync(payload, beforeState, plan, execution, context) || {};
-        warnings.push.apply(warnings, stage4MergeWarnings_(sync.warnings));
-        diagnostics.lifecycle.push('ui.sync.prepared');
-      }
-
-      if (typeof cfg.verify === 'function') {
-        if (cfg.write && !dryRun && typeof OperationRepository_ === 'object') OperationRepository_.heartbeat(operationId, 'before-verify');
-        verification = cfg.verify(payload, beforeState, plan, execution, context) || {};
-        warnings.push.apply(warnings, stage4MergeWarnings_(verification.warnings));
-        diagnostics.verification = verification;
-        diagnostics.lifecycle.push('verification.completed');
-        if (verification && verification.partial === true) execution.partial = true;
-        if (cfg.write && !dryRun && typeof OperationRepository_ === 'object') {
-          OperationRepository_.saveCheckpoint({
-            operationId: operationId,
-            checkpointIndex: 60,
-            processedUpTo: 'verification.complete',
-            lastProcessedEntity: stage4AsArray_(execution.affectedEntities)[0] || '',
-            lastProcessedRow: stage4AsArray_(payload.rowNumbers)[0] || '',
-            checkpointPayload: { verificationResult: OperationRepository_._classifyVerification(verification) },
-            verificationSnapshot: verification
-          });
-        }
-      }
-
-      const lifecycleScenario = (typeof OperationRepository_ === 'object') ? OperationRepository_.canonicalScenario(rawScenario, payload) : rawScenario;
-      const meta = Object.assign({
-        stage: STAGE4_CONFIG.VERSION,
-        hardeningStage: diagnostics.hardeningStage,
-        scenario: lifecycleScenario,
-        rawScenario: rawScenario,
-        operationId: operationId,
-        parentOperationId: payload.parentOperationId || '',
-        route: route,
-        fingerprint: diagnostics.idempotencyFingerprint || '',
-        affectedSheets: stage4AsArray_(execution.affectedSheets),
-        affectedEntities: stage4AsArray_(execution.affectedEntities),
-        appliedChangesCount: Number(execution.appliedChangesCount) || stage4AsArray_(execution.changes).length,
-        skippedChangesCount: Number(execution.skippedChangesCount) || 0,
-        dryRun: dryRun,
-        partial: !!execution.partial,
-        retrySafe: retrySafe,
-        lockUsed: !!lock,
-        lockRequired: !!lockRequired,
-        durationMs: new Date().getTime() - startedAt.getTime(),
-        sync: sync || null,
-        verification: verification || null,
-        repairNeeded: !dryRun && cfg.write && (!!(execution && execution.success === false) || (verification && verification.ok === false) || (verification && verification.partial === true)),
-        diagnosticsSummary: {
-          lifecycle: diagnostics.lifecycle.slice(),
-          fingerprint: diagnostics.idempotencyFingerprint || ''
-        }
-      }, execution.meta || {}, (plan && plan.meta) || {});
-
-      diagnostics.lifecycle.push('response.built');
-
-      const response = buildStage4Response_(
-        execution.success !== false,
-        execution.message || cfg.successMessage || 'Операцію виконано',
-        null,
-        execution.result,
-        execution.changes || [],
-        meta,
-        diagnostics,
-        Object.assign({}, context, execution.context || {}),
-        warnings
-      );
-
-      if (cfg.write && !dryRun && typeof OperationRepository_ === 'object') {
-        OperationRepository_.finalizeSuccessfulExecution({
-          operationId: operationId,
-          payload: payload,
-          result: execution.result,
-          execution: execution,
-          verification: verification,
-          success: execution.success !== false,
-          message: response.message,
-          repairNeeded: meta.repairNeeded,
-          transitionReason: (verification && verification.ok === false) ? 'post-write-verification-failed' : 'commit-complete'
-        });
-      }
-
-      if (stage4GetFeatureFlag_('auditTrail', true)) {
-        Stage4AuditTrail_.record({
-          timestamp: new Date(),
-          operationId: operationId,
-          scenario: lifecycleScenario,
-          level: execution.partial ? 'WARN' : 'AUDIT',
-          status: execution.success === false ? 'ERROR' : (execution.partial ? 'PARTIAL' : 'SUCCESS'),
-          initiator: payload.initiator || (payload.trigger ? 'trigger' : 'manual'),
-          dryRun: dryRun,
-          partial: !!execution.partial,
-          affectedSheets: meta.affectedSheets,
-          affectedEntities: meta.affectedEntities,
-          appliedChangesCount: meta.appliedChangesCount,
-          skippedChangesCount: meta.skippedChangesCount,
-          warnings: warnings,
-          payload: payload,
-          before: beforeState,
-          after: execution.result,
-          changes: execution.changes,
-          diagnostics: diagnostics,
-          message: response.message,
-          error: null,
-          context: context
-        });
-        Stage4AuditTrail_.writeCompactLegacyLog({
-          timestamp: new Date(),
-          operationId: operationId,
-          scenario: lifecycleScenario,
-          level: execution.partial ? 'WARN' : 'AUDIT',
-          affectedSheets: meta.affectedSheets,
-          affectedEntities: meta.affectedEntities,
-          message: response.message,
-          context: context
-        });
-      }
-
-      return response;
-    } catch (e) {
-      diagnostics.lifecycle.push('error');
-      diagnostics.durationMs = new Date().getTime() - startedAt.getTime();
-
-      if (cfg.write && !dryRun && typeof OperationRepository_ === 'object') {
-        try {
-          OperationRepository_.registerFailure({
-            operationId: operationId,
-            payload: payload,
-            result: execution && execution.result || null,
-            execution: execution,
-            errorMessage: e && e.message ? e.message : String(e),
-            transitionReason: 'exception'
-          });
-          OperationRepository_.appendNote(operationId, e && e.message ? e.message : String(e), 'workflow');
-        } catch (_) {}
-      }
-
-      const response = buildStage4Response_(
-        false,
-        '',
-        e && e.message ? e.message : String(e),
-        null,
-        [],
-        {
-          stage: STAGE4_CONFIG.VERSION,
-          hardeningStage: diagnostics.hardeningStage,
-          scenario: (typeof OperationRepository_ === 'object') ? OperationRepository_.canonicalScenario(rawScenario, payload) : rawScenario,
-          rawScenario: rawScenario,
-          operationId: operationId,
-          route: route,
-          fingerprint: diagnostics.idempotencyFingerprint || '',
-          affectedSheets: [],
-          affectedEntities: [],
-          appliedChangesCount: 0,
-          skippedChangesCount: 0,
-          dryRun: dryRun,
-          partial: false,
-          retrySafe: retrySafe,
-          lockUsed: !!lock,
-          lockRequired: !!lockRequired,
-          durationMs: diagnostics.durationMs,
-          verification: verification || null,
-          repairNeeded: !!cfg.write && !dryRun
-        },
-        diagnostics,
-        context,
-        warnings
-      );
-
-      if (stage4GetFeatureFlag_('auditTrail', true)) {
-        Stage4AuditTrail_.record({
-          timestamp: new Date(),
-          operationId: operationId,
-          scenario: rawScenario,
-          level: 'ERROR',
-          status: 'ERROR',
-          initiator: payload.initiator || (payload.trigger ? 'trigger' : 'manual'),
-          dryRun: dryRun,
-          partial: false,
-          affectedSheets: [],
-          affectedEntities: [],
-          appliedChangesCount: 0,
-          skippedChangesCount: 0,
-          warnings: warnings,
-          payload: payload,
-          before: beforeState,
-          after: null,
-          changes: [],
-          diagnostics: diagnostics,
-          message: '',
-          error: response.error,
-          context: context
-        });
-        Stage4AuditTrail_.writeCompactLegacyLog({
-          timestamp: new Date(),
-          operationId: operationId,
-          scenario: rawScenario,
-          level: 'ERROR',
-          affectedSheets: [],
-          affectedEntities: [],
-          message: response.error,
-          context: context
-        });
-      }
-
-      return response;
-    } finally {
-      _releaseLock(lock);
-    }
-  }
-
-  return { run: run };
-})();
+function stage7SecurityAuditOnChange(e) {
+  try {
+    var source = e && e.source ? e.source : SpreadsheetApp.getActive();
+    var userEmail = '';
+    try { userEmail = e && e.user && e.user.getEmail ? String(e.user.getEmail() || '') : ''; } catch (_) {}
+    var actor = AccessEnforcement_.describeEditActorByEmail(userEmail);
+    var changeType = e && e.changeType ? String(e.changeType) : 'OTHER';
+    var shouldAlert = ['sysadmin', 'owner'].indexOf(String(actor.role || '').toLowerCase()) === -1 || !actor.knownUser || !actor.registered;
+    if (!shouldAlert) return;
+    AccessEnforcement_.reportViolation('sheetStructureChangeDeniedOrSuspicious', {
+      spreadsheetId: source && source.getId ? source.getId() : '',
+      spreadsheetName: source && source.getName ? source.getName() : '',
+      changeType: changeType,
+      editorEmailFromEvent: userEmail || ''
+    }, actor);
+  } catch (_) {}
+}

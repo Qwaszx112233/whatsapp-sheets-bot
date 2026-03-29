@@ -1,5 +1,5 @@
 /**
- * ProjectMetadata.gs — truthful release metadata for the active Stage 7.1 baseline.
+ * ProjectMetadata.gs — truthful release metadata for the active Stage 7.1.2 baseline.
  */
 
 function _projectMetaDeepCopy_(value) {
@@ -10,33 +10,37 @@ const PROJECT_RELEASE_NAMING_ = Object.freeze({
   stage: '7.1',
   stageLabel: 'Stage 7.1.2 — Security & Ops Hardened Baseline',
   stageVersion: '7.1.2-security-ops-hardened',
-  activeBaseline: 'stage7-1-1-final-stabilized-repair-baseline',
-  archiveBaseName: 'gas_wasb_stage7_1_1_final_stabilized_repair',
-  archiveFileName: 'gas_wasb_stage7_1_1_final_stabilized_repair.zip',
-  rootFolderName: 'gas_wasb_stage7_1_1_final_stabilized_repair'
+  activeBaseline: 'stage7-1-2-security-ops-hardened-baseline',
+  archiveBaseName: 'gas_wapb_stage7_1_2_security_ops_hardened',
+  archiveFileName: 'gas_wapb_stage7_1_2_security_ops_hardened.zip',
+  rootFolderName: 'gas_wapb_stage7_1_2_security_ops_hardened'
 });
 
 const PROJECT_DOCUMENTATION_MAP_ = Object.freeze({
   active: Object.freeze({
-    readme: 'README.md',
-    architecture: 'ARCHITECTURE.md',
-    runbook: 'RUNBOOK.md',
-    releaseReport: 'STAGE7_REPORT.md'
+    readme: '_extras/README.md',
+    architecture: '_extras/ARCHITECTURE.md',
+    runbook: '_extras/RUNBOOK.md',
+    releaseReport: '_extras/CHANGELOG.md'
   }),
   reference: Object.freeze([
-    'docs/reference/PUBLIC_API_STAGE5.md',
-    'docs/reference/CHANGELOG_STAGE5.md',
-    'docs/reference/STAGE5_REPORT.md',
-    'docs/reference/STAGE6A_REPORT.md',
-    'docs/reference/SPREADSHEET_ACTION_API.md',
-    'docs/reference/JOBS_RUNTIME.md',
-    'docs/reference/SUNSET_POLICY.md'
+    '_extras/history/CANONICAL_APIS_STAGE7_FINAL_STABILIZED.md',
+    '_extras/history/CHANGELOG_STAGE7_FINAL_STABILIZED.md',
+    '_extras/history/COMPATIBILITY_ALIASES_STAGE7_FINAL_STABILIZED.md',
+    '_extras/history/FINAL_STABILIZATION_REPORT_2026-03-26.md',
+    '_extras/history/SCHEMA.md',
+    '_extras/history/SEND_PANEL_TZ_IMPLEMENTATION_2026-03-26.md',
+    '_extras/history/ACCESS_VIEWER_RESTRICTIONS_2026-03-29.md'
   ]),
   historical: Object.freeze([
-    'docs/archive/PUBLIC_API_STAGE4.md',
-    'docs/archive/CHANGELOG_STAGE4.md',
-    'docs/archive/STAGE4_REPORT.md',
-    'docs/archive/STAGE6A_TRANSITION_NOTES.md'
+    '_extras/history/IMPLEMENTATION_REPORT_2026-03-22.md',
+    '_extras/history/STABILIZATION_NOTES_2026-03-22.md',
+    '_extras/history/AUDIT_REPORT_2026-03-24.md',
+    '_extras/history/COMPARISON_AND_MERGE_REPORT_2026-03-26.md',
+    '_extras/history/RELEASE_NAMING_HOTFIX_2026-03-26.md',
+    '_extras/history/RESOLVER_HOTFIX_2026-03-26.md',
+    '_extras/history/STABILIZATION_CHECK_REPORT_STAGE7_FINAL.md',
+    '_extras/history/TZ_EXECUTION_REPORT_2026-03-28.md'
   ])
 });
 
@@ -278,11 +282,13 @@ const PROJECT_CLIENT_RUNTIME_POLICY_ = Object.freeze({
 });
 
 const PROJECT_BUNDLE_FILE_INDEX_ = Object.freeze([
-  "ARCHITECTURE.md",
-  "AUDIT_REPORT_2026-03-24.md",
+  "AccessControl.gs",
+  "AccessE2ETests.gs",
+  "AccessEnforcement.gs",
+  "AccessSheetTriggers.gs",
   "Actions.gs",
+  "AlertsRepository.gs",
   "AuditTrail.gs",
-  "COMMANDS_TERMINAL.md",
   "Code.gs",
   "DataAccess.gs",
   "DateUtils.gs",
@@ -293,10 +299,7 @@ const PROJECT_BUNDLE_FILE_INDEX_ = Object.freeze([
   "Dialogs.gs",
   "DictionaryRepository.gs",
   "DomainTests.gs",
-  "FILES_TO_CREATE_IN_GAS_WEB_EDITOR.txt",
-  "GAS_WEB_EDITOR_IMPORT_GUIDE.md",
   "HtmlUtils.gs",
-  "IMPLEMENTATION_REPORT_2026-03-22.md",
   "JavaScript.html",
   "JobRuntime.gs",
   "JobRuntimeRepository.gs",
@@ -308,6 +311,7 @@ const PROJECT_BUNDLE_FILE_INDEX_ = Object.freeze([
   "Js.Helpers.html",
   "Js.Render.html",
   "Js.State.html",
+  "LifecycleRetention.gs",
   "Log.gs",
   "LogsRepository.gs",
   "MonthSheets.gs",
@@ -318,24 +322,23 @@ const PROJECT_BUNDLE_FILE_INDEX_ = Object.freeze([
   "PersonsRepository.gs",
   "PreviewLinkService.gs",
   "ProjectMetadata.gs",
-  "README.md",
-  "RUNBOOK.md",
   "Reconciliation.gs",
   "RoutingRegistry.gs",
-  "STABILIZATION_NOTES_2026-03-22.md",
-  "STAGE7_REPORT.md",
+  "SecurityRedaction.gs",
   "SelectionActionService.gs",
   "SendPanel.gs",
   "SendPanelConstants.gs",
   "SendPanelRepository.gs",
   "SendPanelService.gs",
   "ServerResponse.gs",
+  "ServiceSheetsBootstrap.gs",
   "SheetSchemas.gs",
   "SheetStandards.gs",
   "Sidebar.html",
   "SidebarServer.gs",
   "SmokeTests.gs",
   "SpreadsheetActionsApi.gs",
+  "SpreadsheetProtection.gs",
   "Stage3ServerApi.gs",
   "Stage4Config.gs",
   "Stage4MaintenanceApi.gs",
@@ -356,18 +359,35 @@ const PROJECT_BUNDLE_FILE_INDEX_ = Object.freeze([
   "VacationsRepository.gs",
   "Validation.gs",
   "WorkflowOrchestrator.gs",
+  "_extras/ARCHITECTURE.md",
+  "_extras/CHANGELOG.md",
+  "_extras/README.md",
+  "_extras/RUNBOOK.md",
+  "_extras/SECURITY.md",
+  "_extras/history/ACCESS_VIEWER_RESTRICTIONS_2026-03-29.md",
+  "_extras/history/AUDIT_REPORT_2026-03-24.md",
+  "_extras/history/CANONICAL_APIS_STAGE7_FINAL_STABILIZED.md",
+  "_extras/history/CHANGELOG_STAGE7_FINAL_STABILIZED.md",
+  "_extras/history/COMMANDS_TERMINAL.md",
+  "_extras/history/COMPARISON_AND_MERGE_REPORT_2026-03-26.md",
+  "_extras/history/COMPATIBILITY_ALIASES_STAGE7_FINAL_STABILIZED.md",
+  "_extras/history/FILES_TO_CREATE_IN_GAS_WEB_EDITOR.txt",
+  "_extras/history/FINAL_DELIVERY_REPORT_2026-03-29.md",
+  "_extras/history/FINAL_STABILIZATION_REPORT_2026-03-26.md",
+  "_extras/history/GAS_WEB_EDITOR_IMPORT_GUIDE.md",
+  "_extras/history/IMPLEMENTATION_REPORT_2026-03-22.md",
+  "_extras/history/RELEASE_NAMING_HOTFIX_2026-03-26.md",
+  "_extras/history/RESOLVER_HOTFIX_2026-03-26.md",
+  "_extras/history/SCHEMA.md",
+  "_extras/history/SEND_PANEL_TZ_IMPLEMENTATION_2026-03-26.md",
+  "_extras/history/STABILIZATION_CHECK_REPORT_STAGE7_FINAL.md",
+  "_extras/history/STABILIZATION_NOTES_2026-03-22.md",
+  "_extras/history/STAGE7_REPORT.md",
+  "_extras/history/TZ_EXECUTION_REPORT_2026-03-28.md",
+  "_extras/tools/package.json",
+  "_extras/tools/static-checks.js",
+  "_extras/tools/validate-gs-syntax.js",
   "appsscript.json",
-  "docs/archive/CHANGELOG_STAGE4.md",
-  "docs/archive/PUBLIC_API_STAGE4.md",
-  "docs/archive/STAGE4_REPORT.md",
-  "docs/archive/STAGE6A_TRANSITION_NOTES.md",
-  "docs/reference/CHANGELOG_STAGE5.md",
-  "docs/reference/JOBS_RUNTIME.md",
-  "docs/reference/PUBLIC_API_STAGE5.md",
-  "docs/reference/SPREADSHEET_ACTION_API.md",
-  "docs/reference/STAGE5_REPORT.md",
-  "docs/reference/STAGE6A_REPORT.md",
-  "docs/reference/SUNSET_POLICY.md",
 ]);
 
 const PROJECT_BUNDLE_METADATA_ = Object.freeze({
@@ -386,25 +406,24 @@ const PROJECT_BUNDLE_METADATA_ = Object.freeze({
     manifestPath: 'appsscript.json',
     claspExamplePath: '',
     localWorkflowOptional: true,
-    notes: ['The release zip must not include .git or node_modules.', 'This web-ready repack omits local PowerShell and Node tooling.', 'No .clasp files are required or shipped for the web-editor workflow.']
+    notes: ['The release zip must not include .git or node_modules.', 'Non-runtime documentation and import helpers live under _extras/.', 'No .clasp files are required or shipped for the web-editor workflow.']
   }),
   maintenanceLayerStatus: 'stage5-canonical-maintenance-api',
+  manifestIncluded: true,
+  documentation: PROJECT_DOCUMENTATION_MAP_,
+  diagnosticsPolicy: Object.freeze({ wording: 'stage7-1-2-security-ops-hardened-baseline' }),
   maintenanceLayerPolicy: PROJECT_MAINTENANCE_POLICY_,
   clientRuntimePolicy: PROJECT_CLIENT_RUNTIME_POLICY_,
   hardeningOverlay: PROJECT_HARDENING_OVERLAY_,
   requiredDocs: Object.freeze([
-    'README.md',
-    'ARCHITECTURE.md',
-  'AUDIT_REPORT_2026-03-24.md',
-    'RUNBOOK.md',
-    'STAGE7_REPORT.md',
-    'docs/reference/PUBLIC_API_STAGE5.md',
-    'docs/reference/CHANGELOG_STAGE5.md',
-    'docs/reference/STAGE5_REPORT.md',
-    'docs/reference/STAGE6A_REPORT.md'
+    '_extras/README.md',
+    '_extras/ARCHITECTURE.md',
+    '_extras/RUNBOOK.md',
+    '_extras/SECURITY.md',
+    '_extras/CHANGELOG.md'
   ]),
   notes: Object.freeze([
-    'Metadata is aligned to the active Stage 7.1 release identity.',
+    'Metadata is aligned to the active Stage 7.1.2 release identity.',
     'Historical Stage 4 compatibility remains intentionally preserved.',
     'Stage 5 maintenance naming remains canonical in the active release.'
   ])

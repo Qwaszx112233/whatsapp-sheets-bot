@@ -345,7 +345,7 @@ function runStage4SmokeTests(options) {
     const meta = getProjectBundleMetadata_();
     _smokeAssert_(meta.manifestIncluded === true, 'manifestIncluded має бути true');
     _smokeAssert_(meta.maintenanceLayerStatus === 'stage5-canonical-maintenance-api', 'maintenanceLayerStatus має вказувати на Stage 5 canonical layer');
-    _smokeAssert_(Array.isArray(meta.documentation.historical) && meta.documentation.historical.indexOf('docs/archive/STAGE4_2_REPORT.md') !== -1, 'docs/archive/STAGE4_2_REPORT.md має бути historical');
+    _smokeAssert_(Array.isArray(meta.documentation.historical) && meta.documentation.historical.indexOf('_extras/history/IMPLEMENTATION_REPORT_2026-03-22.md') !== -1, '_extras/history/IMPLEMENTATION_REPORT_2026-03-22.md має бути historical');
     _smokeAssert_(_smokeBundleHas_('appsscript.json'), 'appsscript.json має фізично існувати у root bundle');
     _smokeAssert_(!_smokeBundleHas_('.clasp.json.example'), '.clasp.json.example не повинен існувати у web-editor-ready root bundle');
     return 'bundle-ok';
@@ -371,7 +371,7 @@ function runStage5ScenarioTests(options) {
   const opts = options || {};
   const report = {
     ok: true,
-    stage: (typeof getProjectBundleMetadata_ === 'function' ? getProjectBundleMetadata_().stageVersion : '7.1.1-final-stabilized-repair'),
+    stage: (typeof getProjectBundleMetadata_ === 'function' ? getProjectBundleMetadata_().stageVersion : '7.1.2-security-ops-hardened'),
     ts: new Date().toISOString(),
     dryRun: opts.dryRun !== false,
     checks: [],
@@ -455,7 +455,7 @@ function runStage5SmokeTests(options) {
   const release = typeof getProjectReleaseNaming_ === 'function' ? getProjectReleaseNaming_() : (meta && meta.release) || {};
   const report = {
     ok: true,
-    stage: meta && meta.stageVersion ? meta.stageVersion : '7.1.1-final-stabilized-repair',
+    stage: meta && meta.stageVersion ? meta.stageVersion : '7.1.2-security-ops-hardened',
     ts: new Date().toISOString(),
     dryRun: opts.dryRun !== false,
     checks: [],
@@ -472,33 +472,35 @@ function runStage5SmokeTests(options) {
 
   _smokePush_(report, 'release metadata truth model', function () {
     _smokeAssert_(String(meta.stage) === '7.1', 'metadata.stage має бути 7.1');
-    _smokeAssert_(meta.stageLabel === 'Stage 7.1.1 — Final Stabilized Repair Baseline', 'stageLabel має бути Stage 7.1.1 — Final Stabilized Repair Baseline');
-    _smokeAssert_(meta.stageVersion === '7.1.1-final-stabilized-repair', 'stageVersion має бути 7.1.1-final-stabilized-repair');
-    _smokeAssert_(meta.activeBaseline === 'stage7-1-1-final-stabilized-repair-baseline', 'activeBaseline має бути stage7-1-1-final-stabilized-repair-baseline');
+    _smokeAssert_(meta.stageLabel === 'Stage 7.1.2 — Security & Ops Hardened Baseline', 'stageLabel має бути Stage 7.1.2 — Security & Ops Hardened Baseline');
+    _smokeAssert_(meta.stageVersion === '7.1.2-security-ops-hardened', 'stageVersion має бути 7.1.2-security-ops-hardened');
+    _smokeAssert_(meta.activeBaseline === 'stage7-1-2-security-ops-hardened-baseline', 'activeBaseline має бути stage7-1-2-security-ops-hardened-baseline');
     _smokeAssert_(meta.maintenanceLayerStatus === 'stage5-canonical-maintenance-api', 'maintenanceLayerStatus не Stage 5 canonical');
     _smokeAssert_(meta.packagingPolicy && meta.packagingPolicy.policy === 'root-manifest-web-editor-only', 'Packaging policy має бути root-manifest-web-editor-only');
-    _smokeAssert_(meta.requiredDocs.indexOf('docs/reference/PUBLIC_API_STAGE5.md') !== -1, 'docs/reference/PUBLIC_API_STAGE5.md відсутній у metadata');
-    _smokeAssert_(meta.requiredDocs.indexOf('docs/reference/STAGE5_REPORT.md') !== -1, 'docs/reference/STAGE5_REPORT.md відсутній у metadata');
-    _smokeAssert_(meta.requiredDocs.indexOf('docs/reference/STAGE6A_REPORT.md') !== -1, 'docs/reference/STAGE6A_REPORT.md відсутній у metadata');
+    _smokeAssert_(meta.requiredDocs.indexOf('_extras/SECURITY.md') !== -1, '_extras/SECURITY.md відсутній у metadata');
+    _smokeAssert_(meta.requiredDocs.indexOf('_extras/CHANGELOG.md') !== -1, '_extras/CHANGELOG.md відсутній у metadata');
+    _smokeAssert_(meta.requiredDocs.length === 5, 'requiredDocs має бути зведено до 5 головних документів');
     return 'metadata-ok';
   });
 
   _smokePush_(report, 'physical bundle layout', function () {
     [
       'appsscript.json',
-      'README.md',
-      'ARCHITECTURE.md',
-      'RUNBOOK.md',
-      'STAGE7_REPORT.md',
+      '_extras/README.md',
+      '_extras/ARCHITECTURE.md',
+      '_extras/RUNBOOK.md',
+      '_extras/SECURITY.md',
+      '_extras/CHANGELOG.md',
+      '_extras/history/CANONICAL_APIS_STAGE7_FINAL_STABILIZED.md',
+      '_extras/history/SCHEMA.md',
+      'AccessE2ETests.gs',
       'OperationRepository.gs',
+      'AccessControl.gs',
+      'ServiceSheetsBootstrap.gs',
       'JavaScript.html',
       'Js.Core.html',
       'Js.Actions.html',
-      'Js.Events.html',
-      'docs/reference/PUBLIC_API_STAGE5.md',
-      'docs/reference/CHANGELOG_STAGE5.md',
-      'docs/reference/STAGE5_REPORT.md',
-      'docs/reference/STAGE6A_REPORT.md'
+      'Js.Events.html'
     ].forEach(function (path) {
       _smokeAssert_(_smokeBundleHas_(path), `Файл відсутній у bundle: ${path}`);
     });
@@ -511,25 +513,25 @@ function runStage5SmokeTests(options) {
     const historicalDocs = Array.isArray(docs.historical) ? docs.historical : [];
     _smokeAssert_(activeDocs.length >= 4, 'Замало active docs');
     activeDocs.forEach(function (path) {
-      _smokeAssert_(String(path).indexOf('docs/archive/') !== 0, `Active doc не може лежати в archive: ${path}`);
+      _smokeAssert_(String(path).indexOf('_extras/') === 0, `Active doc має лежати в _extras/: ${path}`);
       _smokeAssert_(_smokeBundleHas_(path), `Active doc відсутній фізично: ${path}`);
     });
     referenceDocs.forEach(function (path) {
-      _smokeAssert_(String(path).indexOf('docs/reference/') === 0, `Reference doc має лежати в docs/reference/: ${path}`);
+      _smokeAssert_(String(path).indexOf('_extras/') === 0, `Reference doc має лежати в _extras/: ${path}`);
     });
     historicalDocs.forEach(function (path) {
-      _smokeAssert_(String(path).indexOf('docs/archive/') === 0, `Historical doc має лежати в docs/archive/: ${path}`);
+      _smokeAssert_(String(path).indexOf('_extras/') === 0, `Historical doc має лежати в _extras/: ${path}`);
     });
-    _smokeAssert_(docs.active.releaseReport === 'STAGE7_REPORT.md', 'STAGE7_REPORT має бути active release report');
-    _smokeAssert_(referenceDocs.indexOf('docs/reference/STAGE6A_REPORT.md') !== -1, 'STAGE6A_REPORT має бути reference doc');
-    _smokeAssert_(historicalDocs.indexOf('docs/archive/PUBLIC_API_STAGE4.md') !== -1, 'Stage 4 public API має бути historical');
+    _smokeAssert_(docs.active.releaseReport === '_extras/CHANGELOG.md', '_extras/CHANGELOG.md має бути active release report');
+    _smokeAssert_(referenceDocs.indexOf('_extras/history/CANONICAL_APIS_STAGE7_FINAL_STABILIZED.md') !== -1, 'CANONICAL_APIS_STAGE7_FINAL_STABILIZED має бути reference doc');
+    _smokeAssert_(historicalDocs.indexOf('_extras/history/IMPLEMENTATION_REPORT_2026-03-22.md') !== -1, 'IMPLEMENTATION_REPORT_2026-03-22 має бути historical');
     return 'docs-ok';
   });
 
   _smokePush_(report, 'release naming consistency', function () {
-    _smokeAssert_(release.archiveBaseName === 'gas_wasb_stage7_1_1_final_stabilized_repair', 'archiveBaseName має бути gas_wasb_stage7_1_1_final_stabilized_repair');
-    _smokeAssert_(release.archiveFileName === 'gas_wasb_stage7_1_1_final_stabilized_repair.zip', 'archiveFileName має бути gas_wasb_stage7_1_1_final_stabilized_repair.zip');
-    _smokeAssert_(release.rootFolderName === 'gas_wasb_stage7_1_1_final_stabilized_repair', 'rootFolderName має бути gas_wasb_stage7_1_1_final_stabilized_repair');
+    _smokeAssert_(release.archiveBaseName === 'gas_wapb_stage7_1_2_security_ops_hardened', 'archiveBaseName має бути gas_wapb_stage7_1_2_security_ops_hardened');
+    _smokeAssert_(release.archiveFileName === 'gas_wapb_stage7_1_2_security_ops_hardened.zip', 'archiveFileName має бути gas_wapb_stage7_1_2_security_ops_hardened.zip');
+    _smokeAssert_(release.rootFolderName === 'gas_wapb_stage7_1_2_security_ops_hardened', 'rootFolderName має бути gas_wapb_stage7_1_2_security_ops_hardened');
     _smokeAssert_(meta.hardeningOverlay && meta.hardeningOverlay.label === 'Stage 6A hardening evolved into Stage 7 lifecycle baseline', 'overlay label невірний');
     return 'release-naming-ok';
   });
@@ -616,7 +618,7 @@ function runStage5SmokeTests(options) {
       });
     });
 
-    _smokeAssert_(String(full.summary || '').indexOf('Stage 7.1.1 — Final Stabilized Repair Baseline') !== -1, 'Stage 7.1 wording не знайдено в diagnostics summary');
+    _smokeAssert_(String(full.summary || '').indexOf('Stage 7.1.2 — Security & Ops Hardened Baseline') !== -1, 'Stage 7.1 wording не знайдено в diagnostics summary');
     _smokeAssert_((sunset.checks || []).some(function (item) { return item.name === 'Compatibility split report (informational)'; }), 'Informational compatibility split report не знайдено');
     _smokeAssert_((sunset.checks || []).every(function (item) { return item.name !== 'Canonical vs compatibility split'; }), 'Залишився старий compatibility split check name');
     _smokeAssert_((quick.checks || []).every(function (item) { return item.name !== 'Stage5 baseline health bridge'; }), 'У quick diagnostics залишився старий baseline health marker');
@@ -736,6 +738,15 @@ function runStage5SmokeTests(options) {
   });
 
 
+  _smokePush_(report, 'access security e2e dry-run', function () {
+    _smokeAssert_(typeof runAccessSecurityE2ETests_ === 'function', 'runAccessSecurityE2ETests_ відсутній');
+    const e2e = runAccessSecurityE2ETests_({ dryRun: true });
+    _smokeAssert_(e2e && Array.isArray(e2e.checks), 'Access E2E не повернув checks[]');
+    _smokeAssert_(e2e.checks.length >= 8, 'Замало access security E2E checks');
+    _smokeAssert_(e2e.ok !== false, 'Access security E2E повернув ok=false');
+    return `checks=${e2e.checks.length}`;
+  });
+
   _smokePush_(report, 'security hardening helpers', function () {
     _smokeAssert_(typeof AccessControl_ === 'object', 'AccessControl_ відсутній');
     _smokeAssert_(typeof SecurityRedaction_ === 'object', 'SecurityRedaction_ відсутній');
@@ -762,9 +773,9 @@ function runStage5SmokeTests(options) {
   }, { skipOnError: true });
 
   _smokePush_(report, 'historical docs kept non-active', function () {
-    _smokeAssert_(docs.active.releaseReport === 'STAGE7_REPORT.md', 'Stage 7 report має бути активним');
-    _smokeAssert_(Array.isArray(docs.historical) && docs.historical.indexOf('docs/archive/PUBLIC_API_STAGE4.md') !== -1, 'Stage 4 public API має бути historical');
-    _smokeAssert_(Array.isArray(docs.historical) && docs.historical.indexOf('docs/archive/CHANGELOG_STAGE4.md') !== -1, 'Stage 4 changelog має бути historical');
+    _smokeAssert_(docs.active.releaseReport === '_extras/CHANGELOG.md', 'CHANGELOG має бути активним');
+    _smokeAssert_(Array.isArray(docs.historical) && docs.historical.indexOf('_extras/history/IMPLEMENTATION_REPORT_2026-03-22.md') !== -1, 'Implementation report має бути historical');
+    _smokeAssert_(Array.isArray(docs.historical) && docs.historical.indexOf('_extras/history/STABILIZATION_NOTES_2026-03-22.md') !== -1, 'Stabilization notes мають бути historical');
     return 'historical-docs-ok';
   });
 

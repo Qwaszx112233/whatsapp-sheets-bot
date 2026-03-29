@@ -187,7 +187,9 @@
       'ACCESS-user-key-rotated': 'user key оновлено автоматично',
       'ACCESS-user-key-unregistered': 'user key не зареєстровано',
       'ACCESS-email-bound-key': 'ключ прив’язано через аварійний email-міст',
+      'ACCESS-email-bridge': 'ідентифікацію підтверджено через аварійний email-міст',
       'scriptProperties': 'Script Properties (тільки аварійна міграція)',
+      'scriptProperties-email-bridge': 'аварійний email-міст через Script Properties',
       'bootstrap-owner': 'тимчасовий bootstrap-owner',
       'default': 'режим за замовчуванням'
     };
@@ -263,20 +265,35 @@
     return 'Додаткових дій не потрібно. Якщо панель поводиться не так, як роль у звіті, проблема вже не в доступі, а в UI або окремій кнопці.';
   }
 
+
+  function getAllowedActionsText_(access) {
+    const list = Array.isArray(access && access.allowedActions) ? access.allowedActions : [];
+    return list.length ? list.join(', ') : 'немає';
+  }
+
+  function getRotationModeLabel_(access) {
+    return access && access.migrationModeEnabled ? 'user key + аварійний email-міст' : 'strict user key';
+  }
+
   function buildAccessDebugReportText_(access) {
     const roleLabel = getAccessRoleLabel_(access && access.role);
     const sourceLabel = getAccessSourceLabel_(access && access.source);
+    const displayName = String(access && access.displayName || '').trim() || 'не визначено';
     const email = String(access && access.email || '').trim() || 'не визначено';
     const currentKey = String(access && access.currentKey || '').trim() || 'не визначено';
     const keyMasked = maskAccessKey_(currentKey);
     const registeredLabel = access && access.registered ? 'так' : 'ні';
-    const keyModeLabel = access && access.migrationModeEnabled ? 'user key + аварійний email-міст' : 'strict user key';
+    const keyModeLabel = getRotationModeLabel_(access);
     const keyAvailableLabel = access && access.keyAvailable ? 'так' : 'ні';
     const adminLabel = access && access.isAdmin ? 'так' : 'ні';
     const operatorLabel = access && access.isOperator ? 'так' : 'ні';
     const note = String(access && access.note || '').trim() || 'немає';
     const personCallsign = String(access && access.personCallsign || '').trim() || 'не задано';
     const reason = String(access && access.reason || '').trim() || 'немає';
+    const allowedActions = getAllowedActionsText_(access);
+    const lastSeenAt = String(access && access.lastSeenAt || '').trim() || 'немає';
+    const lastRotatedAt = String(access && access.lastRotatedAt || '').trim() || 'немає';
+    const rotationState = String(access && access.rotationState || '').trim() || 'невідомо';
 
     return [
       'ПЕРЕВІРКА ДОСТУПУ',
@@ -285,14 +302,19 @@
       'Режим ідентифікації: ' + keyModeLabel,
       'Ключ користувача доступний: ' + keyAvailableLabel,
       'Ключ користувача зареєстровано: ' + registeredLabel,
+      'Display name: ' + displayName,
       'Поточний user key: ' + currentKey,
       'Маска ключа: ' + keyMasked,
       'Email (довідково): ' + email,
       'Джерело доступу: ' + sourceLabel,
       'Адмін-доступ: ' + adminLabel,
       'Робочий доступ: ' + operatorLabel,
+      'Дозволені дії: ' + allowedActions,
       'Примітка: ' + note,
       'Свій позивний: ' + personCallsign,
+      'last_seen_at: ' + lastSeenAt,
+      'last_rotated_at: ' + lastRotatedAt,
+      'Стан ротації: ' + rotationState,
       'Технічна причина: ' + reason,
       '',
       'Що це означає:',
@@ -310,13 +332,18 @@
     const currentKey = String(access && access.currentKey || '').trim();
     const maskedKey = maskAccessKey_(currentKey);
     const registeredLabel = access && access.registered ? 'Так' : 'Ні';
-    const keyModeLabel = access && access.migrationModeEnabled ? 'user key + аварійний email-міст' : 'strict user key';
+    const keyModeLabel = getRotationModeLabel_(access);
     const keyAvailableLabel = access && access.keyAvailable ? 'Так' : 'Ні';
     const adminLabel = access && access.isAdmin ? 'Дозволено' : 'Заблоковано';
     const operatorLabel = access && access.isOperator ? 'Дозволено' : 'Заблоковано';
     const reason = String(access && access.reason || '').trim() || 'Немає';
     const note = String(access && access.note || '').trim() || 'Немає';
     const personCallsign = String(access && access.personCallsign || '').trim() || 'Немає';
+    const displayName = String(access && access.displayName || '').trim() || 'Немає';
+    const lastSeenAt = String(access && access.lastSeenAt || '').trim() || 'Немає';
+    const lastRotatedAt = String(access && access.lastRotatedAt || '').trim() || 'Немає';
+    const rotationState = String(access && access.rotationState || '').trim() || 'Невідомо';
+    const allowedActions = getAllowedActionsText_(access);
     const explanation = buildAccessDebugExplanation_(access);
     const advice = buildAccessDebugAdvice_(access);
     const reportText = buildAccessDebugReportText_(access);
@@ -346,6 +373,7 @@
                 <div><b>Поточний user key:</b> ${escapeHtml(currentKey || 'Не вдалося визначити')}</div>
                 <div><b>Коротка маска:</b> ${escapeHtml(maskedKey)}</div>
                 <div><b>Email (довідково):</b> ${escapeHtml(email)}</div>
+                <div><b>Display name:</b> ${escapeHtml(displayName)}</div>
                 <div><b>Джерело доступу:</b> ${escapeHtml(sourceLabel)}</div>
               </div>
             </div>
@@ -355,6 +383,7 @@
               <div style="margin-top:6px; line-height:1.5;">
                 <div><b>Робочі дії:</b> ${escapeHtml(operatorLabel)}</div>
                 <div><b>Небезпечні системні дії:</b> ${escapeHtml(adminLabel)}</div>
+                <div><b>Дозволені дії:</b> ${escapeHtml(allowedActions)}</div>
               </div>
             </div>
 
@@ -375,6 +404,7 @@
                 <div>2. У колонку <b>user_key_current</b> встав поточний ключ користувача.</div>
                 <div>3. Якщо ключ змінився, старий тимчасово поклади в <b>user_key_prev</b>.</div>
                 <div>4. Колонку <b>email</b> можеш залишити як довідкову, але доступ тепер іде не по ній.</div>
+                <div>5. Аварійний email-міст тримай вимкненим і вмикай лише на коротку міграцію.</div>
               </div>
             </div>
 
@@ -384,6 +414,9 @@
                 <div><b>Причина:</b> ${escapeHtml(reason)}</div>
                 <div><b>Примітка:</b> ${escapeHtml(note)}</div>
                 <div><b>Свій позивний:</b> ${escapeHtml(personCallsign)}</div>
+                <div><b>last_seen_at:</b> ${escapeHtml(lastSeenAt)}</div>
+                <div><b>last_rotated_at:</b> ${escapeHtml(lastRotatedAt)}</div>
+                <div><b>Стан ротації:</b> ${escapeHtml(rotationState)}</div>
               </div>
               <pre style="margin-top:10px; white-space:pre-wrap; word-break:break-word; font-size:0.78rem; color:var(--text-secondary);">${escapeHtml(JSON.stringify(access || {}, null, 2))}</pre>
             </details>
@@ -608,7 +641,7 @@
       ? Array.from(output.querySelectorAll('.log-entry')).map(el => (el.innerText || '').trim()).filter(Boolean).join('\n')
       : '';
     const text = [
-      'WASB EXECUTION LOG',
+      'WAPB EXECUTION LOG',
       '=================',
       'Час: ' + dateText,
       'Активний місяць: ' + month,

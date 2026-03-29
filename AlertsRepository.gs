@@ -1,24 +1,39 @@
 /**
- * AlertsRepository.gs — lightweight alerts journal.
+ * AlertsRepository.gs — structured alerts journal.
  */
 
 const AlertsRepository_ = (function() {
+  const HEADERS = ['Timestamp', 'Type', 'Severity', 'Action', 'Outcome', 'Role', 'DisplayName', 'UserKey', 'Email', 'Source', 'Message', 'DetailsJson'];
+
   function _sheet() {
     const ss = SpreadsheetApp.getActive();
     const name = appGetCore('ALERTS_SHEET', 'ALERTS_LOG');
     let sh = ss.getSheetByName(name);
     if (!sh) {
       sh = ss.insertSheet(name);
-      sh.getRange(1, 1, 1, 5).setValues([['Timestamp', 'JobName', 'Severity', 'Message', 'DetailsJson']]);
-      sh.getRange(1, 1, 1, 5).setFontWeight('bold').setBackground('#fde68a');
+    }
+    _ensureSchema_(sh);
+    return sh;
+  }
+
+  function _ensureSchema_(sh) {
+    const existing = sh.getLastRow() >= 1 ? sh.getRange(1, 1, 1, Math.max(sh.getLastColumn(), HEADERS.length)).getValues()[0] : [];
+    let changed = false;
+    for (let i = 0; i < HEADERS.length; i++) {
+      if (String(existing[i] || '').trim() !== HEADERS[i]) {
+        sh.getRange(1, i + 1).setValue(HEADERS[i]);
+        changed = true;
+      }
+    }
+    if (changed || sh.getFrozenRows() < 1) {
+      sh.getRange(1, 1, 1, HEADERS.length).setFontWeight('bold').setBackground('#fde68a');
       sh.setFrozenRows(1);
     }
-    return sh;
   }
 
   function ensureSheet() {
     const sh = _sheet();
-    return { success: true, sheet: sh.getName(), lastRow: sh.getLastRow(), lastColumn: sh.getLastColumn() };
+    return { success: true, sheet: sh.getName(), lastRow: sh.getLastRow(), lastColumn: sh.getLastColumn(), headers: HEADERS.slice() };
   }
 
   function appendAlert(record) {
@@ -26,8 +41,15 @@ const AlertsRepository_ = (function() {
     const sh = _sheet();
     sh.appendRow([
       item.timestamp || new Date(),
-      item.jobName || '',
+      item.type || item.jobName || '',
       item.severity || 'warning',
+      item.action || item.actionName || '',
+      item.outcome || '',
+      item.role || '',
+      item.displayName || '',
+      item.userKey || item.currentKey || '',
+      item.email || '',
+      item.source || '',
       item.message || '',
       stage4SafeStringify_(item.details || {}, 9000)
     ]);
@@ -36,6 +58,7 @@ const AlertsRepository_ = (function() {
 
   return {
     ensureSheet: ensureSheet,
-    appendAlert: appendAlert
+    appendAlert: appendAlert,
+    HEADERS: HEADERS.slice()
   };
 })();
