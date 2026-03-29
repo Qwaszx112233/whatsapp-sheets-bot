@@ -27,17 +27,17 @@
 
 ### 3. Documentation consolidated
 Active docs are reduced to:
-- `_extras/README.md`
-- `_extras/ARCHITECTURE.md`
-- `_extras/RUNBOOK.md`
-- `_extras/SECURITY.md`
-- `_extras/CHANGELOG.md`
+- `README.md`
+- `ARCHITECTURE.md`
+- `RUNBOOK.md`
+- `SECURITY.md`
+- `CHANGELOG.md`
 
 Historical reports and one-off notes were moved into `_extras/history/`.
 
 ### 4. Legacy cleanup
 - Broken/bad access files from the newer archive were discarded.
-- Branding and naming drift (`WASB` / legacy naming) was normalized.
+- Branding and naming drift was normalized to the canonical `WASB` form.
 - Metadata, diagnostics, smoke-tests, and physical bundle layout were aligned to the new docs structure.
 - Compatibility wrappers remain only where they are still required for stability; their status is explicitly documented in the deprecated registry.
 

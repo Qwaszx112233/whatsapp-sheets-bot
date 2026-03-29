@@ -1,12 +1,22 @@
 const fs = require('fs');
 const path = require('path');
 const root = process.cwd();
-const files = fs.readdirSync(root).filter(name => /\.(gs|html|md|json)$/.test(name));
+const files = fs.readdirSync(root)
+  .filter(name => /\.(gs|html|md|json)$/.test(name))
+  .filter(name => name !== 'static-checks.js');
 const issues = [];
+const forbiddenBranding = new RegExp('\b(?:W' + 'APB|W' + 'apb|w' + 'apb)\b');
+const staleRelease = /7\.1\.2-security-ops-hardened|stage7-1-2-security-ops-hardened-baseline|gas_wapb_/i;
 for (const file of files) {
   const text = fs.readFileSync(path.join(root, file), 'utf8');
   if (/WASB_WHATSAPP_SENDER_TAB/.test(text)) {
     issues.push(`${file}: legacy whatsapp target name found`);
+  }
+  if (forbiddenBranding.test(text)) {
+    issues.push(`${file}: forbidden WAPB naming found`);
+  }
+  if (staleRelease.test(text)) {
+    issues.push(`${file}: stale release naming/version marker found`);
   }
 }
 const result = { ok: issues.length === 0, issues };
