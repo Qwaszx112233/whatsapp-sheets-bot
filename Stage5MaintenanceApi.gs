@@ -44,7 +44,7 @@ function apiStage5BootstrapAccessSheet() {
     : { success: false, message: 'AccessControl_ недоступний' };
   return _stage5BuildMaintenanceResponse_(
     result.success !== false,
-    result.message || 'ACCESS sheet ініціалізовано',
+    result.message || 'ACCESS sheet ініціалізовано для user key-доступу',
     result,
     'stage5BootstrapAccessSheet',
     result.success === false ? [result.message || 'Не вдалося ініціалізувати ACCESS'] : [],

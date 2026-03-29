@@ -93,7 +93,7 @@
   }
 
   function getAccessRoleLabel_(role) {
-    const map = { viewer: 'Перегляд', operator: 'Оператор', admin: 'Адмін', sysadmin: 'Сис. адмін' };
+    const map = { viewer: 'Перегляд', operator: 'Оператор', admin: 'Адміністратор', sysadmin: 'Сис. адміністратор' };
     return map[String(role || 'viewer').trim().toLowerCase()] || 'Перегляд';
   }
 
@@ -109,29 +109,50 @@
     return consoleParts.join(' • ');
   }
 
+
   function getAccessSourceLabel_(source) {
     const raw = String(source || '').trim();
     const map = {
-      'ACCESS': 'лист ACCESS',
-      'scriptProperties': 'налаштування Script Properties',
+      'ACCESS': 'лист ACCESS (старий email-режим)',
+      'ACCESS-user-key-current': 'зареєстрований поточний user key',
+      'ACCESS-user-key-prev': 'зареєстрований попередній user key',
+      'ACCESS-user-key-rotated': 'user key оновлено автоматично',
+      'ACCESS-user-key-unregistered': 'user key не зареєстровано',
+      'ACCESS-email-bound-key': 'ключ прив’язано до рядка ACCESS через legacy email',
+      'scriptProperties': 'налаштування Script Properties (legacy email)',
       'bootstrap-admin': 'тимчасовий bootstrap-admin',
-      'ACCESS-fallback-sysadmin': 'резервний sysadmin із ACCESS',
-      'ACCESS-fallback-admin': 'резервний admin із ACCESS',
+      'ACCESS-fallback-sysadmin': 'резервний sysadmin із ACCESS (міграційний режим)',
+      'ACCESS-fallback-admin': 'резервний admin із ACCESS (міграційний режим)',
       'default': 'режим за замовчуванням'
     };
     return map[raw] || (raw || 'невідомо');
   }
 
+  function maskAccessKey_(value) {
+    const key = String(value || '').trim();
+    if (!key) return 'не визначено';
+    if (key.length <= 10) return key;
+    return key.slice(0, 6) + '…' + key.slice(-4);
+  }
+
   function buildAccessDebugExplanation_(access) {
     const role = String(access && access.role || 'viewer').toLowerCase();
-    const knownUser = !!(access && access.knownUser);
+    const registered = !!(access && access.registered);
+    const keyMode = !!(access && access.userKeyModeEnabled);
+    const keyAvailable = !!(access && access.keyAvailable);
     const source = String(access && access.source || '').trim();
 
-    if (!knownUser && source === 'default') {
-      return 'Система не змогла визначити email поточного користувача. Через це доступ автоматично знижено до безпечного режиму перегляду.';
+    if (keyMode && !registered && !keyAvailable) {
+      return 'Система вже працює в режимі user key, але поточний сеанс не віддав ключ користувача. Через це доступ знижено до безпечного режиму перегляду.';
     }
-    if (!knownUser && (source === 'ACCESS-fallback-sysadmin' || source === 'ACCESS-fallback-admin')) {
-      return 'Email користувача недоступний, тому система тимчасово взяла резервний доступ із листа ACCESS.';
+    if (keyMode && !registered && keyAvailable) {
+      return 'Система отримала user key поточного користувача, але не знайшла його в листі ACCESS. Через це доступ знижено до безпечного режиму перегляду.';
+    }
+    if (!keyMode && (source === 'ACCESS-fallback-sysadmin' || source === 'ACCESS-fallback-admin')) {
+      return 'ACCESS ще не переведено повністю на user key. Тимчасово застосовано міграційний резервний доступ, щоб не заблокувати адміністратора.';
+    }
+    if (!keyMode && !registered) {
+      return 'Система ще працює в legacy email-режимі, але не змогла надійно впізнати користувача. Через це доступ знижено до перегляду.';
     }
     if (role === 'sysadmin') {
       return 'Усе добре. Користувача впізнано як сис. адміністратора. Повний системний блок має бути доступний.';
@@ -140,24 +161,28 @@
       return 'Усе добре. Користувача впізнано як адміністратора. Адмінські дії мають бути доступні.';
     }
     if (role === 'operator') {
-      return 'Користувача впізнано як оператора. Робочі дії дозволені, а небезпечні системні дії приховані.';
+      return 'Усе добре. Користувача впізнано як оператора. Робочі дії дозволені, а небезпечні системні дії приховані.';
     }
-    return 'Користувача визначено в режимі перегляду. Це означає, що система не знайшла для нього вищий рівень доступу.';
+    return 'Користувача визначено в режимі перегляду. Це означає, що для нього не знайдено зареєстрований ключ або вищий рівень доступу.';
   }
 
   function buildAccessDebugAdvice_(access) {
     const role = String(access && access.role || 'viewer').toLowerCase();
-    const knownUser = !!(access && access.knownUser);
-    const source = String(access && access.source || '').trim();
+    const registered = !!(access && access.registered);
+    const keyMode = !!(access && access.userKeyModeEnabled);
+    const keyAvailable = !!(access && access.keyAvailable);
 
-    if (!knownUser && source === 'default') {
-      return 'Перевірте, чи це середовище Google Apps Script взагалі передає email користувача. Якщо ні — доступ за email із ACCESS для цього акаунта не спрацює.';
+    if (keyMode && !registered && keyAvailable) {
+      return 'Скопіюйте свій user key та внесіть його в ACCESS у колонку user_key_current навпроти потрібної ролі. Якщо ключ змінився — старий можна тимчасово покласти в user_key_prev.';
+    }
+    if (keyMode && !registered && !keyAvailable) {
+      return 'Перевірте, чи цей сеанс Google Apps Script віддає temporary user key. Якщо ні — цей браузер/сеанс не зможе пройти user key-ідентифікацію.';
+    }
+    if (!keyMode) {
+      return 'Переведіть ACCESS на user key: додайте ключі користувачів у user_key_current. Старий email у колонці email можна залишити лише як довідкове поле.';
     }
     if (role === 'viewer') {
-      return 'Перевірте лист ACCESS: email без пробілів, роль одна з viewer/operator/admin/sysadmin, enabled = TRUE.';
-    }
-    if (role === 'operator') {
-      return 'Якщо це саме оператор, усе нормально. Якщо очікувався admin — перевір роль у листі ACCESS.';
+      return 'Перевірте ACCESS: user_key_current без пробілів, роль одна з viewer/operator/admin/sysadmin, enabled = TRUE.';
     }
     return 'Додаткових дій не потрібно. Якщо панель поводиться не так, як роль у звіті, проблема вже не в доступі, а в UI або окремій кнопці.';
   }
@@ -166,7 +191,11 @@
     const roleLabel = getAccessRoleLabel_(access && access.role);
     const sourceLabel = getAccessSourceLabel_(access && access.source);
     const email = String(access && access.email || '').trim() || 'не визначено';
-    const knownUserLabel = access && access.knownUser ? 'так' : 'ні';
+    const currentKey = String(access && access.currentKey || '').trim() || 'не визначено';
+    const keyMasked = maskAccessKey_(currentKey);
+    const registeredLabel = access && access.registered ? 'так' : 'ні';
+    const keyModeLabel = access && access.userKeyModeEnabled ? 'user key' : 'legacy email (міграційний режим)';
+    const keyAvailableLabel = access && access.keyAvailable ? 'так' : 'ні';
     const adminLabel = access && access.isAdmin ? 'так' : 'ні';
     const operatorLabel = access && access.isOperator ? 'так' : 'ні';
     const note = String(access && access.note || '').trim() || 'немає';
@@ -176,8 +205,12 @@
       'ПЕРЕВІРКА ДОСТУПУ',
       '=================',
       'Режим доступу: ' + roleLabel,
-      'Користувача впізнано: ' + knownUserLabel,
-      'Email: ' + email,
+      'Режим ідентифікації: ' + keyModeLabel,
+      'Ключ користувача доступний: ' + keyAvailableLabel,
+      'Ключ користувача зареєстровано: ' + registeredLabel,
+      'Поточний user key: ' + currentKey,
+      'Маска ключа: ' + keyMasked,
+      'Email (довідково): ' + email,
       'Джерело доступу: ' + sourceLabel,
       'Адмін-доступ: ' + adminLabel,
       'Робочий доступ: ' + operatorLabel,
@@ -196,7 +229,11 @@
     const roleLabel = getAccessRoleLabel_(access && access.role);
     const sourceLabel = getAccessSourceLabel_(access && access.source);
     const email = String(access && access.email || '').trim() || 'Не вдалося визначити';
-    const knownUserLabel = access && access.knownUser ? 'Так' : 'Ні';
+    const currentKey = String(access && access.currentKey || '').trim();
+    const maskedKey = maskAccessKey_(currentKey);
+    const registeredLabel = access && access.registered ? 'Так' : 'Ні';
+    const keyModeLabel = access && access.userKeyModeEnabled ? 'user key' : 'legacy email (міграційний режим)';
+    const keyAvailableLabel = access && access.keyAvailable ? 'Так' : 'Ні';
     const adminLabel = access && access.isAdmin ? 'Дозволено' : 'Заблоковано';
     const operatorLabel = access && access.isOperator ? 'Дозволено' : 'Заблоковано';
     const reason = String(access && access.reason || '').trim() || 'Немає';
@@ -204,6 +241,7 @@
     const explanation = buildAccessDebugExplanation_(access);
     const advice = buildAccessDebugAdvice_(access);
     const reportText = buildAccessDebugReportText_(access);
+    const keyToCopy = currentKey || '';
 
     return `
       <div class="result-item">
@@ -211,6 +249,7 @@
         <div class="result-value">
           <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
             <button class="btn btn-primary" type="button" onclick="SidebarApp.copyResultText('${escapeJsString(reportText)}')">Копіювати звіт</button>
+            <button class="btn" type="button" onclick="SidebarApp.copyResultText('${escapeJsString(keyToCopy)}')" ${!keyToCopy ? 'disabled' : ''}>Копіювати user key</button>
           </div>
 
           <div style="display:grid; gap:10px;">
@@ -220,10 +259,14 @@
             </div>
 
             <div style="padding:10px; border:1px solid var(--border-color); border-radius:12px; background:var(--bg-glass);">
-              <div style="font-size:0.78rem; color:var(--text-secondary);">Що система бачить</div>
+              <div style="font-size:0.78rem; color:var(--text-secondary);">Ідентифікація користувача</div>
               <div style="margin-top:6px; line-height:1.5;">
-                <div><b>Email:</b> ${escapeHtml(email)}</div>
-                <div><b>Користувача впізнано:</b> ${escapeHtml(knownUserLabel)}</div>
+                <div><b>Режим:</b> ${escapeHtml(keyModeLabel)}</div>
+                <div><b>Ключ доступний:</b> ${escapeHtml(keyAvailableLabel)}</div>
+                <div><b>Ключ зареєстровано:</b> ${escapeHtml(registeredLabel)}</div>
+                <div><b>Поточний user key:</b> ${escapeHtml(currentKey || 'Не вдалося визначити')}</div>
+                <div><b>Коротка маска:</b> ${escapeHtml(maskedKey)}</div>
+                <div><b>Email (довідково):</b> ${escapeHtml(email)}</div>
                 <div><b>Джерело доступу:</b> ${escapeHtml(sourceLabel)}</div>
               </div>
             </div>
@@ -246,6 +289,16 @@
               <div style="margin-top:6px; line-height:1.55;">${escapeHtml(advice)}</div>
             </div>
 
+            <div style="padding:10px; border:1px solid var(--border-color); border-radius:12px; background:var(--bg-glass);">
+              <div style="font-size:0.78rem; color:var(--text-secondary);">Як заповнювати ACCESS тепер</div>
+              <div style="margin-top:6px; line-height:1.55;">
+                <div>1. У рядку користувача залиш role та enabled.</div>
+                <div>2. У колонку <b>user_key_current</b> встав поточний ключ користувача.</div>
+                <div>3. Якщо ключ змінився, старий тимчасово поклади в <b>user_key_prev</b>.</div>
+                <div>4. Колонку <b>email</b> можеш залишити як довідкову, але доступ тепер іде не по ній.</div>
+              </div>
+            </div>
+
             <details style="padding:10px; border:1px solid var(--border-color); border-radius:12px; background:var(--bg-glass);">
               <summary style="cursor:pointer; font-weight:700;">Технічні деталі</summary>
               <div style="margin-top:8px; line-height:1.5;">
@@ -259,7 +312,6 @@
       </div>
     `;
   }
-
   function applyAccessPolicyUI() {
     const banner = $id('accessBanner');
     const message = $id('accessBannerText');
@@ -565,10 +617,10 @@
           const data = result.data || {};
           logToConsole(
             '🔐 Access debug: role=' + String(data.role || 'viewer') +
-            ', knownUser=' + String(!!data.knownUser) +
+            ', registered=' + String(!!data.registered) +
             ', source=' + String(data.source || 'default') +
-            ', email=' + String(data.email || '∅'),
-            data.knownUser ? 'info' : 'warning'
+            ', key=' + String(data.currentKey ? maskAccessKey_(data.currentKey) : '∅'),
+            data.registered ? 'info' : 'warning'
           );
 
           setHtml('resultContent', renderAccessDebugResult_(data));
