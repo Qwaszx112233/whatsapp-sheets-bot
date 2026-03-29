@@ -10,10 +10,10 @@ const PROJECT_RELEASE_NAMING_ = Object.freeze({
   stage: '7.1',
   stageLabel: 'Stage 7.1.2 — Security & Ops Hardened Baseline',
   stageVersion: '7.1.2-security-ops-hardened',
-  activeBaseline: 'stage7-1-2-security-ops-hardened-baseline',
-  archiveBaseName: 'gas_wapb_stage7_1_2_security_ops_hardened',
-  archiveFileName: 'gas_wapb_stage7_1_2_security_ops_hardened.zip',
-  rootFolderName: 'gas_wapb_stage7_1_2_security_ops_hardened'
+  activeBaseline: 'stage7-1-1-final-stabilized-repair-baseline',
+  archiveBaseName: 'gas_wapb_stage7_1_1_final_stabilized_repair',
+  archiveFileName: 'gas_wapb_stage7_1_1_final_stabilized_repair.zip',
+  rootFolderName: 'gas_wapb_stage7_1_1_final_stabilized_repair'
 });
 
 const PROJECT_DOCUMENTATION_MAP_ = Object.freeze({
