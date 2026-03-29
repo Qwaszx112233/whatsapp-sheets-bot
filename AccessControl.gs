@@ -119,82 +119,90 @@ const AccessControl_ = (function() {
     return null;
   }
 
-  function _configuredEntriesCount_() {
-    let count = listEmailsByRole('sysadmin').length + listEmailsByRole('admin').length + listEmailsByRole('operator').length + listEmailsByRole('viewer').length;
-    const sh = _getSheet_(false);
-    if (sh && sh.getLastRow() >= 2) {
-      count += sh.getLastRow() - 1;
-    }
-    return count;
-  }
-
-  function _getEnabledSheetEntries_() {
+  function _listEnabledSheetEntries_() {
     const sh = _getSheet_(false);
     if (!sh || sh.getLastRow() < 2) return [];
+
     const values = sh.getRange(2, 1, sh.getLastRow() - 1, Math.max(sh.getLastColumn(), SHEET_HEADERS.length)).getValues();
     const result = [];
+
     for (let i = 0; i < values.length; i++) {
       const row = values[i];
       const email = normalizeEmail_(row[0]);
       const role = normalizeRole_(row[1]);
       const enabledRaw = String(row[2] === '' || row[2] === null ? 'TRUE' : row[2]).trim().toLowerCase();
       const enabled = !(enabledRaw === 'false' || enabledRaw === '0' || enabledRaw === 'no' || enabledRaw === 'ні');
+
       if (!email || !enabled) continue;
+
       result.push({
         email: email,
         role: role,
-        enabled: enabled,
+        enabled: true,
         note: String(row[3] || ''),
         source: ACCESS_SHEET,
         sheetRow: i + 2
       });
     }
+
     return result;
   }
 
-  function _getEnabledPropertyEntries_() {
-    const roles = ['sysadmin', 'admin', 'operator', 'viewer'];
-    const result = [];
-    roles.forEach(function(role) {
-      listEmailsByRole(role).forEach(function(email) {
-        result.push({ email: email, role: role, enabled: true, note: '', source: 'scriptProperties' });
-      });
-    });
-    return result;
-  }
+  function _resolveUnknownUserFallback_() {
+    const sheetEntries = _listEnabledSheetEntries_();
 
-  function _resolveAnonymousFallback_() {
-    const entries = _getEnabledSheetEntries_().concat(_getEnabledPropertyEntries_());
-    if (!entries.length) return null;
-
-    const sysadmins = entries.filter(function(entry) { return entry.role === 'sysadmin'; });
+    const sysadmins = sheetEntries.filter(item => item.role === 'sysadmin');
     if (sysadmins.length === 1) {
       return Object.assign({}, sysadmins[0], {
-        source: sysadmins[0].source + '-fallback',
-        reason: 'Email користувача недоступний; використано єдиний запис sysadmin з ACCESS.'
+        source: 'ACCESS-fallback-sysadmin'
       });
     }
 
-    const admins = entries.filter(function(entry) { return entry.role === 'admin'; });
-    const elevated = entries.filter(function(entry) { return entry.role === 'sysadmin' || entry.role === 'admin'; });
-    if (!sysadmins.length && admins.length === 1 && elevated.length === 1) {
+    const admins = sheetEntries.filter(item => item.role === 'admin');
+    if (admins.length === 1) {
       return Object.assign({}, admins[0], {
-        source: admins[0].source + '-fallback',
-        reason: 'Email користувача недоступний; використано єдиний запис admin з ACCESS.'
+        source: 'ACCESS-fallback-admin'
       });
     }
 
     return null;
   }
 
+  function _configuredEntriesCount_() {
+    let count =
+      listEmailsByRole('sysadmin').length +
+      listEmailsByRole('admin').length +
+      listEmailsByRole('operator').length +
+      listEmailsByRole('viewer').length;
+
+    const sh = _getSheet_(false);
+    if (!sh || sh.getLastRow() < 2) return count;
+
+    const values = sh.getRange(2, 1, sh.getLastRow() - 1, Math.max(sh.getLastColumn(), SHEET_HEADERS.length)).getValues();
+
+    for (let i = 0; i < values.length; i++) {
+      const email = normalizeEmail_(values[i][0]);
+      if (email) count += 1;
+    }
+
+    return count;
+  }
+
   function describe(email) {
-    const userEmail = normalizeEmail_(email) || safeGetUserEmail_();
-    const configuredEntries = _configuredEntriesCount_();
-    const sheetEntry = _findInSheet_(userEmail);
-    const propEntry = !sheetEntry ? _findInProperties_(userEmail) : null;
-    const anonymousFallback = (!userEmail && !sheetEntry && !propEntry) ? _resolveAnonymousFallback_() : null;
-    const match = sheetEntry || propEntry || anonymousFallback;
+    const explicitEmail = normalizeEmail_(email);
+    const sessionEmail = safeGetUserEmail_();
+    const userEmail = explicitEmail || sessionEmail;
     const knownUser = !!userEmail;
+
+    const configuredEntries = _configuredEntriesCount_();
+
+    let sheetEntry = userEmail ? _findInSheet_(userEmail) : null;
+    let propEntry = (!sheetEntry && userEmail) ? _findInProperties_(userEmail) : null;
+    let match = sheetEntry || propEntry;
+
+    if (!match && !knownUser) {
+      match = _resolveUnknownUserFallback_();
+    }
 
     if (!match && configuredEntries === 0 && knownUser) {
       return {
@@ -215,18 +223,20 @@ const AccessControl_ = (function() {
     }
 
     const role = match ? normalizeRole_(match.role) : 'viewer';
-    const readOnly = role === 'viewer';
     const enabled = match ? match.enabled !== false : true;
-    const reason = !knownUser
-      ? (match && match.reason
-        ? String(match.reason)
-        : 'Email користувача недоступний; небезпечні дії переведені в safe-mode.')
-      : (match
-        ? ''
-        : 'Роль не налаштовано. Доступ до maintenance-операцій заборонено.');
+    const readOnly = role === 'viewer';
+
+    let reason = '';
+    if (!knownUser && !match) {
+      reason = 'Email користувача недоступний; небезпечні дії переведені в safe-mode.';
+    } else if (!knownUser && match) {
+      reason = 'Email користувача недоступний; застосовано fallback-доступ із ACCESS.';
+    } else if (!match) {
+      reason = 'Роль не налаштовано. Доступ до maintenance-операцій заборонено.';
+    }
 
     return {
-      email: userEmail,
+      email: userEmail || (match && match.email) || '',
       role: role,
       enabled: enabled,
       knownUser: knownUser,
