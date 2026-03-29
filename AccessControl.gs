@@ -418,6 +418,48 @@ const AccessControl_ = (function() {
     }).length;
   }
 
+  function _sanitizeKeyPair_(currentKey, previousKey) {
+    const current = normalizeUserKey_(currentKey);
+    let previous = normalizeUserKey_(previousKey);
+    if (current && previous && current === previous) previous = '';
+    return { current: current, previous: previous };
+  }
+
+  function _auditKeyRotation_(entry, payload) {
+    try {
+      if (typeof Stage4AuditTrail_ !== 'object' || typeof Stage4AuditTrail_.record !== 'function') return;
+      const data = payload || {};
+      Stage4AuditTrail_.record({
+        timestamp: new Date(),
+        operationId: stage4UniqueId_('access_key_rotation'),
+        scenario: 'access.user_key_rotation',
+        level: 'AUDIT',
+        status: 'COMMITTED',
+        initiator: 'access-control',
+        dryRun: false,
+        partial: false,
+        affectedSheets: [ACCESS_SHEET, appGetCore('AUDIT_SHEET', 'AUDIT_LOG')],
+        affectedEntities: [String(entry && entry.email || ''), String(entry && entry.displayName || ''), String(entry && entry.personCallsign || '')].filter(Boolean),
+        payload: {
+          rotationSource: data.source || '',
+          matchedBy: data.matchedBy || '',
+          oldCurrentKeyMasked: maskSensitiveValue_(data.oldCurrentKey || ''),
+          newCurrentKeyMasked: maskSensitiveValue_(data.newCurrentKey || ''),
+          newPreviousKeyMasked: maskSensitiveValue_(data.newPreviousKey || ''),
+          lastRotatedAt: data.lastRotatedAt || ''
+        },
+        message: 'Автоматично оновлено user_key_current / user_key_prev після збігу за попереднім ключем'
+      });
+    } catch (_) {}
+  }
+
+  function maskSensitiveValue_(value) {
+    const key = normalizeUserKey_(value);
+    if (!key) return '';
+    if (key.length <= 10) return key;
+    return key.slice(0, 6) + '…' + key.slice(-4);
+  }
+
   function _configuredEntriesCount_() {
     let count = 0;
     ROLE_VALUES.forEach(function(role) {
@@ -438,20 +480,34 @@ const AccessControl_ = (function() {
     if (userKey && entry.userKeyCurrent === userKey) {
       // last_seen_at only
     } else if (userKey && entry.userKeyPrev === userKey) {
-      updates.user_key_prev = entry.userKeyCurrent || entry.userKeyPrev || '';
-      updates.user_key_current = userKey;
+      const pair = _sanitizeKeyPair_(userKey, entry.userKeyCurrent || entry.userKeyPrev || '');
+      updates.user_key_current = pair.current;
+      updates.user_key_prev = pair.previous;
       updates.last_rotated_at = now;
       source = 'ACCESS-user-key-rotated';
     }
 
     _writeEntryFields_(entry.sheetRow, updates);
-    return Object.assign({}, entry, {
+    const result = Object.assign({}, entry, {
       userKeyCurrent: updates.user_key_current !== undefined ? updates.user_key_current : entry.userKeyCurrent,
       userKeyPrev: updates.user_key_prev !== undefined ? updates.user_key_prev : entry.userKeyPrev,
       lastSeenAt: now,
       lastRotatedAt: updates.last_rotated_at !== undefined ? updates.last_rotated_at : entry.lastRotatedAt,
       source: source
     });
+
+    if (source === 'ACCESS-user-key-rotated') {
+      _auditKeyRotation_(entry, {
+        source: source,
+        matchedBy: 'user_key_prev',
+        oldCurrentKey: entry.userKeyCurrent || '',
+        newCurrentKey: result.userKeyCurrent || '',
+        newPreviousKey: result.userKeyPrev || '',
+        lastRotatedAt: result.lastRotatedAt || now
+      });
+    }
+
+    return result;
   }
 
   function _bindCurrentUserKeyByEmail_(sessionEmail, currentKey) {
@@ -461,9 +517,10 @@ const AccessControl_ = (function() {
     const updates = { last_seen_at: now };
 
     if (currentKey) {
-      updates.user_key_current = currentKey;
+      const pair = _sanitizeKeyPair_(currentKey, entry.userKeyCurrent && entry.userKeyCurrent !== currentKey ? entry.userKeyCurrent : entry.userKeyPrev);
+      updates.user_key_current = pair.current;
+      if (pair.previous) updates.user_key_prev = pair.previous;
       if (entry.userKeyCurrent && entry.userKeyCurrent !== currentKey) {
-        updates.user_key_prev = entry.userKeyCurrent;
         updates.last_rotated_at = now;
       }
     }
@@ -693,6 +750,6 @@ const AccessControl_ = (function() {
   };
 })();
 
-function bootstrapWapbAccessSheet() {
+function bootstrapWasbAccessSheet() {
   return AccessControl_.bootstrapSheet();
 }

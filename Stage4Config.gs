@@ -30,7 +30,7 @@ var STAGE6A_CONFIG = (typeof STAGE6A_CONFIG !== 'undefined') ? STAGE6A_CONFIG : 
 
 function buildAppConfig_() {
   return Object.freeze({
-    CURRENT_VERSION: '7.1.2-security-ops-hardened',
+    CURRENT_VERSION: '7.1.2-final-clean',
 
     CORE: Object.freeze({
       AUDIT_SHEET: 'AUDIT_LOG',

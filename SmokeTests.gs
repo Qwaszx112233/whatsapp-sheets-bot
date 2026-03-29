@@ -313,7 +313,7 @@ function runStage5ScenarioTests(options) {
   const opts = options || {};
   const report = {
     ok: true,
-    stage: (typeof getProjectBundleMetadata_ === 'function' ? getProjectBundleMetadata_().stageVersion : '7.1.2-security-ops-hardened'),
+    stage: (typeof getProjectBundleMetadata_ === 'function' ? getProjectBundleMetadata_().stageVersion : '7.1.2-final-clean'),
     ts: new Date().toISOString(),
     dryRun: opts.dryRun !== false,
     checks: [],
@@ -397,7 +397,7 @@ function runStage5SmokeTests(options) {
   const release = typeof getProjectReleaseNaming_ === 'function' ? getProjectReleaseNaming_() : (meta && meta.release) || {};
   const report = {
     ok: true,
-    stage: meta && meta.stageVersion ? meta.stageVersion : '7.1.2-security-ops-hardened',
+    stage: meta && meta.stageVersion ? meta.stageVersion : '7.1.2-final-clean',
     ts: new Date().toISOString(),
     dryRun: opts.dryRun !== false,
     checks: [],
@@ -414,9 +414,9 @@ function runStage5SmokeTests(options) {
 
   _smokePush_(report, 'release metadata truth model', function () {
     _smokeAssert_(String(meta.stage) === '7.1', 'metadata.stage має бути 7.1');
-    _smokeAssert_(meta.stageLabel === 'Stage 7.1.2 — Security & Ops Hardened Baseline', 'stageLabel має бути Stage 7.1.2 — Security & Ops Hardened Baseline');
-    _smokeAssert_(meta.stageVersion === '7.1.2-security-ops-hardened', 'stageVersion має бути 7.1.2-security-ops-hardened');
-    _smokeAssert_(meta.activeBaseline === 'stage7-1-2-security-ops-hardened-baseline', 'activeBaseline має бути stage7-1-2-security-ops-hardened-baseline');
+    _smokeAssert_(meta.stageLabel === 'Stage 7.1.2 — Security & Ops Hardened Baseline (Final Clean)', 'stageLabel має бути Stage 7.1.2 — Security & Ops Hardened Baseline (Final Clean)');
+    _smokeAssert_(meta.stageVersion === '7.1.2-final-clean', 'stageVersion має бути 7.1.2-final-clean');
+    _smokeAssert_(meta.activeBaseline === 'stage7-1-2-final-clean-baseline', 'activeBaseline має бути stage7-1-2-final-clean-baseline');
     _smokeAssert_(meta.maintenanceLayerStatus === 'stage5-canonical-maintenance-api', 'maintenanceLayerStatus не Stage 5 canonical');
     _smokeAssert_(meta.packagingPolicy && meta.packagingPolicy.policy === 'root-manifest-web-editor-only', 'Packaging policy має бути root-manifest-web-editor-only');
     _smokeAssert_(meta.requiredDocs.indexOf('SECURITY.md') !== -1, 'SECURITY.md відсутній у metadata');
@@ -550,7 +550,7 @@ function runStage5SmokeTests(options) {
       });
     });
 
-    _smokeAssert_(String(full.summary || '').indexOf('Stage 7.1.2 — Security & Ops Hardened Baseline') !== -1, 'Stage 7.1 wording не знайдено в diagnostics summary');
+    _smokeAssert_(String(full.summary || '').indexOf('Stage 7.1.2 — Security & Ops Hardened Baseline (Final Clean)') !== -1, 'Stage 7.1 wording не знайдено в diagnostics summary');
     _smokeAssert_((sunset.checks || []).some(function (item) { return item.name === 'Compatibility split report (informational)'; }), 'Informational compatibility split report не знайдено');
     _smokeAssert_((sunset.checks || []).every(function (item) { return item.name !== 'Canonical vs compatibility split'; }), 'Залишився старий compatibility split check name');
     _smokeAssert_((quick.checks || []).every(function (item) { return item.name !== 'Stage5 baseline health bridge'; }), 'У quick diagnostics залишився старий baseline health marker');

@@ -6,7 +6,7 @@ function runAccessSecurityE2ETests_(options) {
   const opts = options || {};
   const report = {
     ok: true,
-    stage: (typeof getProjectBundleMetadata_ === 'function' ? getProjectBundleMetadata_().stageVersion : '7.1.2-security-ops-hardened'),
+    stage: (typeof getProjectBundleMetadata_ === 'function' ? getProjectBundleMetadata_().stageVersion : '7.1.2-final-clean'),
     ts: new Date().toISOString(),
     dryRun: opts.dryRun !== false,
     checks: []

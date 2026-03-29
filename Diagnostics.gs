@@ -1057,7 +1057,10 @@ function _projectBundleMissing_(paths) {
 }
 
 function _isProjectDocPath_(path) {
-  return String(path || '').indexOf('_extras/') === 0;
+  const value = String(path || '').trim();
+  if (!value) return false;
+  if (/^[A-Z0-9_\-]+\.md$/i.test(value)) return true;
+  return value.indexOf('_extras/history/') === 0;
 }
 
 function _isArchivePath_(path) {
@@ -1255,7 +1258,7 @@ function runHistoricalStructuralDiagnosticsInternal_(options) {
   return {
     ok: checks.filter(function(item) { return item.status === 'FAIL'; }).length === 0,
     status: checks.some(function(item) { return item.status === 'FAIL'; }) ? 'FAIL' : 'OK',
-    stage: (typeof getProjectBundleMetadata_ === 'function' ? getProjectBundleMetadata_().stageVersion : '6.0.0-final'),
+    stage: (typeof getProjectBundleMetadata_ === 'function' ? getProjectBundleMetadata_().stageVersion : '7.1.2-final-clean'),
     mode: opts.mode || 'structural',
     checks: checks,
     warnings: warnings,
@@ -1318,7 +1321,7 @@ function runHistoricalCompatibilityDiagnosticsInternal_(options) {
   return {
     ok: checks.filter(function(item) { return item.status === 'FAIL'; }).length === 0,
     status: checks.some(function(item) { return item.status === 'FAIL'; }) ? 'FAIL' : 'OK',
-    stage: (typeof getProjectBundleMetadata_ === 'function' ? getProjectBundleMetadata_().stageVersion : '6.0.0-final'),
+    stage: (typeof getProjectBundleMetadata_ === 'function' ? getProjectBundleMetadata_().stageVersion : '7.1.2-final-clean'),
     mode: opts.mode || 'compatibility',
     checks: checks,
     warnings: [...new Set(warnings)],
@@ -1341,7 +1344,7 @@ function runHistoricalQuickDiagnosticsInternal_(options) {
   return {
     ok: checks.filter(function(item) { return item.status === 'FAIL'; }).length === 0,
     status: checks.some(function(item) { return item.status === 'FAIL'; }) ? 'FAIL' : 'OK',
-    stage: (typeof getProjectBundleMetadata_ === 'function' ? getProjectBundleMetadata_().stageVersion : '6.0.0-final'),
+    stage: (typeof getProjectBundleMetadata_ === 'function' ? getProjectBundleMetadata_().stageVersion : '7.1.2-final-clean'),
     mode: opts.mode || 'quick',
     checks: checks,
     warnings: [],
@@ -1363,7 +1366,7 @@ function runHistoricalFullDiagnosticsInternal_(options) {
   return {
     ok: checks.filter(function(item) { return item.status === 'FAIL'; }).length === 0,
     status: checks.some(function(item) { return item.status === 'FAIL'; }) ? 'FAIL' : 'OK',
-    stage: (typeof getProjectBundleMetadata_ === 'function' ? getProjectBundleMetadata_().stageVersion : '6.0.0-final'),
+    stage: (typeof getProjectBundleMetadata_ === 'function' ? getProjectBundleMetadata_().stageVersion : '7.1.2-final-clean'),
     mode: opts.mode || 'full',
     checks: checks,
     warnings: warnings,
@@ -1537,7 +1540,7 @@ function runStage4HealthCheck_(options) {
   return {
     ok: failures === 0,
     status: failures === 0 ? 'OK' : 'FAIL',
-    stage: (typeof getProjectBundleMetadata_ === 'function' ? getProjectBundleMetadata_().stageVersion : '6.0.0-final'),
+    stage: (typeof getProjectBundleMetadata_ === 'function' ? getProjectBundleMetadata_().stageVersion : '7.1.2-final-clean'),
     checks: checks,
     warnings: [...new Set(warnings)],
     summary: failures === 0
@@ -1856,7 +1859,7 @@ function _stage3HasFn_(name) {
 
 function _releaseStageLabel_() {
   var meta = typeof getProjectBundleMetadata_ === 'function' ? getProjectBundleMetadata_() : null;
-  return meta && meta.stageLabel ? meta.stageLabel : 'Stage 7.1.2 — Security & Ops Hardened Baseline';
+  return meta && meta.stageLabel ? meta.stageLabel : 'Stage 7.1.2 — Security & Ops Hardened Baseline (Final Clean)';
 }
 
 function _diagNormalizeStatus_(status) {
