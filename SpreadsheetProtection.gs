@@ -2,7 +2,7 @@
  * SpreadsheetProtection.gs — protection helpers for service sheets.
  */
 
-function _wapbServiceSheets_() {
+function _wasbServiceSheets_() {
   return [
     CONFIG.LOG_SHEET || 'LOG',
     STAGE4_CONFIG.AUDIT_SHEET || 'AUDIT_LOG',
@@ -37,7 +37,7 @@ function applySpreadsheetProtections_(options) {
     warnings: []
   };
 
-  _wapbServiceSheets_().forEach(function(sheetName) {
+  _wasbServiceSheets_().forEach(function(sheetName) {
     const sh = ss.getSheetByName(sheetName);
     if (!sh) {
       summary.missingSheets.push(sheetName);
@@ -48,7 +48,7 @@ function applySpreadsheetProtections_(options) {
 
     try {
       const protection = sh.protect();
-      protection.setDescription('WAPB service sheet protection');
+      protection.setDescription('WASB service sheet protection');
       protection.setWarningOnly(warningOnly);
       if (!warningOnly) {
         try {
