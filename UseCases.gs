@@ -139,6 +139,9 @@ const Stage4UseCases_ = (function() {
       write: true,
       validate: function(input) {
         const dateInfo = validateDatePayload_(input, 'date');
+        if (typeof AccessEnforcement_ === 'object' && AccessEnforcement_.assertCanUseSendPanel) {
+          AccessEnforcement_.assertCanUseSendPanel('generateSendPanelForDate', { requestedDate: dateInfo.dateStr });
+        }
         return {
           payload: Object.assign({}, input, { date: dateInfo.dateStr, dateStr: dateInfo.dateStr, dryRun: !!input.dryRun }),
           warnings: dateInfo.warnings
@@ -211,6 +214,9 @@ const Stage4UseCases_ = (function() {
       write: true,
       validate: function(input) {
         const range = validateDateRangePayload_(input);
+        if (typeof AccessEnforcement_ === 'object' && AccessEnforcement_.assertCanUseSendPanel) {
+          AccessEnforcement_.assertCanUseSendPanel('generateSendPanelForRange', { startDate: range.payload.startDate, endDate: range.payload.endDate });
+        }
         return {
           payload: Object.assign({}, input, range.payload, { dryRun: !!input.dryRun }),
           warnings: range.warnings
@@ -285,6 +291,9 @@ const Stage4UseCases_ = (function() {
       write: true,
       validate: function(input) {
         const rowsInfo = validatePanelRowSelection_(input.rowNumbers, { maxRows: input.maxRows });
+        if (typeof AccessEnforcement_ === 'object' && AccessEnforcement_.assertCanUseSendPanel) {
+          AccessEnforcement_.assertCanUseSendPanel('markPanelRowsAsPending', { rowNumbers: rowsInfo.rows });
+        }
         return {
           payload: Object.assign({}, input, { rowNumbers: rowsInfo.rows, dryRun: !!input.dryRun }),
           warnings: rowsInfo.warnings
@@ -352,6 +361,9 @@ const Stage4UseCases_ = (function() {
       write: true,
       validate: function(input) {
         const rowsInfo = validatePanelRowSelection_(input.rowNumbers, { maxRows: input.maxRows });
+        if (typeof AccessEnforcement_ === 'object' && AccessEnforcement_.assertCanUseSendPanel) {
+          AccessEnforcement_.assertCanUseSendPanel('markPanelRowsAsSent', { rowNumbers: rowsInfo.rows });
+        }
         return {
           payload: Object.assign({}, input, { rowNumbers: rowsInfo.rows, dryRun: !!input.dryRun }),
           warnings: rowsInfo.warnings
@@ -424,6 +436,9 @@ const Stage4UseCases_ = (function() {
       write: true,
       validate: function(input) {
         const rowsInfo = validatePanelRowSelection_(input.rowNumbers, { maxRows: input.maxRows });
+        if (typeof AccessEnforcement_ === 'object' && AccessEnforcement_.assertCanUseSendPanel) {
+          AccessEnforcement_.assertCanUseSendPanel('markPanelRowsAsUnsent', { rowNumbers: rowsInfo.rows });
+        }
         return {
           payload: Object.assign({}, input, { rowNumbers: rowsInfo.rows, dryRun: !!input.dryRun }),
           warnings: rowsInfo.warnings
@@ -491,6 +506,9 @@ const Stage4UseCases_ = (function() {
       write: true,
       validate: function(input) {
         const sendInfo = validateSendOperation_(input);
+        if (typeof AccessEnforcement_ === 'object' && AccessEnforcement_.assertCanUseSendPanel) {
+          AccessEnforcement_.assertCanUseSendPanel('sendPendingRows', { limit: sendInfo.payload.limit || '' });
+        }
         return {
           payload: Object.assign({}, input, sendInfo.payload),
           warnings: sendInfo.warnings
@@ -613,6 +631,12 @@ const Stage4UseCases_ = (function() {
       payload: payload,
       write: false,
       lock: false,
+      validate: function(input) {
+        if (typeof AccessEnforcement_ === 'object' && AccessEnforcement_.assertCanUseSendPanel) {
+          AccessEnforcement_.assertCanUseSendPanel('getSendPanelData', {});
+        }
+        return { payload: input || {}, warnings: [] };
+      },
       execute: function() {
         const rows = SendPanelRepository_.readRows();
         const stats = SendPanelRepository_.buildStats(rows);
@@ -646,8 +670,8 @@ const Stage4UseCases_ = (function() {
       lock: false,
       validate: function(input) {
         const info = validateDatePayload_(input, 'date');
-        if (typeof AccessEnforcement_ === 'object' && AccessEnforcement_.assertCanUseDetailedSummary) {
-          AccessEnforcement_.assertCanUseDetailedSummary(info.payload.dateStr || info.payload.date || '');
+        if (typeof AccessEnforcement_ === 'object' && AccessEnforcement_.assertCanUseDaySummary) {
+          AccessEnforcement_.assertCanUseDaySummary(info.payload.dateStr || info.payload.date || '');
         }
         return { payload: info.payload, warnings: [] };
       },
@@ -686,6 +710,9 @@ const Stage4UseCases_ = (function() {
       lock: false,
       validate: function(input) {
         const info = validateDatePayload_(input, 'date');
+        if (typeof AccessEnforcement_ === 'object' && AccessEnforcement_.assertCanUseDetailedSummary) {
+          AccessEnforcement_.assertCanUseDetailedSummary(info.payload.dateStr || info.payload.date || '');
+        }
         return { payload: info.payload, warnings: [] };
       },
       execute: function(input, beforeState, plan, context) {
@@ -785,6 +812,9 @@ const Stage4UseCases_ = (function() {
       lock: false,
       validate: function(input) {
         const info = validateDatePayload_(input, 'date');
+        if (typeof AccessEnforcement_ === 'object' && AccessEnforcement_.assertCanUseWorkingActions) {
+          AccessEnforcement_.assertCanUseWorkingActions('checkVacationsAndBirthdays', { requestedDate: info.payload.dateStr || info.payload.date || '' });
+        }
         return { payload: info.payload, warnings: [] };
       },
       execute: function(input, beforeState, plan, context) {
@@ -821,6 +851,9 @@ const Stage4UseCases_ = (function() {
       write: true,
       validate: function(input) {
         const validated = validateMonthSwitch_(input.month || input.monthSheetName || input.sheetName || '');
+        if (typeof AccessEnforcement_ === 'object' && AccessEnforcement_.assertCanUseWorkingActions) {
+          AccessEnforcement_.assertCanUseWorkingActions('switchBotToMonth', { requestedMonth: validated.month });
+        }
         return {
           payload: Object.assign({}, input, { month: validated.month }),
           warnings: []
@@ -865,6 +898,9 @@ const Stage4UseCases_ = (function() {
       write: true,
       validate: function(input) {
         if (input.sourceMonth) validateMonthSwitch_(input.sourceMonth);
+        if (typeof AccessEnforcement_ === 'object' && AccessEnforcement_.assertCanUseWorkingActions) {
+          AccessEnforcement_.assertCanUseWorkingActions('createNextMonth', { requestedSourceMonth: input.sourceMonth || '' });
+        }
         return { payload: input, warnings: [] };
       },
       execute: function(input, beforeState, plan, context) {

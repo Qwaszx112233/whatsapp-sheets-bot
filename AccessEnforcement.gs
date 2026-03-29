@@ -1,5 +1,5 @@
 /**
- * AccessEnforcement.gs — viewer self-card restrictions, detailed summary restrictions,
+ * AccessEnforcement.gs — viewer self-card restrictions, summary/send-panel gates,
  * and access violation alerts.
  */
 
@@ -15,7 +15,7 @@ var AccessEnforcement_ = AccessEnforcement_ || (function() {
   function _descriptor_() {
     return (typeof AccessControl_ === 'object' && AccessControl_.describe)
       ? AccessControl_.describe()
-      : { role: 'guest', isAdmin: false, isOperator: false, enabled: true, registered: false, source: 'fallback', personCallsign: '' };
+      : { role: 'guest', isAdmin: false, isOperator: false, isMaintainer: false, enabled: true, registered: false, source: 'fallback', personCallsign: '' };
   }
 
   function _roleLabel_(role) {
@@ -39,6 +39,45 @@ var AccessEnforcement_ = AccessEnforcement_ || (function() {
     });
   }
 
+  function _appendAudit_(record) {
+    try {
+      if (typeof Stage4AuditTrail_ !== 'object' || !Stage4AuditTrail_.record) return;
+      Stage4AuditTrail_.record({
+        timestamp: new Date(),
+        scenario: 'accessViolation',
+        level: 'SECURITY',
+        status: 'BLOCKED',
+        initiator: record.email || record.currentKey || record.role || '',
+        affectedSheets: [appGetCore('ALERTS_SHEET', 'ALERTS_LOG')],
+        affectedEntities: [record.action || 'accessViolation'],
+        warnings: [record.message || 'Порушення доступу'],
+        payload: record.details || {},
+        diagnostics: record,
+        message: record.message || 'Зафіксовано порушення доступу'
+      });
+    } catch (_) {}
+  }
+
+  function _appendCompactLog_(record) {
+    try {
+      if (typeof LogsRepository_ !== 'object' || !LogsRepository_.writeBatch) return;
+      LogsRepository_.writeBatch([{
+        timestamp: new Date(),
+        reportDateStr: _nowText_(),
+        sheet: appGetCore('ALERTS_SHEET', 'ALERTS_LOG'),
+        cell: record.action || '',
+        fio: record.displayName || record.personCallsign || record.roleLabel || '',
+        phone: '',
+        code: 'ACCESS_VIOLATION',
+        service: record.source || '',
+        place: '',
+        tasks: '',
+        message: record.message || '',
+        link: ''
+      }]);
+    } catch (_) {}
+  }
+
   function _sendMail_(subject, body) {
     var recipients = _notificationEmails_();
     if (!recipients.length) return { sent: false, recipients: [] };
@@ -46,59 +85,83 @@ var AccessEnforcement_ = AccessEnforcement_ || (function() {
     return { sent: true, recipients: recipients };
   }
 
+  function _roleAtLeast_(descriptor, roleName) {
+    var access = descriptor || _descriptor_();
+    if (access.enabled === false) return false;
+    if (typeof AccessControl_ === 'object' && AccessControl_.ROLE_ORDER) {
+      var current = AccessControl_.ROLE_ORDER[String(access.role || 'guest').toLowerCase()] || 0;
+      var need = AccessControl_.ROLE_ORDER[String(roleName || 'guest').toLowerCase()] || 0;
+      return current >= need;
+    }
+    var fallback = { guest: 0, viewer: 1, operator: 2, maintainer: 3, admin: 4, sysadmin: 5, owner: 6 };
+    return (fallback[String(access.role || 'guest').toLowerCase()] || 0) >= (fallback[String(roleName || 'guest').toLowerCase()] || 0);
+  }
+
   function reportViolation(actionName, details, descriptorOpt) {
     var descriptor = descriptorOpt || _descriptor_();
     var action = String(actionName || 'unknownAction').trim() || 'unknownAction';
     var info = Object.assign({}, details || {});
     var role = String(descriptor.role || 'guest').trim().toLowerCase() || 'guest';
-    var message = 'Спроба доступу без прав: ' + action + ' (' + _roleLabel_(role) + ')';
+    var roleLabel = _roleLabel_(role);
+    var message = 'Спроба доступу без прав: ' + action + ' (' + roleLabel + ')';
     var record = {
       timestamp: _nowText_(),
       action: action,
       role: role,
-      roleLabel: _roleLabel_(role),
+      roleLabel: roleLabel,
       source: descriptor.source || '',
       registered: !!descriptor.registered,
       enabled: descriptor.enabled !== false,
       email: descriptor.email || '',
+      displayName: descriptor.displayName || '',
       currentKey: descriptor.currentKey || '',
       personCallsign: descriptor.personCallsign || '',
+      outcome: info.blocked === false ? 'warning' : 'blocked',
+      message: message,
       details: info
     };
 
-    _appendAlert_('critical', message, record);
+    _appendAlert_(info.bestEffort ? 'warning' : 'critical', message, record);
+    _appendAudit_(record);
+    _appendCompactLog_(record);
 
     var body = [
       'WAPB SECURITY ALERT',
       '===================',
-      'Час: ' + record.timestamp,
-      'Подія: ' + action,
-      'Роль: ' + record.roleLabel,
-      'Джерело доступу: ' + record.source,
-      'Зареєстровано: ' + (record.registered ? 'так' : 'ні'),
-      'Email: ' + (record.email || 'не визначено'),
+      'Дата і час: ' + record.timestamp,
+      'Тип порушення: ' + action,
+      'Роль: ' + roleLabel,
+      'Display name: ' + (record.displayName || 'не визначено'),
       'User key: ' + (record.currentKey || 'не визначено'),
-      'Прив\'язаний позивний: ' + (record.personCallsign || 'не задано'),
+      'Email: ' + (record.email || 'не визначено'),
+      'Джерело: ' + (record.source || 'не визначено'),
+      'Спроба: ' + (info.requestedAction || info.violation || action),
+      'Підсумок: ' + (record.outcome === 'blocked' ? 'заблоковано / відхилено' : 'best-effort warning'),
+      'Позивний користувача: ' + (record.personCallsign || 'не задано'),
       '',
       'Деталі:',
       stage4SafeStringify_(info || {}, 9000)
     ].join('\n');
 
     var mailResult = { sent: false, recipients: [] };
-    try {
-      mailResult = _sendMail_('WAPB SECURITY ALERT: ' + action, body);
-    } catch (error) {
-      _appendAlert_('error', 'Не вдалося надіслати email-сповіщення про порушення доступу', {
-        action: action,
-        error: error && error.message ? error.message : String(error),
-        original: record
-      });
+    if (!info.suppressEmail) {
+      try {
+        mailResult = _sendMail_('WAPB SECURITY ALERT: ' + action, body);
+      } catch (error) {
+        _appendAlert_('error', 'Не вдалося надіслати email-сповіщення про порушення доступу', {
+          action: action,
+          error: error && error.message ? error.message : String(error),
+          original: record
+        });
+      }
     }
 
     return {
       success: true,
       message: message,
       alertLogged: true,
+      auditLogged: true,
+      logWritten: true,
       emailSent: !!mailResult.sent,
       recipients: mailResult.recipients || [],
       data: record
@@ -110,7 +173,7 @@ var AccessEnforcement_ = AccessEnforcement_ || (function() {
     var target = _normCallsign_(callsign);
     if (!target) return false;
     if (access.enabled === false) return false;
-    if (access.isOperator || access.isAdmin) return true;
+    if (_roleAtLeast_(access, 'operator')) return true;
     if (String(access.role || 'guest').toLowerCase() !== 'viewer') return false;
     var own = _normCallsign_(access.personCallsign || '');
     return !!own && own === target;
@@ -120,26 +183,78 @@ var AccessEnforcement_ = AccessEnforcement_ || (function() {
     var descriptor = descriptorOpt || _descriptor_();
     if (canOpenPersonCard(descriptor, callsign)) return descriptor;
     reportViolation('openPersonCardDenied', {
+      requestedAction: 'openPersonCard',
       requestedCallsign: String(callsign || ''),
       requestedDate: String(dateStr || ''),
-      violation: 'viewer-card-access'
+      violation: 'viewer-card-access',
+      blocked: true
     }, descriptor);
     throw new Error('Недостатньо прав для відкриття цієї картки.');
   }
 
+  function canUseDaySummary(descriptor) {
+    var access = descriptor || _descriptor_();
+    return _roleAtLeast_(access, 'viewer');
+  }
+
+  function assertCanUseDaySummary(dateStr, descriptorOpt) {
+    var descriptor = descriptorOpt || _descriptor_();
+    if (canUseDaySummary(descriptor)) return descriptor;
+    reportViolation('daySummaryDenied', {
+      requestedAction: 'buildDaySummary',
+      requestedDate: String(dateStr || ''),
+      violation: 'guest-day-summary-access',
+      blocked: true
+    }, descriptor);
+    throw new Error('Недостатньо прав для зведення дня.');
+  }
+
   function canUseDetailedSummary(descriptor) {
     var access = descriptor || _descriptor_();
-    return !!(access.enabled !== false && ((access.isOperator || access.isAdmin) || ['operator', 'maintainer', 'admin', 'sysadmin', 'owner'].indexOf(String(access.role || '').toLowerCase()) !== -1));
+    return _roleAtLeast_(access, 'operator');
   }
 
   function assertCanUseDetailedSummary(dateStr, descriptorOpt) {
     var descriptor = descriptorOpt || _descriptor_();
     if (canUseDetailedSummary(descriptor)) return descriptor;
     reportViolation('detailedSummaryDenied', {
+      requestedAction: 'buildDetailedSummary',
       requestedDate: String(dateStr || ''),
-      violation: 'viewer-detailed-summary-access'
+      violation: 'viewer-detailed-summary-access',
+      blocked: true
     }, descriptor);
     throw new Error('Недостатньо прав для детального зведення.');
+  }
+
+  function canUseWorkingActions(descriptor) {
+    var access = descriptor || _descriptor_();
+    return _roleAtLeast_(access, 'operator');
+  }
+
+  function assertCanUseWorkingActions(actionName, details, descriptorOpt) {
+    var descriptor = descriptorOpt || _descriptor_();
+    if (canUseWorkingActions(descriptor)) return descriptor;
+    reportViolation('workingActionDenied', Object.assign({
+      requestedAction: String(actionName || 'workingAction'),
+      violation: 'working-action-access',
+      blocked: true
+    }, details || {}), descriptor);
+    throw new Error('Недостатньо прав для цієї робочої дії.');
+  }
+
+  function canUseSendPanel(descriptor) {
+    return canUseWorkingActions(descriptor);
+  }
+
+  function assertCanUseSendPanel(actionName, details, descriptorOpt) {
+    var descriptor = descriptorOpt || _descriptor_();
+    if (canUseSendPanel(descriptor)) return descriptor;
+    reportViolation('sendPanelDenied', Object.assign({
+      requestedAction: String(actionName || 'SEND_PANEL'),
+      violation: 'send-panel-access',
+      blocked: true
+    }, details || {}), descriptor);
+    throw new Error('Недостатньо прав для SEND_PANEL.');
   }
 
   function describeEditActorByEmail(email) {
@@ -182,8 +297,14 @@ var AccessEnforcement_ = AccessEnforcement_ || (function() {
     reportViolation: reportViolation,
     canOpenPersonCard: canOpenPersonCard,
     assertCanOpenPersonCard: assertCanOpenPersonCard,
+    canUseDaySummary: canUseDaySummary,
+    assertCanUseDaySummary: assertCanUseDaySummary,
     canUseDetailedSummary: canUseDetailedSummary,
     assertCanUseDetailedSummary: assertCanUseDetailedSummary,
+    canUseWorkingActions: canUseWorkingActions,
+    assertCanUseWorkingActions: assertCanUseWorkingActions,
+    canUseSendPanel: canUseSendPanel,
+    assertCanUseSendPanel: assertCanUseSendPanel,
     describeEditActorByEmail: describeEditActorByEmail
   };
 })();
@@ -202,15 +323,19 @@ function stage7SecurityAuditOnEdit(e) {
     var role = String(actor.role || 'guest').toLowerCase();
     var protectedSheets = ['ACCESS', 'ALERTS_LOG', 'JOB_RUNTIME_LOG', 'AUDIT_LOG', 'OPS_LOG', 'ACTIVE_OPERATIONS', 'CHECKPOINTS'];
     var editedProtectedSheet = protectedSheets.indexOf(sheetName) !== -1;
-    var shouldAlert = (role === 'guest' || role === 'viewer' || !actor.registered || !actor.knownUser || (editedProtectedSheet && !actor.isAdmin));
+    var shouldAlert = actor.knownUser
+      ? (role === 'guest' || role === 'viewer' || !actor.registered || (editedProtectedSheet && !actor.isAdmin))
+      : false;
     if (!shouldAlert) return;
     AccessEnforcement_.reportViolation('sheetEditDeniedOrSuspicious', {
+      requestedAction: 'sheetEdit',
       sheet: sheetName,
       a1Notation: e && e.range && e.range.getA1Notation ? e.range.getA1Notation() : '',
       oldValue: e && typeof e.oldValue !== 'undefined' ? e.oldValue : '',
       newValue: e && typeof e.value !== 'undefined' ? e.value : '',
       editedProtectedSheet: editedProtectedSheet,
-      editorEmailFromEvent: userEmail || ''
+      editorEmailFromEvent: userEmail || '',
+      blocked: editedProtectedSheet && !actor.isAdmin
     }, actor);
   } catch (_) {}
 }
@@ -225,10 +350,14 @@ function stage7SecurityAuditOnChange(e) {
     var shouldAlert = (!actor.isAdmin) || !actor.knownUser || !actor.registered;
     if (!shouldAlert) return;
     AccessEnforcement_.reportViolation('sheetStructureChangeDeniedOrSuspicious', {
+      requestedAction: 'sheetStructureChange',
       spreadsheetId: source && source.getId ? source.getId() : '',
       spreadsheetName: source && source.getName ? source.getName() : '',
       changeType: changeType,
-      editorEmailFromEvent: userEmail || ''
+      editorEmailFromEvent: userEmail || '',
+      bestEffort: !actor.knownUser,
+      suppressEmail: !actor.knownUser,
+      blocked: !actor.isAdmin
     }, actor);
   } catch (_) {}
 }

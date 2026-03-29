@@ -54,18 +54,18 @@
       <div class="menu-section active" id="menuSection">
         <div class="menu-grid">
 
-          <button class="menu-item" onclick="SidebarApp.handleMenuAction('generatePanel')" title="Створити панель відправки на сьогодні">
+          <button id="btnGeneratePanel" class="menu-item" data-role-min="operator" onclick="SidebarApp.handleMenuAction('generatePanel')" title="Створити панель відправки на сьогодні">
             <span class="menu-icon">🎲</span><span class="menu-text">Панель відправок</span>
           </button>
 
-          <button id="sendUnsentBtn" class="btn btn" onclick="SidebarApp.handleMenuAction('sendUnsent')" title="Немає невідправлених" disabled>🚀 Невідправлені
+          <button id="sendUnsentBtn" class="btn btn" data-role-min="operator" onclick="SidebarApp.handleMenuAction('sendUnsent')" title="Немає невідправлених" disabled>🚀 Невідправлені
           </button>
 
-          <button id="btnDetailedSummary" class="menu-item" onclick="SidebarApp.handleMenuAction('detailedDay')" title="Детальне зведення за день">
+          <button id="btnDetailedSummary" class="menu-item" data-role-min="operator" onclick="SidebarApp.handleMenuAction('detailedDay')" title="Детальне зведення за день">
             <span class="menu-icon">🪬</span><span class="menu-text">Детальне зведення</span>
           </button>
 
-          <button class="menu-item" onclick="SidebarApp.handleMenuAction('daySummary')" title="Коротке зведення за день">
+          <button id="btnDaySummary" class="menu-item" data-role-min="viewer" onclick="SidebarApp.handleMenuAction('daySummary')" title="Коротке зведення за день">
             <span class="menu-icon">1️⃣</span><span class="menu-text">Зведення дня</span>
           </button>
 
@@ -73,49 +73,49 @@
             <button id="btnOpenPersonnelModal" class="btn personnel-launch-btn" type="button">🪖 Особовий склад</button>
           </div>
 
-          <button class="menu-item" onclick="SidebarApp.handleMenuAction('createNextMonth')" title="Створити аркуш наступного місяця">
+          <button id="btnCreateNextMonth" class="menu-item" data-role-min="operator" onclick="SidebarApp.handleMenuAction('createNextMonth')" title="Створити аркуш наступного місяця">
             <span class="menu-icon">🗓️</span><span class="menu-text">Новий аркуш місяця</span>
           </button>
 
-          <button class="menu-item" onclick="SidebarApp.handleMenuAction('switchMonth')" title="Перемкнути бота на інший місяць">
+          <button id="btnSwitchMonth" class="menu-item" data-role-min="operator" onclick="SidebarApp.handleMenuAction('switchMonth')" title="Перемкнути бота на інший місяць">
             <span class="menu-icon">🏃‍♂️‍➡️✈️</span><span class="menu-text">Перемістити бота</span>
           </button>
 
-          <button class="menu-item" onclick="SidebarApp.handleMenuAction('vacationReminder')" title="Перевірити відпустки">
+          <button id="btnVacationReminder" class="menu-item" data-role-min="operator" onclick="SidebarApp.handleMenuAction('vacationReminder')" title="Перевірити відпустки">
             <span class="menu-icon">🏖️</span><span class="menu-text">Відпустки</span>
           </button>
 
-          <button class="menu-item" onclick="SidebarApp.handleMenuAction('birthdayCheck')" title="Перевірити іменинників">
+          <button id="btnBirthdayCheck" class="menu-item" data-role-min="operator" onclick="SidebarApp.handleMenuAction('birthdayCheck')" title="Перевірити іменинників">
             <span class="menu-icon">🎂</span><span class="menu-text">Дні народження</span>
           </button>
 
 
           <div class="menu-divider" style="grid-column: span 2"></div>
 
-          <div class="health-actions" data-admin-only="true" style="grid-column: span 2; display:none;">
+          <div class="health-actions" data-role-min="maintainer" style="grid-column: span 2; display:none;">
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:8px;">
 
-              <button class="btn btn-secondary" onclick="SidebarApp.showPendingRepairs()" style="padding:6px; font-size:0.72rem; grid-column: span 2;">🛠 Потребують виправлення</button>
+              <button class="btn btn-secondary" data-role-min="maintainer" onclick="SidebarApp.showPendingRepairs()" style="padding:6px; font-size:0.72rem; grid-column: span 2;">🛠 Потребують виправлення</button>
 
-              <button class="btn btn-secondary" onclick="SidebarApp.handleMenuAction('applyProtections')" style="padding:6px; font-size:0.72rem; grid-column: span 2;">🛡 Захистити службові листи</button>
+              <button class="btn btn-secondary" data-role-min="sysadmin" onclick="SidebarApp.handleMenuAction('applyProtections')" style="padding:6px; font-size:0.72rem; grid-column: span 2;">🛡 Захистити службові листи</button>
 
-              <button class="btn btn-secondary" onclick="SidebarApp.runHealthCheck()" style="padding:6px; font-size:0.72rem;">🩺 Перевірка системи</button>
+              <button class="btn btn-secondary" data-role-min="maintainer" onclick="SidebarApp.runHealthCheck()" style="padding:6px; font-size:0.72rem;">🩺 Перевірка системи</button>
 
-              <button class="btn btn-secondary" onclick="SidebarApp.handleMenuAction('restartBot')" style="padding:6px; font-size:0.72rem;">♻ Перезапуск бота</button>
+              <button class="btn btn-secondary" data-role-min="sysadmin" onclick="SidebarApp.handleMenuAction('restartBot')" style="padding:6px; font-size:0.72rem;">♻ Перезапуск бота</button>
 
-              <button class="btn btn-secondary" onclick="SidebarApp.handleMenuAction('clearCache')" style="padding:6px; font-size:0.72rem;">🧹 Очистити кеш</button>
+              <button class="btn btn-secondary" data-role-min="sysadmin" onclick="SidebarApp.handleMenuAction('clearCache')" style="padding:6px; font-size:0.72rem;">🧹 Очистити кеш</button>
 
-              <button class="btn btn-secondary" onclick="SidebarApp.handleMenuAction('clearLog')" style="padding:6px; font-size:0.72rem;">🗑 Очистити лог</button>
+              <button class="btn btn-secondary" data-role-min="admin" onclick="SidebarApp.handleMenuAction('clearLog')" style="padding:6px; font-size:0.72rem;">🗑 Очистити лог</button>
 
-              <button class="btn btn-secondary" onclick="SidebarApp.clearPhoneCache()" style="padding:6px; font-size:0.72rem;">🧹 Очистити кеш тел.</button>
+              <button class="btn btn-secondary" data-role-min="sysadmin" onclick="SidebarApp.clearPhoneCache()" style="padding:6px; font-size:0.72rem;">🧹 Очистити кеш тел.</button>
 
-              <button class="btn btn-secondary" onclick="SidebarApp.debugPhones()" style="padding:6px; font-size:0.72rem;">📞 Діагностика тел.</button>
+              <button class="btn btn-secondary" data-role-min="maintainer" onclick="SidebarApp.debugPhones()" style="padding:6px; font-size:0.72rem;">📞 Діагностика тел.</button>
 
-              <button class="btn btn-secondary" onclick="SidebarApp.cleanupTriggers()" style="padding:6px; font-size:0.72rem;">🎏 Перевірка дублів тригерів</button>
+              <button class="btn btn-secondary" data-role-min="sysadmin" onclick="SidebarApp.cleanupTriggers()" style="padding:6px; font-size:0.72rem;">🎏 Перевірка дублів тригерів</button>
 
-              <button class="btn btn-secondary" onclick="SidebarApp.setupTrigger()" style="padding:6px; font-size:0.72rem;">⏰ Створити тригер</button>
+              <button class="btn btn-secondary" data-role-min="sysadmin" onclick="SidebarApp.setupTrigger()" style="padding:6px; font-size:0.72rem;">⏰ Створити тригер</button>
 
-              <button class="btn btn-secondary" onclick="SidebarApp.copyHealthReport()" style="padding:6px; font-size:0.72rem;">📋 Копія звіту</button>
+              <button class="btn btn-secondary" data-role-min="maintainer" onclick="SidebarApp.copyHealthReport()" style="padding:6px; font-size:0.72rem;">📋 Копія звіту</button>
             </div>
           </div>
         </div>

@@ -4,8 +4,8 @@
  * Stage 7.1 user-key access model:
  * - primary identity: Session.getTemporaryActiveUserKey()
  * - ACCESS stores current/previous user keys per user row
- * - legacy email-based behavior is retained only as a migration bridge while
- *   ACCESS does not contain any registered user keys yet.
+ * - email-based behavior is disabled by default and can be enabled only via
+ *   explicit emergency migration flag WAPB_ACCESS_MIGRATION_MODE.
  */
 
 const AccessControl_ = (function() {
@@ -17,6 +17,7 @@ const AccessControl_ = (function() {
   const OPERATOR_PROP = 'WAPB_ACCESS_OPERATOR_EMAILS';
   const VIEWER_PROP = 'WAPB_ACCESS_VIEWER_EMAILS';
   const GUEST_PROP = 'WAPB_ACCESS_GUEST_EMAILS';
+  const MIGRATION_MODE_PROP = 'WAPB_ACCESS_MIGRATION_MODE';
   const ROLE_ORDER = Object.freeze({ guest: 0, viewer: 1, operator: 2, maintainer: 3, admin: 4, sysadmin: 5, owner: 6 });
   const ROLE_VALUES = Object.freeze(['guest', 'viewer', 'operator', 'maintainer', 'admin', 'sysadmin', 'owner']);
   const ROLE_METADATA = Object.freeze({
@@ -92,6 +93,11 @@ const AccessControl_ = (function() {
 
   function _getProperties_() {
     return PropertiesService.getScriptProperties();
+  }
+
+  function isMigrationModeEnabled_() {
+    const raw = String(_getProperties_().getProperty(MIGRATION_MODE_PROP) || '').trim().toLowerCase();
+    return raw === '1' || raw === 'true' || raw === 'yes' || raw === 'on';
   }
 
   function _parseEmailsList_(value) {
@@ -404,9 +410,6 @@ const AccessControl_ = (function() {
 
   function _configuredEntriesCount_() {
     let count = 0;
-    ROLE_VALUES.forEach(function(role) {
-      count += listEmailsByRole(role).length;
-    });
     _readSheetEntries_().forEach(function(entry) {
       if (entry.email || entry.userKeyCurrent || entry.userKeyPrev || entry.displayName || entry.personCallsign) count += 1;
     });
@@ -417,26 +420,6 @@ const AccessControl_ = (function() {
     return _readSheetEntries_().filter(function(entry) { return entry.enabled; });
   }
 
-  function _resolveLegacyFallback_() {
-    const sheetEntries = _listEnabledSheetEntries_();
-
-    const owners = sheetEntries.filter(function(item) { return item.role === 'owner'; });
-    if (owners.length === 1) {
-      return Object.assign({}, owners[0], { source: 'ACCESS-fallback-owner' });
-    }
-
-    const sysadmins = sheetEntries.filter(function(item) { return item.role === 'sysadmin'; });
-    if (sysadmins.length === 1) {
-      return Object.assign({}, sysadmins[0], { source: 'ACCESS-fallback-sysadmin' });
-    }
-
-    const admins = sheetEntries.filter(function(item) { return item.role === 'admin'; });
-    if (admins.length === 1) {
-      return Object.assign({}, admins[0], { source: 'ACCESS-fallback-admin' });
-    }
-
-    return null;
-  }
 
   function _touchLastSeen_(entry, userKey) {
     if (!entry || !entry.sheetRow) return entry;
@@ -493,10 +476,10 @@ const AccessControl_ = (function() {
     const emailAvailable = !!sessionEmail;
     const registeredKeysCount = _registeredKeysCount_();
     const configuredEntries = _configuredEntriesCount_();
-    const userKeyModeEnabled = registeredKeysCount > 0;
+    const migrationModeEnabled = isMigrationModeEnabled_();
 
     let match = null;
-    let mode = userKeyModeEnabled ? 'user-key' : 'legacy-email';
+    let mode = migrationModeEnabled ? 'migration-email-bridge' : 'user-key';
 
     if (keyAvailable) {
       match = _findByUserKey_(currentKey);
@@ -505,21 +488,20 @@ const AccessControl_ = (function() {
       }
     }
 
-    if (!match && keyAvailable && emailAvailable) {
+    if (!match && migrationModeEnabled && keyAvailable && emailAvailable) {
       match = _bindCurrentUserKeyByEmail_(sessionEmail, currentKey);
       if (match) {
-        mode = 'user-key';
+        mode = 'migration-email-bridge';
       }
     }
 
-    if (!match && !userKeyModeEnabled) {
-      const sheetEntry = emailAvailable ? _findByEmailInSheet_(sessionEmail) : null;
-      const propEntry = !sheetEntry && emailAvailable ? _findInProperties_(sessionEmail) : null;
+    if (!match && migrationModeEnabled && emailAvailable) {
+      const sheetEntry = _findByEmailInSheet_(sessionEmail);
+      const propEntry = !sheetEntry ? _findInProperties_(sessionEmail) : null;
       match = sheetEntry || propEntry;
-      if (!match && !emailAvailable) {
-        match = _resolveLegacyFallback_();
+      if (match && match.sheetRow && keyAvailable) {
+        match = _bindCurrentUserKeyByEmail_(sessionEmail, currentKey) || match;
       }
-      mode = 'legacy-email';
     }
 
     if (!match && configuredEntries === 0 && (keyAvailable || emailAvailable)) {
@@ -535,16 +517,18 @@ const AccessControl_ = (function() {
         readOnly: false,
         isAdmin: true,
         isOperator: true,
+        isMaintainer: true,
         source: 'bootstrap-owner',
         note: '',
         displayName: '',
         personCallsign: '',
         accessSheet: ACCESS_SHEET,
         reason: 'RBAC ще не налаштовано. Поточний користувач тимчасово працює як bootstrap-owner, поки не буде заповнено ACCESS.',
-        adminEmailsConfigured: 0,
+        adminEmailsConfigured: listAdminEmails().length,
         availableRoles: ROLE_VALUES.slice(),
-        userKeyModeEnabled: userKeyModeEnabled,
-        mode: mode,
+        userKeyModeEnabled: true,
+        migrationModeEnabled: migrationModeEnabled,
+        mode: 'bootstrap-owner',
         registeredKeysCount: registeredKeysCount
       };
     }
@@ -556,14 +540,14 @@ const AccessControl_ = (function() {
     const readOnly = (role === 'guest' || role === 'viewer');
 
     let reason = '';
-    if (!registered && userKeyModeEnabled && !keyAvailable) {
-      reason = 'Ключ поточного користувача недоступний; доступ переведено в safe-mode перегляду.';
-    } else if (!registered && userKeyModeEnabled && keyAvailable) {
-      reason = 'Поточний ключ користувача не зареєстровано в ACCESS. Доступ переведено в safe-mode перегляду.';
-    } else if (!registered && !userKeyModeEnabled && !emailAvailable) {
-      reason = 'Email користувача недоступний; небезпечні дії переведені в safe-mode.';
-    } else if (!registered && !userKeyModeEnabled) {
-      reason = 'Роль не налаштовано. Доступ до maintenance-операцій заборонено.';
+    if (!registered && !keyAvailable) {
+      reason = migrationModeEnabled
+        ? 'Ключ поточного користувача недоступний. Тимчасовий email-міст увімкнено лише як аварійний режим міграції; небезпечні дії заблоковано.'
+        : 'Ключ поточного користувача недоступний; система працює у строгому user key-режимі, тому доступ знижено до safe-mode.';
+    } else if (!registered && keyAvailable) {
+      reason = migrationModeEnabled
+        ? 'Поточний user key ще не зареєстровано в ACCESS. Аварійний email-міст не підтвердив користувача; доступ знижено до safe-mode.'
+        : 'Поточний user key не зареєстровано в ACCESS. Неявні fallback-схеми вимкнено; користувача вважаємо незареєстрованим.';
     }
 
     return {
@@ -579,7 +563,7 @@ const AccessControl_ = (function() {
       isAdmin: (ROLE_ORDER[role] || 0) >= ROLE_ORDER.admin && enabled,
       isOperator: (ROLE_ORDER[role] || 0) >= ROLE_ORDER.operator && enabled,
       isMaintainer: (ROLE_ORDER[role] || 0) >= ROLE_ORDER.maintainer && enabled,
-      source: match ? match.source : (userKeyModeEnabled ? 'ACCESS-user-key-unregistered' : 'default'),
+      source: match ? match.source : 'ACCESS-user-key-unregistered',
       note: match && match.note ? String(match.note) : (registered ? getRoleNoteTemplate_(role) : ''),
       displayName: match && match.displayName ? String(match.displayName) : '',
       personCallsign: match && match.personCallsign ? String(match.personCallsign) : '',
@@ -587,7 +571,8 @@ const AccessControl_ = (function() {
       reason: reason,
       adminEmailsConfigured: listAdminEmails().length,
       availableRoles: ROLE_VALUES.slice(),
-      userKeyModeEnabled: userKeyModeEnabled,
+      userKeyModeEnabled: true,
+      migrationModeEnabled: migrationModeEnabled,
       mode: mode,
       registeredKeysCount: registeredKeysCount,
       lastSeenAt: match && match.lastSeenAt ? String(match.lastSeenAt) : '',
@@ -601,6 +586,17 @@ const AccessControl_ = (function() {
     const current = normalizeRole_(descriptor.role);
     if (!descriptor.enabled || (ROLE_ORDER[current] || 0) < (ROLE_ORDER[need] || 0)) {
       const label = String(actionLabel || 'ця дія');
+      try {
+        if (typeof AccessEnforcement_ === 'object' && AccessEnforcement_.reportViolation) {
+          AccessEnforcement_.reportViolation('roleDenied', {
+            requestedAction: label,
+            requiredRole: need,
+            currentRole: current,
+            source: 'server-assertRoleAtLeast',
+            blocked: true
+          }, descriptor);
+        }
+      } catch (_) {}
       throw new Error('Недостатньо прав для дії: ' + label + '. Поточна роль: ' + current + '.');
     }
     return descriptor;
@@ -626,7 +622,8 @@ const AccessControl_ = (function() {
     normalizeEmail: normalizeEmail_,
     normalizeUserKey: normalizeUserKey_,
     safeGetUserEmail: safeGetUserEmail_,
-    safeGetUserKey: safeGetUserKey_
+    safeGetUserKey: safeGetUserKey_,
+    isMigrationModeEnabled: isMigrationModeEnabled_
   };
 })();
 

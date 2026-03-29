@@ -16,6 +16,9 @@ function showSidebar() {
 
 function sendFromSidebar(personData) {
   try {
+    if (typeof AccessEnforcement_ === 'object' && AccessEnforcement_.assertCanUseSendPanel) {
+      AccessEnforcement_.assertCanUseSendPanel('sendFromSidebar', { source: 'SidebarServer.sendFromSidebar' });
+    }
     if (!personData || !personData.link) {
       throw new Error('Немає даних для відправки');
     }
@@ -44,6 +47,9 @@ function sendFromSidebar(personData) {
 
 function sendAllFromSidebar(personnelList) {
   try {
+    if (typeof AccessEnforcement_ === 'object' && AccessEnforcement_.assertCanUseSendPanel) {
+      AccessEnforcement_.assertCanUseSendPanel('sendAllFromSidebar', { source: 'SidebarServer.sendAllFromSidebar' });
+    }
     if (!Array.isArray(personnelList) || !personnelList.length) {
       throw new Error('Немає даних для відправки');
     }
@@ -85,6 +91,9 @@ function sendAllFromSidebar(personnelList) {
 
 function sendDaySummaryToCommanderSidebar(dateStr, summaryText) {
   try {
+    if (typeof AccessEnforcement_ === 'object' && AccessEnforcement_.assertCanUseWorkingActions) {
+      AccessEnforcement_.assertCanUseWorkingActions('sendDaySummaryToCommanderSidebar', { requestedDate: dateStr || '' });
+    }
     if (!summaryText) {
       throw new Error('Немає тексту зведення');
     }
