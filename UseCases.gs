@@ -1116,14 +1116,15 @@ const Stage7UseCases_ = (function() {
             const response = normalizeServerResponse_(LogsRepository_.clear(), 'clearLog', {});
             const result = Object.assign({ type: 'clearLog' }, response.data || {});
             const cleared = !!result.cleared;
+            const clearedSheets = stage7AsArray_(result.clearedSheets);
             return {
               success: response.success !== false,
-              message: response.message || (cleared ? 'LOG очищено' : 'LOG не знайдено'),
+              message: response.message || (cleared ? 'Логи очищено' : 'Жоден лог-аркуш не знайдено'),
               result: result,
-              changes: cleared ? [{ type: 'clearLog' }] : [],
-              affectedSheets: ['LOG'],
+              changes: cleared ? [{ type: 'clearLog', sheets: clearedSheets }] : [],
+              affectedSheets: clearedSheets,
               affectedEntities: [],
-              appliedChangesCount: cleared ? 1 : 0,
+              appliedChangesCount: clearedSheets.length,
               skippedChangesCount: cleared ? 0 : 1,
               warnings: response.warnings || []
             };
