@@ -15,12 +15,21 @@ const LogsRepository_ = (function() {
   }
 
   function clear() {
-    const ok = clearLogCore_();
+    const result = clearLogCore_();
+    const cleared = !!(result && result.cleared);
+    const clearedSheets = cleared ? (result.clearedSheets || []) : [];
+    const missingSheets = result && result.missingSheets ? result.missingSheets : [];
     return okResponse_({
-      cleared: !!ok
-    }, ok ? 'LOG очищено' : 'LOG відсутній', {
+      cleared: cleared,
+      clearedSheets: clearedSheets,
+      missingSheets: missingSheets,
+      details: result && result.details ? result.details : [],
+      runtimeStorage: result && result.runtimeStorage ? result.runtimeStorage : null
+    }, cleared
+      ? ('Логи очищено: ' + clearedSheets.join(', '))
+      : 'Жоден лог-аркуш не знайдено', {
       repository: 'LogsRepository_'
-    }, ok ? [] : ['Лист LOG не знайдено']);
+    }, cleared ? [] : ['Не знайдено жодного лог-аркуша для очищення']);
   }
 
   return {
