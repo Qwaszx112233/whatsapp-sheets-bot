@@ -287,14 +287,25 @@
 
       const guard = STATE._linkOpenGuard || { url: '', openedAt: 0 };
       const now = Date.now();
-      if (guard.url === link && (now - Number(guard.openedAt || 0)) < 1500) {
-        return STATE.waSenderWindow && !STATE.waSenderWindow.closed ? STATE.waSenderWindow : null;
+      let currentWindow = null;
+
+      try {
+        currentWindow = STATE.waSenderWindow && !STATE.waSenderWindow.closed ? STATE.waSenderWindow : null;
+      } catch (_) {
+        currentWindow = null;
+      }
+      STATE.waSenderWindow = currentWindow;
+
+      if (guard.url === link && (now - Number(guard.openedAt || 0)) < 1500 && currentWindow) {
+        try { currentWindow.focus(); } catch (_) {}
+        return currentWindow;
       }
 
       const existing = primeWhatsAppSenderTab();
       if (existing && !existing.closed) {
         try {
           existing.location.replace(link);
+          try { existing.opener = null; } catch (_) {}
           existing.focus();
           STATE.waSenderWindow = existing;
           STATE._linkOpenGuard = { url: link, openedAt: now };
@@ -303,8 +314,9 @@
       }
 
       const targetName = String(STATE.waSenderWindowName || WA_SENDER_TARGET || 'WA_SENDER_WINDOW');
-      const opened = window.open(link, targetName, 'noopener,noreferrer');
+      const opened = window.open(link, targetName);
       if (opened) {
+        try { opened.opener = null; } catch (_) {}
         try { opened.focus(); } catch (_) {}
         STATE.waSenderWindow = opened;
         STATE._linkOpenGuard = { url: link, openedAt: now };
@@ -314,26 +326,38 @@
       const anchor = document.createElement('a');
       anchor.href = link;
       anchor.target = targetName;
-      anchor.rel = 'noopener noreferrer';
+      anchor.rel = 'noreferrer';
       anchor.style.display = 'none';
       document.body.appendChild(anchor);
       anchor.click();
       document.body.removeChild(anchor);
       STATE._linkOpenGuard = { url: link, openedAt: now };
-      return null;
+      return { closed: false, focus() {} };
     } catch (error) {
       console.error('openLinkSafe error:', error);
       try {
         const fallbackUrl = String(url || '').trim();
         if (!fallbackUrl) return null;
         const targetName = String(STATE.waSenderWindowName || WA_SENDER_TARGET || 'WA_SENDER_WINDOW');
-        const fallback = window.open(fallbackUrl, targetName, 'noopener,noreferrer');
+        const fallback = window.open(fallbackUrl, targetName);
         if (fallback) {
+          try { fallback.opener = null; } catch (_) {}
           try { fallback.focus(); } catch (_) {}
           STATE.waSenderWindow = fallback;
           STATE._linkOpenGuard = { url: fallbackUrl, openedAt: Date.now() };
+          return fallback;
         }
-        return fallback;
+
+        const anchor = document.createElement('a');
+        anchor.href = fallbackUrl;
+        anchor.target = targetName;
+        anchor.rel = 'noreferrer';
+        anchor.style.display = 'none';
+        document.body.appendChild(anchor);
+        anchor.click();
+        document.body.removeChild(anchor);
+        STATE._linkOpenGuard = { url: fallbackUrl, openedAt: Date.now() };
+        return { closed: false, focus() {} };
       } catch (_) {
         return null;
       }
