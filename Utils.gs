@@ -256,21 +256,69 @@ function waClearCache() {
   SpreadsheetApp.getUi().alert('✓ Кеш очищено');
 }
 
-function clearLogCore_() {
-  const sh = SpreadsheetApp.getActive().getSheetByName(CONFIG.LOG_SHEET);
-  if (!sh) return false;
+function _clearSheetDataPreserveHeaders_(sheetName, headerRows, ensureFn) {
+  const sh = SpreadsheetApp.getActive().getSheetByName(sheetName);
+  if (!sh) {
+    return { sheet: sheetName, cleared: false, exists: false, rowsCleared: 0 };
+  }
+  const keepRows = Math.max(Number(headerRows) || 1, 1);
   const lastRow = sh.getLastRow();
   const lastCol = Math.max(sh.getLastColumn(), 1);
-  if (lastRow > 1) sh.getRange(2, 1, lastRow - 1, lastCol).clearContent();
-  ensureLogHeader_(sh);
-  return true;
+  const rowsCleared = Math.max(lastRow - keepRows, 0);
+  if (rowsCleared > 0) {
+    sh.getRange(keepRows + 1, 1, rowsCleared, lastCol).clearContent();
+  }
+  if (typeof ensureFn === 'function') {
+    try { ensureFn(sh); } catch (_) {}
+  }
+  return { sheet: sheetName, cleared: true, exists: true, rowsCleared: rowsCleared };
+}
+
+function clearLogCore_() {
+  const targets = [
+    { name: CONFIG.LOG_SHEET || 'LOG', headerRows: 1, ensure: function(sh) { try { ensureLogHeader_(sh); } catch (_) {} } },
+    { name: (typeof STAGE7_CONFIG !== 'undefined' ? (STAGE7_CONFIG.AUDIT_SHEET || 'AUDIT_LOG') : 'AUDIT_LOG'), headerRows: (typeof STAGE7_CONFIG !== 'undefined' ? (STAGE7_CONFIG.AUDIT_HEADER_ROW || 1) : 1), ensure: function() { try { ensureAuditTrailSheet_(); } catch (_) {} } },
+    { name: (typeof appGetCore === 'function' ? appGetCore('ALERTS_SHEET', 'ALERTS_LOG') : 'ALERTS_LOG'), headerRows: 1, ensure: function() { try { AlertsRepository_.ensureSheet(); } catch (_) {} } },
+    { name: (typeof STAGE7_CONFIG !== 'undefined' ? (STAGE7_CONFIG.JOB_RUNTIME_SHEET || 'JOB_RUNTIME_LOG') : 'JOB_RUNTIME_LOG'), headerRows: 1, ensure: function() { try { JobRuntimeRepository_.ensureSheet(); } catch (_) {} } },
+    { name: (typeof appGetCore === 'function' ? appGetCore('OPS_LOG_SHEET', 'OPS_LOG') : 'OPS_LOG'), headerRows: 1 },
+    { name: (typeof appGetCore === 'function' ? appGetCore('ACTIVE_OPERATIONS_SHEET', 'ACTIVE_OPERATIONS') : 'ACTIVE_OPERATIONS'), headerRows: 1 },
+    { name: (typeof appGetCore === 'function' ? appGetCore('CHECKPOINTS_SHEET', 'CHECKPOINTS') : 'CHECKPOINTS'), headerRows: 1 }
+  ];
+
+  const clearedSheets = [];
+  const missingSheets = [];
+  const details = [];
+  targets.forEach(function(target) {
+    const item = _clearSheetDataPreserveHeaders_(target.name, target.headerRows, target.ensure);
+    details.push(item);
+    if (item.cleared) clearedSheets.push(item.sheet);
+    else missingSheets.push(item.sheet);
+  });
+
+  let runtimeStorage = null;
+  try {
+    if (typeof JobRuntimeRepository_ === 'object' && JobRuntimeRepository_ && typeof JobRuntimeRepository_.clearStorage === 'function') {
+      runtimeStorage = JobRuntimeRepository_.clearStorage();
+    }
+  } catch (_) {
+    runtimeStorage = { success: false };
+  }
+
+  return {
+    cleared: clearedSheets.length > 0,
+    clearedSheets: clearedSheets,
+    missingSheets: missingSheets,
+    details: details,
+    runtimeStorage: runtimeStorage
+  };
 }
 
 function clearLogSheet() {
   const ui = SpreadsheetApp.getUi();
   if (ui.alert('🧹 Очистити LOG?', ui.ButtonSet.YES_NO) !== ui.Button.YES) return;
-  if (clearLogCore_()) ui.alert('✓ Лог очищено');
-  else ui.alert('✕ LOG не знайдено');
+  const result = clearLogCore_();
+  if (result && result.cleared) ui.alert('✓ Логи очищено');
+  else ui.alert('✕ Жоден лог-аркуш не знайдено');
 }
 
 function clearPhoneCache() {
@@ -298,8 +346,9 @@ function clearCacheSidebar() {
 
 function clearLogSidebar() {
   try {
-    if (!clearLogCore_()) throw new Error('LOG не знайдено');
-    return { success: true, message: 'Лог очищено' };
+    const result = clearLogCore_();
+    if (!result || !result.cleared) throw new Error('Жоден лог-аркуш не знайдено');
+    return { success: true, message: 'Логи очищено', data: result };
   } catch (e) {
     return { success: false, error: e.toString() };
   }
