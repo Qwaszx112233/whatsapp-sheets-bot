@@ -21,7 +21,7 @@ var AccessEnforcement_ = AccessEnforcement_ || (function() {
   }
 
   function _roleLabel_(role) {
-    var map = { guest: 'Гість', viewer: 'Перегляд', operator: 'Оператор', maintainer: 'Редактор', admin: 'Адмін', sysadmin: 'Сис. адмін', owner: 'Власник' };
+    var map = { guest: 'Гість', viewer: 'Спостерігач', operator: 'Оператор', maintainer: 'Редактор', admin: 'Адмін', sysadmin: 'Сис. адмін', owner: 'Власник' };
     return map[String(role || 'guest').trim().toLowerCase()] || 'Гість';
   }
 
@@ -198,7 +198,7 @@ var AccessEnforcement_ = AccessEnforcement_ || (function() {
 
   function canUseDaySummary(descriptor) {
     var access = descriptor || _descriptor_();
-    return !!(access.enabled !== false && _roleAtLeast_(access.role, 'viewer'));
+    return !!(access.enabled !== false && _roleAtLeast_(access.role, 'operator'));
   }
 
   function assertCanUseDaySummary(dateStr, descriptorOpt) {
@@ -228,7 +228,7 @@ var AccessEnforcement_ = AccessEnforcement_ || (function() {
 
   function canUseWorkingActions(descriptor) {
     var access = descriptor || _descriptor_();
-    return !!(access.enabled !== false && _roleAtLeast_(access.role, 'operator'));
+    return !!(access.enabled !== false && _roleAtLeast_(access.role, 'maintainer'));
   }
 
   function assertCanUseWorkingActions(actionName, details, descriptorOpt) {
@@ -240,7 +240,7 @@ var AccessEnforcement_ = AccessEnforcement_ || (function() {
 
   function canUseSendPanel(descriptor) {
     var access = descriptor || _descriptor_();
-    return !!(access.enabled !== false && _roleAtLeast_(access.role, 'operator'));
+    return !!(access.enabled !== false && _roleAtLeast_(access.role, 'maintainer'));
   }
 
   function assertCanUseSendPanel(actionName, details, descriptorOpt) {
