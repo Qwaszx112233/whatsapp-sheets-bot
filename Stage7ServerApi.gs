@@ -37,6 +37,60 @@ function apiMarkPanelRowsAsSent(rowNumbers, options) {
   return Stage7UseCases_.markPanelRowsAsSent(rowNumbers, options || {});
 }
 
+function _sanitizeFastSendPanelRows_(rowNumbers) {
+  const rows = Array.isArray(rowNumbers) ? rowNumbers.map(function(value) {
+    return Number(value);
+  }) : [];
+  const seen = {};
+  return rows.filter(function(row) {
+    if (!Number.isFinite(row) || row <= 0) return false;
+    const key = String(row);
+    if (seen[key]) return false;
+    seen[key] = true;
+    return true;
+  });
+}
+
+function apiMarkPanelRowsAsSentFast(rowNumbers, options) {
+  const opts = Object.assign({
+    dryRun: false,
+    returnRows: false,
+    targetedVisualUpdate: true
+  }, options || {});
+
+  const rows = _sanitizeFastSendPanelRows_(rowNumbers);
+  if (!rows.length) {
+    throw new Error('Не передано коректні рядки SEND_PANEL');
+  }
+
+  if (typeof AccessEnforcement_ === 'object' && AccessEnforcement_.assertCanUseSendPanel) {
+    AccessEnforcement_.assertCanUseSendPanel('markPanelRowsAsSentFast', { rowNumbers: rows });
+  }
+
+  const result = SendPanelRepository_.markRowsAsSent(rows, opts);
+
+  return {
+    success: true,
+    message: 'Позначено ' + (Array.isArray(result.updatedRows) ? result.updatedRows.length : 0) + ' рядків',
+    warnings: [],
+    context: {
+      route: 'sidebar.markPanelRowsAsSentFast',
+      scenario: 'markPanelRowsAsSentFast',
+      fastPath: true
+    },
+    data: {
+      result: {
+        rows: Array.isArray(result.rows) ? result.rows : [],
+        updatedRows: Array.isArray(result.updatedRows) ? result.updatedRows : [],
+        stats: result.stats || {},
+        month: '',
+        date: ''
+      },
+      meta: {}
+    }
+  };
+}
+
 function apiMarkPanelRowsAsUnsent(rowNumbers, options) {
   return Stage7UseCases_.markPanelRowsAsUnsent(rowNumbers, options || {});
 }

@@ -20,36 +20,35 @@ const SendPanelRepository_ = (function() {
     return true;
   }
 
-  function applyRowsVisualState_(panel, rowNumbers) {
+  function applyVisualStateToRows_(panel, rowNumbers) {
     if (!panel || !Array.isArray(rowNumbers) || !rowNumbers.length) return false;
 
     const schema = SheetSchemas_.get('SEND_PANEL');
     rowNumbers.forEach(function(row) {
-      const safeRow = Number(row);
-      if (!Number.isFinite(safeRow)) return;
-      panel.getRange(safeRow, 1, 1, 7).setBackground(null);
-      panel.getRange(safeRow, schema.columns.status, 1, 2).setHorizontalAlignment('center');
+      if (!Number.isFinite(row)) return;
+      panel.getRange(row, 1, 1, 7).setBackground(null);
+      panel.getRange(row, schema.columns.status, 1, 2).setHorizontalAlignment('center');
     });
-
     return true;
   }
 
   function readRowsByNumbers_(panel, rowNumbers) {
-    const sheet = panel || getPanelSheet(false);
-    if (!sheet) return [];
+    if (!panel || !Array.isArray(rowNumbers) || !rowNumbers.length) return [];
 
     const schema = SheetSchemas_.get('SEND_PANEL');
-    const lastRow = sheet.getLastRow();
-    const validRows = Array.isArray(rowNumbers)
-      ? [...new Set(rowNumbers.map(Number))].filter(function(row) {
-          return Number.isFinite(row) && row >= schema.dataStartRow && row <= lastRow;
-        })
-      : [];
+    const formulasByRow = {};
+    const valuesByRow = {};
 
-    return validRows.map(function(row) {
-      const values = sheet.getRange(row, 1, 1, 7).getDisplayValues()[0];
-      const formula = sheet.getRange(row, schema.columns.action, 1, 1).getFormula();
+    rowNumbers.forEach(function(row) {
+      if (!Number.isFinite(row) || row < schema.dataStartRow) return;
+      const values = panel.getRange(row, 1, 1, 7).getDisplayValues()[0] || [];
+      const formula = panel.getRange(row, schema.columns.action, 1, 1).getFormulas()[0][0] || '';
+      valuesByRow[row] = values;
+      formulasByRow[row] = formula;
+    });
 
+    return rowNumbers.map(function(row) {
+      const values = valuesByRow[row] || [];
       return {
         fio: String(values[0] || '').trim(),
         phone: String(values[1] || '').replace(/^'/, '').trim() || '—',
@@ -57,14 +56,13 @@ const SendPanelRepository_ = (function() {
         tasks: String(values[3] || '').trim() || '—',
         status: normalizeSendPanelStatus_(String(values[4] || '').trim()),
         sent: isSendPanelSentMark_(values[5]),
-        link: extractLinkUrl(formula || ''),
+        link: extractLinkUrl(formulasByRow[row] || ''),
         row: row
       };
     }).filter(function(item) {
       return item.fio || item.code || item.phone !== '—';
     });
   }
-
 
   function readRows() {
     const panel = getPanelSheet(false);
@@ -307,21 +305,22 @@ const SendPanelRepository_ = (function() {
     });
     if (!eligibleRows.length) throw new Error('Немає готових рядків SEND_PANEL для позначення як відправлені');
 
-    const panelMeta = getSendPanelMetadata_(panel);
-    const logTimestamp = new Date();
-
     eligibleRows.forEach(function(row) {
       const item = byRow[row] || {};
       panel.getRange(row, schema.columns.sent).setValue(getSendPanelSentMark_());
       panel.getRange(row, schema.columns.action).setValue(resolveSendPanelActionCellValue_(item.link || '', item.status || SendPanelConstants_.STATUS_READY, true));
     });
 
-    applyRowsVisualState_(panel, eligibleRows);
+    if (options.targetedVisualUpdate) {
+      applyVisualStateToRows_(panel, eligibleRows);
+    } else {
+      applyVisualState_(panel, Math.max(0, panel.getLastRow() - (schema.dataStartRow - 1)));
+    }
 
     const logs = beforeRows.filter(function(item) { return eligibleRows.indexOf(item.row) !== -1; }).map(function(item) {
       return {
-        timestamp: logTimestamp,
-        reportDateStr: panelMeta.date || _todayStr_(),
+        timestamp: new Date(),
+        reportDateStr: getSendPanelMetadata_(panel).date || _todayStr_(),
         sheet: CONFIG.SEND_PANEL_SHEET,
         cell: `ROW:${item.row}`,
         fio: item.fio,
@@ -337,6 +336,10 @@ const SendPanelRepository_ = (function() {
 
     if (logs.length) {
       try { LogsRepository_.writeBatch(logs); } catch (_) {}
+    }
+
+    if (options.returnRows === false) {
+      return { updatedRows: eligibleRows, rows: [], stats: null };
     }
 
     const afterRows = readRows();
@@ -362,7 +365,9 @@ const SendPanelRepository_ = (function() {
     const validRows = getValidRows_(panel, rows);
     if (!validRows.length) throw new Error('Передано некоректні рядки SEND_PANEL');
 
-    const beforeRows = readRowsByNumbers_(panel, validRows);
+    const beforeRows = readRows().filter(function(item) {
+      return validRows.indexOf(item.row) !== -1;
+    });
     const byRow = {};
     beforeRows.forEach(function(item) { byRow[item.row] = item; });
 
@@ -373,7 +378,7 @@ const SendPanelRepository_ = (function() {
       panel.getRange(row, schema.columns.action).setValue(resolveSendPanelActionCellValue_(item.link || '', status, false));
     });
 
-    applyRowsVisualState_(panel, validRows);
+    applyVisualState_(panel, Math.max(0, panel.getLastRow() - (schema.dataStartRow - 1)));
 
     const afterRows = readRows();
     return { updatedRows: validRows, rows: afterRows, stats: buildStats(afterRows) };

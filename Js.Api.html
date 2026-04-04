@@ -72,6 +72,10 @@
       return adaptStage4PanelResponse(await Api.run('apiMarkPanelRowsAsSent', rows, options));
     },
 
+    async markAsSentFast(rows, options = {}) {
+      return adaptStage4PanelResponse(await Api.run('apiMarkPanelRowsAsSentFast', rows, options));
+    },
+
     async markAsUnsent(rows, options = {}) {
       return adaptStage4PanelResponse(await Api.run('apiMarkPanelRowsAsUnsent', rows, options));
     },

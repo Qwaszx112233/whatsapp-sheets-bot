@@ -464,11 +464,19 @@
     showResult(title);
   }
 
-  function showLoading() {
+  function setLoadingOverlayText(message) {
+    const loadingTextEl = document.querySelector('#loadingOverlay .loading-text');
+    if (!loadingTextEl) return;
+    loadingTextEl.textContent = String(message || 'Обробка...');
+  }
+
+  function showLoading(message) {
+    setLoadingOverlayText(message);
     show('loadingOverlay', 'flex');
   }
 
   function hideLoading() {
+    setLoadingOverlayText('Обробка...');
     hide('loadingOverlay');
   }
 </script>
