@@ -227,14 +227,19 @@
   }
 
   async function markPanelRowAsSentSmart_(rowNum, options = {}) {
-    const rows = [Number(rowNum)];
+    const targetRow = Number(rowNum);
     const opts = options || {};
+    const targetDate = String(getPanelAnchorDate_() || '').trim();
 
-    if (Stage7Api && typeof Stage7Api.markAsSentFast === 'function') {
-      return Stage7Api.markAsSentFast(rows, opts);
+    if (Stage7Api && typeof Stage7Api.markRowSentFast === 'function') {
+      return Stage7Api.markRowSentFast(targetRow, targetDate, opts);
     }
 
-    return Stage7Api.markAsSent(rows, opts);
+    if (Stage7Api && typeof Stage7Api.markAsSentFast === 'function') {
+      return Stage7Api.markAsSentFast([targetRow], opts);
+    }
+
+    return Stage7Api.markAsSent([targetRow], opts);
   }
 
   function isReadyRowMismatchError_(error) {
@@ -304,11 +309,8 @@
     }
 
     const panelRows = Array.isArray(STATE.currentPanelData) ? STATE.currentPanelData : [];
-    const targetDate = getPanelAnchorDate_();
-    const sentRows = panelRows
-      .filter(function(row) { return row && row.sent === true; })
-      .map(function(row) { return Number(row.row); })
-      .filter(function(rowNum) { return Number.isFinite(rowNum) && rowNum > 0; });
+    const targetDate = String(getPanelAnchorDate_() || '').trim();
+    const sentRows = panelRows.filter(function(row) { return row && row.sent === true; });
 
     if (!sentRows.length) {
       logToConsole('Немає відправлених рядків для скидання', 'info');
@@ -322,23 +324,25 @@
     showSendPanelBusyScreen_('Скидаю статус відправлених рядків...');
 
     try {
-      const result = await ActionDispatcher.run(
-        'markAllPanelRowsAsUnsent',
-        () => Stage7Api.markAsUnsent(sentRows),
-        { showLoader: false, successMessage: '' }
+      const result = await withUiTimeout_(
+        ActionDispatcher.run(
+          'resetAllSentFast',
+          () => Stage7Api.resetAllSentFast(targetDate),
+          { showLoader: false, successMessage: '' }
+        ),
+        12000,
+        'Скидання відправлених зависло. Оновіть панель або спробуйте ще раз.'
       );
 
       if (!result?.success) {
         throw new Error(result?.error || 'Не вдалося скинути відправлені рядки');
       }
 
-      logToConsole(`Скинуто ${sentRows.length} відправлених рядків`, 'success');
-      await rebuildCurrentSendPanelInternal_({
-        targetDate: targetDate,
-        busyMessage: 'Скидання завершено. Пересобираю панель...',
-        actionName: 'rebuildSendPanelAfterReset',
-        logSuccess: false
-      });
+      const affected = Array.isArray(result.updatedRows) ? result.updatedRows.length : sentRows.length;
+      logToConsole(`Скинуто ${affected} відправлених рядків`, 'success');
+
+      await refreshSendPanelDataFromServer({ silent: true, preserveNonEmpty: false });
+      showSendPanel();
     } catch (error) {
       logToConsole(`Помилка скидання відправлених: ${normalizeError(error)}`, 'error');
       try { await refreshSendPanelDataFromServer({ silent: true, preserveNonEmpty: false }); } catch (_) {}

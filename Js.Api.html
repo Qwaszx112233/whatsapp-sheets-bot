@@ -43,7 +43,11 @@
     },
 
     async generatePanelForDate(options = {}) {
-      return adaptStage4PanelResponse(await Api.run('apiGenerateSendPanelForDate', options));
+      return adaptStage4PanelResponse(await Api.run('apiBuildSendPanelFast', options));
+    },
+
+    async generatePanelForDateFast(options = {}) {
+      return adaptStage4PanelResponse(await Api.run('apiBuildSendPanelFast', options));
     },
 
     async generatePanelForRange(options = {}) {
@@ -76,8 +80,16 @@
       return adaptStage4PanelResponse(await Api.run('apiMarkPanelRowsAsSentFast', rows, options));
     },
 
+    async markRowSentFast(rowNum, dateStr = '', options = {}) {
+      return adaptStage4PanelResponse(await Api.run('apiMarkRowSentFast', rowNum, { date: dateStr || '' }, options));
+    },
+
     async markAsUnsent(rows, options = {}) {
       return adaptStage4PanelResponse(await Api.run('apiMarkPanelRowsAsUnsent', rows, options));
+    },
+
+    async resetAllSentFast(dateStr = '') {
+      return adaptStage4PanelResponse(await Api.run('apiResetAllSentFast', { date: dateStr || '' }));
     },
 
     async sendPendingRows(options = {}) {

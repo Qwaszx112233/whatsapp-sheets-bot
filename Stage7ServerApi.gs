@@ -55,7 +55,8 @@ function apiMarkPanelRowsAsSentFast(rowNumbers, options) {
   const opts = Object.assign({
     dryRun: false,
     returnRows: false,
-    targetedVisualUpdate: true
+    targetedVisualUpdate: true,
+    writeLogs: false
   }, options || {});
 
   const rows = _sanitizeFastSendPanelRows_(rowNumbers);
