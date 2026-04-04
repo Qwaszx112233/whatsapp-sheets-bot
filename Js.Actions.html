@@ -169,7 +169,7 @@
       if (Array.isArray(data.commanderMessages) && data.commanderMessages.length > 0) {
         html += `
           <div style="background:#e3f2fd;border:1px solid #2196F3;border-left:4px solid #2196F3;border-radius:14px;padding:12px;margin-bottom:12px;">
-            <div style="font-weight:800;font-size:13px;color:#0b5e9e;margin-bottom:10px;">👨‍✈️ КОМАНДИРУ (${data.commanderMessages.length})</div>
+            <div style="font-weight:800;font-size:13px;color:#0b5e9e;margin-bottom:10px;">КОМАНДИРУ (${data.commanderMessages.length})</div>
         `;
 
         data.commanderMessages.forEach(row => {
@@ -184,8 +184,8 @@
               </div>
               ${
                 row.link
-                  ? `<button style="${btnStyle}background:#1565C0;" onclick="SidebarApp.sendBirthdayMessage('${escapeJsString(row.link)}')">📱 Відправити</button>`
-                  : `<div style="color:#888;font-size:12px;margin-top:6px;">⁈ Немає посилання</div>`
+                  ? `<button style="${btnStyle}background:#1565C0;" onclick="SidebarApp.sendBirthdayMessage('${escapeJsString(row.link)}')">Відправити</button>`
+                  : `<div style="color:#888;font-size:12px;margin-top:6px;">Немає посилання</div>`
               }
             </div>
           `;
@@ -197,7 +197,7 @@
       if (Array.isArray(data.birthdayMessages) && data.birthdayMessages.length > 0) {
         html += `
           <div style="background:#fff3e0;border:1px solid #ff9800;border-left:4px solid #ff9800;border-radius:14px;padding:12px;margin-bottom:12px;">
-            <div style="font-weight:800;font-size:13px;color:#e65100;margin-bottom:10px;">🎉 ІМЕНИННИКУ (${data.birthdayMessages.length})</div>
+            <div style="font-weight:800;font-size:13px;color:#e65100;margin-bottom:10px;">ІМЕНИННИКУ (${data.birthdayMessages.length})</div>
         `;
 
         data.birthdayMessages.forEach(person => {
@@ -212,10 +212,10 @@
               </div>
               ${
                 person.link
-                  ? `<button style="${btnStyle}" onclick="SidebarApp.sendBirthdayMessage('${escapeJsString(person.link)}')">📱 Привітати</button>`
+                  ? `<button style="${btnStyle}" onclick="SidebarApp.sendBirthdayMessage('${escapeJsString(person.link)}')">Привітати</button>`
                   : (
                       person.phone
-                        ? `<button style="${btnStyle}" onclick="SidebarApp.openBirthdayWA('${escapeJsString(person.phone)}', '${escapeJsString(person.displayName || person.fio)}')">📱 Привітати у WhatsApp</button>`
+                        ? `<button style="${btnStyle}" onclick="SidebarApp.openBirthdayWA('${escapeJsString(person.phone)}', '${escapeJsString(person.displayName || person.fio)}')">Привітати у WhatsApp</button>`
                         : `<div style="color:#888;font-size:12px;margin-top:6px;">⁈ Немає телефону</div>`
                     )
               }
@@ -244,8 +244,8 @@
               </div>
               ${
                 person.phone
-                  ? `<button style="${btnStyle}" onclick="SidebarApp.openBirthdayWA('${escapeJsString(person.phone)}', '${escapeJsString(person.displayName || person.fio)}')">📱 Привітати у WhatsApp</button>`
-                  : `<div style="color:#888;font-size:12px;margin-top:6px;">⁈ Немає телефону</div>`
+                  ? `<button style="${btnStyle}" onclick="SidebarApp.openBirthdayWA('${escapeJsString(person.phone)}', '${escapeJsString(person.displayName || person.fio)}')">Привітати у WhatsApp</button>`
+                  : `<div style="color:#888;font-size:12px;margin-top:6px;">Немає телефону</div>`
               }
             </div>
           `;
@@ -505,27 +505,43 @@
         .toUpperCase()
         .replace(/\s+/g, ' ');
 
-    let filteredCallsigns = [...PERSONNEL_CALLSIGNS];
+    let filteredCallsigns = Array.isArray(PERSONNEL_CALLSIGNS) ? [...PERSONNEL_CALLSIGNS] : [];
+
+    // Начальное состояние accessibility
+    btnOpen.setAttribute('aria-expanded', 'false');
+    modal.hidden = true;
 
     function updateCount(count) {
       countEl.textContent = `Усього: ${count}`;
     }
 
     function openModal() {
+      modal.hidden = false;
       modal.classList.add('open');
-      modal.setAttribute('aria-hidden', 'false');
-      setTimeout(() => searchInput.focus(), 20);
+      btnOpen.setAttribute('aria-expanded', 'true');
+
+      setTimeout(() => {
+        try {
+          searchInput.focus();
+          searchInput.select?.();
+        } catch (_) {}
+      }, 20);
     }
 
     function closeModal() {
       modal.classList.remove('open');
-      modal.setAttribute('aria-hidden', 'true');
+      modal.hidden = true;
+      btnOpen.setAttribute('aria-expanded', 'false');
+
+      try {
+        btnOpen.focus();
+      } catch (_) {}
     }
 
     function renderGrid(list) {
       grid.innerHTML = '';
 
-      if (!list.length) {
+      if (!Array.isArray(list) || !list.length) {
         emptyState.classList.remove('hidden');
         updateCount(0);
         return;
@@ -539,6 +555,7 @@
       list.forEach(callsign => {
         const btn = document.createElement('button');
         const allowed = canOpenPersonCardClientSafe_(callsign);
+
         btn.type = 'button';
         btn.className = 'personnel-card';
         btn.textContent = allowed ? callsign : (callsign + ' 🔒');
@@ -555,6 +572,7 @@
             showToast('Можна відкрити лише власну картку');
             return;
           }
+
           closeModal();
           openPersonCardByCallsign_(callsign);
         });
@@ -584,16 +602,20 @@
 
     btnClose.addEventListener('click', closeModal);
     backdrop.addEventListener('click', closeModal);
-    searchInput.addEventListener('input', event => filterGrid(event.target.value));
+
+    searchInput.addEventListener('input', event => {
+      filterGrid(event.target.value);
+    });
 
     document.addEventListener('keydown', event => {
-      if (modal.classList.contains('open') && event.key === 'Escape') {
+      if (!modal.hidden && event.key === 'Escape') {
         closeModal();
       }
     });
 
     renderGrid(filteredCallsigns);
   }
+
 
   function registerLegacyPersonnelButtons() {
     PERSONNEL_CALLSIGNS.forEach(callsign => {
@@ -643,7 +665,6 @@
 
   window.addEventListener('load', onSidebarLoad);
 
-  
   // =========================
   // EXPORTS
   // =========================
