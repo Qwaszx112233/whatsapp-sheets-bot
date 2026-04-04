@@ -41,6 +41,41 @@ function _stage7AssertAdminAccess_(actionLabel) {
   return _stage7AssertRole_('admin', actionLabel || 'maintenance action');
 }
 
+function _stage7NormalizeWarningText_(value) {
+  if (value == null) return '';
+  if (typeof value === 'string') return value.trim();
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value).trim();
+
+  if (typeof value === 'object') {
+    const message = value.message != null ? String(value.message).trim() : '';
+    const code = value.code != null ? String(value.code).trim() : '';
+
+    if (message) return message;
+    if (code) return code;
+
+    try {
+      return JSON.stringify(value);
+    } catch (error) {
+      return String(value).trim();
+    }
+  }
+
+  return String(value).trim();
+}
+
+function _stage7BuildDescriptorWarnings_(descriptor) {
+  const reason = descriptor && descriptor.reason;
+  const warningText = _stage7NormalizeWarningText_(reason);
+  const code = descriptor && descriptor.reason && typeof descriptor.reason === 'object' && descriptor.reason.code != null
+    ? String(descriptor.reason.code).trim()
+    : '';
+
+  if (!warningText) return [];
+  if (warningText === 'ok' || warningText === 'access.ok' || code === 'access.ok') return [];
+
+  return [warningText];
+}
+
 
 function apiStage7BootstrapAccessSheet() {
   _stage7AssertRole_('admin', 'bootstrap access sheet');
@@ -52,7 +87,7 @@ function apiStage7BootstrapAccessSheet() {
     result.message || 'ACCESS sheet ініціалізовано для user key-доступу',
     result,
     'stage7BootstrapAccessSheet',
-    result.success === false ? [result.message || 'Не вдалося ініціалізувати ACCESS'] : [],
+    result.success === false ? [_stage7NormalizeWarningText_(result.message) || 'Не вдалося ініціалізувати ACCESS'] : [],
     { affectedSheets: [appGetCore('ACCESS_SHEET', 'ACCESS')] }
   );
 }
@@ -61,12 +96,15 @@ function apiStage7GetAccessDescriptor() {
   const descriptor = (typeof AccessControl_ === 'object')
     ? AccessControl_.describe()
     : { role: 'guest', knownUser: false, reason: 'AccessControl_ недоступний' };
+
+  const warnings = _stage7BuildDescriptorWarnings_(descriptor);
+
   return _stage7BuildMaintenanceResponse_(
     true,
-    descriptor.isAdmin ? 'Роль доступу визначено' : 'Доступ до maintenance-дій обмежено',
+    descriptor.isAdmin ? 'Роль доступу визначено' : 'Доступ визначено',
     descriptor,
     'stage7AccessDescriptor',
-    descriptor.reason ? [descriptor.reason] : []
+    warnings
   );
 }
 
@@ -74,9 +112,10 @@ function apiStage7DebugAccess() {
   const descriptor = (typeof AccessControl_ === 'object')
     ? AccessControl_.describe()
     : { role: 'guest', knownUser: false, reason: 'AccessControl_ недоступний' };
+
   return _stage7BuildMaintenanceResponse_(
     true,
-    'Діагностику доступу виконано',
+    'Перевірку доступу виконано',
     descriptor,
     'stage7DebugAccess',
     descriptor.reason ? [descriptor.reason] : []
