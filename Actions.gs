@@ -1,125 +1,332 @@
-
 /**
  * Actions.gs — stage 5 thin spreadsheet/menu wrappers.
  *
  * Новая логика сюда больше не растёт. Этот файл только перенаправляет
  * меню/manual сценарии в канонический spreadsheet action API и presenter-слой.
+ * 
+ * Важливо: всі функції перевіряють права доступу перед виконанням.
  */
 
-function buildPayloadFromSelection_() {
-  return SelectionActionService_.prepareSingleSelection().payload;
+// ==================== ДОПОМІЖНІ ФУНКЦІЇ ====================
+
+function _checkAccessForAction_(requiredRole, actionName) {
+  try {
+    if (typeof AccessControl_ !== 'object') {
+      throw new Error('AccessControl_ не доступний');
+    }
+    const descriptor = AccessControl_.describe();
+    if (!descriptor.enabled) {
+      throw new Error('Ваш обліковий запис вимкнено');
+    }
+    
+    const roleOrder = AccessControl_.ROLE_ORDER || { guest: 0, viewer: 1, operator: 2, maintainer: 3, admin: 4, sysadmin: 5, owner: 6 };
+    const currentLevel = roleOrder[descriptor.role] || 0;
+    const requiredLevel = roleOrder[requiredRole] || 0;
+    
+    if (currentLevel < requiredLevel) {
+      throw new Error(`Недостатньо прав для дії "${actionName}". Потрібна роль: ${requiredRole}, ваша роль: ${descriptor.role}`);
+    }
+    
+    return descriptor;
+  } catch (e) {
+    if (typeof AccessEnforcement_ === 'object' && AccessEnforcement_.reportViolation) {
+      AccessEnforcement_.reportViolation(actionName, { requiredRole: requiredRole }, { role: 'guest' });
+    }
+    throw e;
+  }
 }
 
-function _unwrapActionResult_(result) {
-  if (!result || result.success !== true) {
-    throw new Error((result && (result.error || result.message)) || 'Сценарій не виконано');
+function _auditAction_(actionName, result, details) {
+  try {
+    if (typeof Stage7AuditTrail_ === 'object' && Stage7AuditTrail_.record) {
+      Stage7AuditTrail_.record({
+        timestamp: new Date(),
+        operationId: typeof stage7UniqueId_ === 'function' ? stage7UniqueId_('action') : Date.now().toString(),
+        scenario: 'menu.action.' + actionName,
+        level: 'INFO',
+        status: result === 'success' ? 'COMMITTED' : 'FAILED',
+        initiator: Session.getActiveUser().getEmail(),
+        dryRun: false,
+        partial: false,
+        affectedSheets: [],
+        affectedEntities: [],
+        payload: { action: actionName, details: details || {} },
+        message: `Виконано дію: ${actionName}`,
+        error: result === 'error' ? String(details) : ''
+      });
+    }
+  } catch (_) {}
+}
+
+function buildPayloadFromSelection_() {
+  try {
+    _checkAccessForAction_('viewer', 'buildPayloadFromSelection');
+    return SelectionActionService_.prepareSingleSelection().payload;
+  } catch (e) {
+    _showActionError_(e);
+    return null;
   }
-  return (result.data && result.data.result) || null;
+}
+
+function _unwrapActionResult_(result, actionName) {
+  if (!result) {
+    throw new Error('Сценарій не повернув результат');
+  }
+  if (result.success !== true) {
+    const errorMsg = (result && (result.error || result.message)) || 'Сценарій не виконано';
+    throw new Error(errorMsg);
+  }
+  
+  // Перевіряємо наявність даних
+  const data = (result.data && result.data.result) || result.data;
+  if (data === null || data === undefined) {
+    throw new Error('Сценарій виконано, але не повернуто даних для відображення');
+  }
+  
+  return data;
 }
 
 function _showActionError_(e) {
-  SpreadsheetApp.getUi().alert('✕ ' + (e && e.message ? e.message : String(e)));
+  const errorMsg = e && e.message ? e.message : String(e);
+  try {
+    SpreadsheetApp.getUi().alert('Помилка', errorMsg, SpreadsheetApp.getUi().ButtonSet.OK);
+  } catch (_) {
+    // Якщо UI недоступний (наприклад, при виконанні з тригера)
+    Logger.log('[Actions] Помилка: ' + errorMsg);
+  }
 }
 
+// ==================== ФУНКЦІЇ ДЛЯ МЕНЮ ====================
+
 function waShowForSelection() {
+  const actionName = 'waShowForSelection';
   try {
-    DialogPresenter_.showPrepared(_unwrapActionResult_(apiPreviewSelectionMessage({})));
+    _checkAccessForAction_('viewer', actionName);
+    const result = _unwrapActionResult_(apiPreviewSelectionMessage({}), actionName);
+    if (result) {
+      DialogPresenter_.showPrepared(result);
+      _auditAction_(actionName, 'success', {});
+    } else {
+      throw new Error('Немає даних для відображення');
+    }
   } catch (e) {
+    _auditAction_(actionName, 'error', e.message);
     _showActionError_(e);
   }
 }
 
 function waLogAndShowForSelection() {
+  const actionName = 'waLogAndShowForSelection';
   try {
-    DialogPresenter_.showPrepared(_unwrapActionResult_(apiLogPreparedMessages({ mode: 'selection' })));
+    _checkAccessForAction_('operator', actionName);
+    const result = _unwrapActionResult_(apiLogPreparedMessages({ mode: 'selection' }), actionName);
+    if (result) {
+      DialogPresenter_.showPrepared(result);
+      _auditAction_(actionName, 'success', { mode: 'selection' });
+    } else {
+      throw new Error('Немає даних для відображення');
+    }
   } catch (e) {
+    _auditAction_(actionName, 'error', e.message);
     _showActionError_(e);
   }
 }
 
 function waShowForMultipleCells() {
+  const actionName = 'waShowForMultipleCells';
   try {
-    DialogPresenter_.showPrepared(_unwrapActionResult_(apiPreviewMultipleMessages({})));
+    _checkAccessForAction_('viewer', actionName);
+    const result = _unwrapActionResult_(apiPreviewMultipleMessages({}), actionName);
+    if (result) {
+      DialogPresenter_.showPrepared(result);
+      _auditAction_(actionName, 'success', {});
+    } else {
+      throw new Error('Немає даних для відображення');
+    }
   } catch (e) {
+    _auditAction_(actionName, 'error', e.message);
     _showActionError_(e);
   }
 }
 
 function waLogAndShowForMultipleCells() {
+  const actionName = 'waLogAndShowForMultipleCells';
   try {
-    DialogPresenter_.showPrepared(_unwrapActionResult_(apiLogPreparedMessages({ mode: 'multiple' })));
+    _checkAccessForAction_('operator', actionName);
+    const result = _unwrapActionResult_(apiLogPreparedMessages({ mode: 'multiple' }), actionName);
+    if (result) {
+      DialogPresenter_.showPrepared(result);
+      _auditAction_(actionName, 'success', { mode: 'multiple' });
+    } else {
+      throw new Error('Немає даних для відображення');
+    }
   } catch (e) {
+    _auditAction_(actionName, 'error', e.message);
     _showActionError_(e);
   }
 }
 
 function waMassByRange() {
+  const actionName = 'waMassByRange';
   try {
-    DialogPresenter_.showPrepared(_unwrapActionResult_(apiLogPreparedMessages({ mode: 'range' })));
+    _checkAccessForAction_('maintainer', actionName);
+    const result = _unwrapActionResult_(apiLogPreparedMessages({ mode: 'range' }), actionName);
+    if (result) {
+      DialogPresenter_.showPrepared(result);
+      _auditAction_(actionName, 'success', { mode: 'range' });
+    } else {
+      throw new Error('Немає даних для відображення');
+    }
   } catch (e) {
+    _auditAction_(actionName, 'error', e.message);
     _showActionError_(e);
   }
 }
 
 function waShowGroupedByPhone() {
+  const actionName = 'waShowGroupedByPhone';
   try {
-    DialogPresenter_.showPrepared(_unwrapActionResult_(apiPreviewGroupedMessages({})));
+    _checkAccessForAction_('viewer', actionName);
+    const result = _unwrapActionResult_(apiPreviewGroupedMessages({}), actionName);
+    if (result) {
+      DialogPresenter_.showPrepared(result);
+      _auditAction_(actionName, 'success', {});
+    } else {
+      throw new Error('Немає даних для відображення');
+    }
   } catch (e) {
+    _auditAction_(actionName, 'error', e.message);
     _showActionError_(e);
   }
 }
 
 function waLogAndShowGroupedByPhone() {
+  const actionName = 'waLogAndShowGroupedByPhone';
   try {
-    DialogPresenter_.showPrepared(_unwrapActionResult_(apiLogPreparedMessages({ mode: 'grouped' })));
+    _checkAccessForAction_('operator', actionName);
+    const result = _unwrapActionResult_(apiLogPreparedMessages({ mode: 'grouped' }), actionName);
+    if (result) {
+      DialogPresenter_.showPrepared(result);
+      _auditAction_(actionName, 'success', { mode: 'grouped' });
+    } else {
+      throw new Error('Немає даних для відображення');
+    }
   } catch (e) {
+    _auditAction_(actionName, 'error', e.message);
     _showActionError_(e);
   }
 }
 
 function processMultipleCells_(log) {
-  if (log) return waLogAndShowForMultipleCells();
-  return waShowForMultipleCells();
+  const actionName = 'processMultipleCells';
+  try {
+    _checkAccessForAction_(log ? 'operator' : 'viewer', actionName);
+    if (log) {
+      return waLogAndShowForMultipleCells();
+    }
+    return waShowForMultipleCells();
+  } catch (e) {
+    _showActionError_(e);
+    return null;
+  }
 }
 
 function processGroupedByPhone_(log) {
-  if (log) return waLogAndShowGroupedByPhone();
-  return waShowGroupedByPhone();
+  const actionName = 'processGroupedByPhone';
+  try {
+    _checkAccessForAction_(log ? 'operator' : 'viewer', actionName);
+    if (log) {
+      return waLogAndShowGroupedByPhone();
+    }
+    return waShowGroupedByPhone();
+  } catch (e) {
+    _showActionError_(e);
+    return null;
+  }
 }
 
 function sumShowForSelectedColumn() {
+  const actionName = 'sumShowForSelectedColumn';
   try {
-    DialogPresenter_.showPrepared(_unwrapActionResult_(apiBuildCommanderSummaryPreview({})));
+    _checkAccessForAction_('operator', actionName);
+    const result = _unwrapActionResult_(apiBuildCommanderSummaryPreview({}), actionName);
+    if (result) {
+      DialogPresenter_.showPrepared(result);
+      _auditAction_(actionName, 'success', {});
+    } else {
+      throw new Error('Немає даних для відображення');
+    }
   } catch (e) {
+    _auditAction_(actionName, 'error', e.message);
     _showActionError_(e);
   }
 }
 
 function sumWaToCommanderForSelectedColumn() {
+  const actionName = 'sumWaToCommanderForSelectedColumn';
   try {
-    DialogPresenter_.showPrepared(_unwrapActionResult_(apiBuildCommanderSummaryLink({})));
+    _checkAccessForAction_('maintainer', actionName);
+    const result = _unwrapActionResult_(apiBuildCommanderSummaryLink({}), actionName);
+    if (result) {
+      DialogPresenter_.showPrepared(result);
+      _auditAction_(actionName, 'success', {});
+    } else {
+      throw new Error('Немає даних для відображення');
+    }
   } catch (e) {
+    _auditAction_(actionName, 'error', e.message);
     _showActionError_(e);
   }
 }
 
 function diagnoseCommanderPhone() {
+  const actionName = 'diagnoseCommanderPhone';
   try {
-    const report = _unwrapActionResult_(apiRunSelectionDiagnostics({}));
-    SpreadsheetApp.getUi().alert(
-      '📱 Діагностика',
-      [
-        `Аркуш: ${report.sheet}`,
-        `Bot sheet: ${report.botSheet}`,
-        `Активне виділення: ${report.activeRange || '—'}`,
-        `Діапазонів виділено: ${report.selectedRangesCount}`,
-        `Payload: ${report.payloadCount}`,
-        `Помилок: ${report.errorCount}`,
-        `Командир (${report.commanderRole}): ${report.commanderPhonePresent ? 'є телефон' : 'немає телефону'}`
-      ].join('\n'),
-      SpreadsheetApp.getUi().ButtonSet.OK
-    );
+    _checkAccessForAction_('maintainer', actionName);
+    const report = _unwrapActionResult_(apiRunSelectionDiagnostics({}), actionName);
+    
+    if (!report) {
+      throw new Error('Не вдалося отримати діагностичний звіт');
+    }
+    
+    const message = [
+      'ДІАГНОСТИКА',
+      '================',
+      `Аркуш: ${report.sheet || '—'}`,
+      `Bot sheet: ${report.botSheet || '—'}`,
+      `Активне виділення: ${report.activeRange || '—'}`,
+      `Діапазонів виділено: ${report.selectedRangesCount || 0}`,
+      `Payload: ${report.payloadCount || 0}`,
+      `Помилок: ${report.errorCount || 0}`,
+      `Командир (${report.commanderRole || '—'}): ${report.commanderPhonePresent ? 'є телефон' : 'немає телефону'}`,
+      '',
+      report.errorCount > 0 ? `Виявлено ${report.errorCount} помилок. Перевірте журнал.` : 'Система працює нормально'
+    ].join('\n');
+    
+    SpreadsheetApp.getUi().alert('Діагностика', message, SpreadsheetApp.getUi().ButtonSet.OK);
+    _auditAction_(actionName, 'success', { errorCount: report.errorCount });
   } catch (e) {
+    _auditAction_(actionName, 'error', e.message);
     _showActionError_(e);
+  }
+}
+
+// ==================== ДОДАТКОВІ ФУНКЦІЇ ДЛЯ ЗРУЧНОСТІ ====================
+
+function getAvailableActionsForCurrentUser() {
+  try {
+    if (typeof AccessControl_ !== 'object') {
+      return { error: 'AccessControl_ не доступний' };
+    }
+    const descriptor = AccessControl_.describe();
+    return {
+      role: descriptor.role,
+      allowedActions: descriptor.allowedActions || [],
+      canView: descriptor.readOnly === false,
+      canEdit: descriptor.isMaintainer || descriptor.isAdmin,
+      canAdmin: descriptor.isAdmin
+    };
+  } catch (e) {
+    return { error: e.message };
   }
 }
