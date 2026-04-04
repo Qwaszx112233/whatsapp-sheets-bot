@@ -511,7 +511,50 @@ function findPhoneByRole_(role) {
   return findPhone_({ role: role });
 }
 
+function _normalizeBuildPayloadRequest_(sheetOrRequest, row, col, phonesMap, dictMap) {
+  const request = (sheetOrRequest && typeof sheetOrRequest === 'object' && typeof sheetOrRequest.getRange !== 'function')
+    ? sheetOrRequest
+    : null;
+
+  if (!request) {
+    return {
+      sheet: sheetOrRequest || null,
+      row: Number(row),
+      col: Number(col),
+      phonesMap: phonesMap || null,
+      dictMap: dictMap || null
+    };
+  }
+
+  const resolvedSheet = request.sheet
+    || (request.sheetName ? SpreadsheetApp.getActive().getSheetByName(String(request.sheetName)) : null);
+
+  return {
+    sheet: resolvedSheet || null,
+    row: Number(request.row),
+    col: Number(request.col),
+    phonesMap: request.phonesMap || phonesMap || null,
+    dictMap: request.dictMap || dictMap || null
+  };
+}
+
 function buildPayloadForCell_(sheet, row, col, phonesMap, dictMap) {
+  const request = _normalizeBuildPayloadRequest_(sheet, row, col, phonesMap, dictMap);
+  sheet = request.sheet;
+  row = request.row;
+  col = request.col;
+  phonesMap = request.phonesMap;
+  dictMap = request.dictMap;
+
+  if (!sheet || typeof sheet.getRange !== 'function') {
+    throw buildContextError_('buildPayloadForCell_', {
+      sheet: '',
+      row: row,
+      col: col,
+      a1: ''
+    }, 'Не вдалося визначити аркуш для побудови payload');
+  }
+
   const codeRef = sheet.getRange(CONFIG.CODE_RANGE_A1);
   const a1 = a1FromRowCol_(row, col);
   const baseContext = {
