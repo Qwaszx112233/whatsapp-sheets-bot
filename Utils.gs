@@ -2,7 +2,6 @@
  * Utils.gs — спільні утиліти для WhatsAppBot
  */
 
-
 function getTimeZone_() {
   return DateUtils_.getTimeZone();
 }
@@ -87,8 +86,25 @@ function normalizePhone_(v) {
 }
 
 function loadPhonesProfiles_() {
+  const empty = { byCallsign: {}, byFio: {}, byNorm: {}, byRole: {}, items: [], versionMarker: 'stage7-phones-profiles-v3' };
   if (typeof loadPhonesIndex_ !== 'function') {
-    return { byCallsign: {}, byFio: {}, byNorm: {}, byRole: {}, items: [] };
+    return empty;
+  }
+
+  const cache = CacheService.getScriptCache();
+  const primaryKey = cacheKeyPhonesProfiles_();
+  const legacyKeys = [primaryKey, 'PHONES_PROFILES_v4'].filter(Boolean);
+
+  for (let i = 0; i < legacyKeys.length; i++) {
+    const key = legacyKeys[i];
+    const cached = cache.get(key);
+    if (!cached) continue;
+    try {
+      const parsed = JSON.parse(cached);
+      if (parsed && typeof parsed === 'object' && parsed.byFio && parsed.byNorm && parsed.byRole && parsed.byCallsign) {
+        return parsed;
+      }
+    } catch (e) {}
   }
 
   const index = loadPhonesIndex_();
@@ -98,7 +114,7 @@ function loadPhonesProfiles_() {
     byNorm: {},
     byRole: {},
     items: Array.isArray(index.items) ? index.items.slice() : [],
-    versionMarker: 'stage7-phones-profiles-v2'
+    versionMarker: 'stage7-phones-profiles-v3'
   };
 
   (index.items || []).forEach(function(item) {
@@ -113,6 +129,14 @@ function loadPhonesProfiles_() {
     if (callsignKey) out.byCallsign[callsignKey] = item;
     if (roleKey) out.byRole[roleKey] = item;
   });
+
+  try {
+    const ttl = (typeof CONFIG !== 'undefined' && CONFIG && Number(CONFIG.CACHE_TTL_SEC)) ? Number(CONFIG.CACHE_TTL_SEC) : 300;
+    const json = JSON.stringify(out);
+    if (json.length < 90000) {
+      cache.put(primaryKey, json, ttl);
+    }
+  } catch (e) {}
 
   return out;
 }
@@ -247,7 +271,8 @@ function clearCacheCore_() {
     cacheKeyDict_(),
     cacheKeyDictSum_(),
     cacheKeyTemplates_(),
-    'PHONES_PROFILES_v4'
+    'PHONES_PROFILES_v4',
+    'TPL_MAP_V1'
   ]);
 }
 
@@ -327,7 +352,8 @@ function clearPhoneCache() {
       cacheKeyPhones_(),
       cacheKeyPhonesIndex_(),
       cacheKeyPhonesProfiles_(),
-      'PHONES_PROFILES_v4'
+      'PHONES_PROFILES_v4',
+      'TPL_MAP_V1'
     ]);
     return { success: true, message: 'Кеш телефонів очищено' };
   } catch (e) {
