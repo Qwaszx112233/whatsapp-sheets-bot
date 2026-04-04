@@ -240,7 +240,7 @@ function onOpen() {
       try { AccessControl_.refreshAccessSheetUi({ forceRewriteNotes: false }); } catch (_) {}
     }
     SpreadsheetApp.getUi()
-      .createMenu('🧐ПАНЕЛЬ')
+      .createMenu('WASB')
       .addItem('📱 ПАНЕЛЬ', 'showSidebar')
       .addToUi();
   } catch (err) {
@@ -264,20 +264,20 @@ function setupVacationTrigger() {
 
     ScriptApp.newTrigger('autoVacationReminder')
       .timeBased()
-      .everyDays(1)
-      .atHour(9)
+      .everyDays(2)
+      .atHour(6)
       .create();
 
     ScriptApp.newTrigger('autoBirthdayReminder')
       .timeBased()
-      .everyDays(1)
-      .atHour(8)
+      .everyDays(2)
+      .atHour(5)
       .create();
 
     return {
       success: true,
       removed: removed,
-      message: `✓ Тригери встановлено:\n• Відпустки — щодня о 9:00\n• Дні Народження — щодня о 8:00\nВидалено старих: ${removed}`
+      message: `✓ Тригери встановлено:\n• Відпустки — щодня о 17:00\n• Дні Народження — щодня о 18:00\nВидалено старих: ${removed}`
     };
   } catch (e) {
     return { success: false, error: e.toString() };
@@ -360,9 +360,9 @@ function debugPhones() {
       return idx >= 0 ? idx : fallbackIndex;
     }
 
-    const fioCol = findCol(['піб', 'фіо', 'фио'], 0);
-    const phoneCol = findCol(['тел', 'phone'], 1);
-    const roleCol = findCol(['роль', 'позив', 'callsign'], 2);
+    const fioCol = findCol(['піб', 'фіо', 'fio'], 0);
+    const phoneCol = findCol(['тел', 'телефон', 'phones', 'phone'], 1);
+    const roleCol = findCol(['роль', 'позив', 'callsign', 'role'], 2);
     const birthdayCol = findCol(['дн', 'д.н', 'дата народ', 'день народ', 'birthday'], 3);
     function cleanBirthday(value) {
       const s = String(value || '').trim();
