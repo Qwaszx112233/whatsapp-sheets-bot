@@ -60,14 +60,15 @@ function _veCommanderRole_() {
 
 function _veTimeZone_() {
   try {
+    if (typeof DateUtils_ !== 'undefined' && DateUtils_ && typeof DateUtils_.getTimeZone === 'function') {
+      const tz = DateUtils_.getTimeZone();
+      if (tz) return tz;
+    }
     if (typeof getTimeZone_ === 'function') {
       const tz = getTimeZone_();
       if (tz) return tz;
     }
-    if (typeof DateUtils_ !== 'undefined' && DateUtils_ && typeof DateUtils_.getTimeZone === 'function') {
-      return DateUtils_.getTimeZone();
-    }
-  } catch (_) { }
+  } catch (_) {}
   return 'Europe/Kyiv';
 }
 
@@ -307,7 +308,7 @@ function _veCommanderPhone_() {
   try {
     const role = _veCommanderRole_();
     if (typeof findPhone_ === 'function') {
-      return findPhone_({ role: role }) || '';
+      return findPhone_({ role: role, callsign: role }) || '';
     }
     if (typeof findPhoneByRole_ === 'function') {
       return findPhoneByRole_(role) || '';
