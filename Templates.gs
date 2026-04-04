@@ -8,6 +8,25 @@ const TEMPLATES_SHEET_NAME = 'TEMPLATES';
 const TPL_CACHE_KEY = 'TPL_MAP_V1';
 const TPL_CACHE_TTL_SEC = 600;
 
+function _templatesCacheKey_() {
+  try {
+    if (typeof cacheKeyTemplates_ === 'function') {
+      const key = cacheKeyTemplates_();
+      if (key) return key;
+    }
+  } catch (e) {}
+  return TPL_CACHE_KEY;
+}
+
+function clearTemplatesCache_() {
+  try {
+    CacheService.getScriptCache().removeAll([_templatesCacheKey_(), TPL_CACHE_KEY]);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 function renderTemplate_(tpl, data) {
   tpl = String(tpl ?? '')
     .replace(/\\n/g, '\n')
@@ -33,9 +52,23 @@ function _isEnabled_(v) {
 /** Забираем карту шаблонов из листа (и кладём в Cache) */
 function _loadTemplatesMap_() {
   const cache = CacheService.getScriptCache();
-  const cached = cache.get(TPL_CACHE_KEY);
-  if (cached) {
-    try { return JSON.parse(cached); } catch (e) { }
+  const primaryKey = _templatesCacheKey_();
+  const cacheKeys = [primaryKey, TPL_CACHE_KEY].filter(function(key, index, arr) {
+    return !!key && arr.indexOf(key) === index;
+  });
+
+  for (let i = 0; i < cacheKeys.length; i++) {
+    const cached = cache.get(cacheKeys[i]);
+    if (!cached) continue;
+    try {
+      const parsed = JSON.parse(cached);
+      if (parsed && typeof parsed === 'object') {
+        if (cacheKeys[i] !== primaryKey) {
+          try { cache.put(primaryKey, cached, TPL_CACHE_TTL_SEC); } catch (e) {}
+        }
+        return parsed;
+      }
+    } catch (e) {}
   }
 
   const ss = SpreadsheetApp.getActive();
@@ -64,7 +97,7 @@ function _loadTemplatesMap_() {
     };
   }
 
-  cache.put(TPL_CACHE_KEY, JSON.stringify(map), TPL_CACHE_TTL_SEC);
+  cache.put(primaryKey, JSON.stringify(map), TPL_CACHE_TTL_SEC);
   return map;
 }
 
