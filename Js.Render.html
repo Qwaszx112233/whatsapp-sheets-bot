@@ -271,12 +271,18 @@
     }
 
     STATE._panelBatchSendLock = true;
+
+    const releaseBatchLock = function() {
+      STATE._panelBatchSendLock = false;
+    };
+
     try {
       const data = Array.isArray(STATE.currentPanelData) ? STATE.currentPanelData : [];
       const queue = getReadyPanelItems(data);
 
       if (!queue.length) {
         logToConsole('Немає рядків для відправки', 'success');
+        releaseBatchLock();
         return;
       }
 
@@ -287,10 +293,6 @@
       showProgressBar(queue.length, 0);
       if (!STATE.DIAG_TEST_MODE) primeWhatsAppSenderTab();
       STATE._sendingCancelled = false;
-
-      const releaseBatchLock = function() {
-        STATE._panelBatchSendLock = false;
-      };
 
       const finishBatch = async () => {
         stopSending();
@@ -316,8 +318,17 @@
 
           const rowNum = Number(item.row);
           if (rowNum) {
-            const result = await ActionDispatcher.run('markPanelRowsAsSentBatchItem', () => Stage7Api.markAsSent([rowNum]), { showLoader: false });
-            if (Array.isArray(result?.data)) {
+            const result = await ActionDispatcher.run(
+              'markPanelRowsAsSentBatchItem',
+              () => Stage7Api.markAsSent([rowNum]),
+              { showLoader: false }
+            );
+
+            if (!result?.success) {
+              throw new Error(result?.error || 'Не вдалося позначити як відправлено');
+            }
+
+            if (Array.isArray(result.data)) {
               setCurrentPanelData(result.data);
             }
           }
@@ -333,6 +344,7 @@
           releaseBatchLock();
           return;
         }
+
         if (idx >= queue.length) {
           await finishBatch();
         } else {
@@ -342,7 +354,7 @@
 
       STATE.sendingInterval = setTimeout(runNextStep, 0);
     } catch (error) {
-      STATE._panelBatchSendLock = false;
+      releaseBatchLock();
       logToConsole(`startSendingUnsent: ${normalizeError(error)}`, 'error');
     }
   }
