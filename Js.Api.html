@@ -43,11 +43,7 @@
     },
 
     async generatePanelForDate(options = {}) {
-      return adaptStage4PanelResponse(await Api.run('apiBuildSendPanelFast', options));
-    },
-
-    async generatePanelForDateFast(options = {}) {
-      return adaptStage4PanelResponse(await Api.run('apiBuildSendPanelFast', options));
+      return adaptStage4PanelResponse(await Api.run('apiGenerateSendPanelForDate', options));
     },
 
     async generatePanelForRange(options = {}) {
@@ -80,16 +76,8 @@
       return adaptStage4PanelResponse(await Api.run('apiMarkPanelRowsAsSentFast', rows, options));
     },
 
-    async markRowSentFast(rowNum, dateStr = '', options = {}) {
-      return adaptStage4PanelResponse(await Api.run('apiMarkRowSentFast', rowNum, { date: dateStr || '' }, options));
-    },
-
     async markAsUnsent(rows, options = {}) {
       return adaptStage4PanelResponse(await Api.run('apiMarkPanelRowsAsUnsent', rows, options));
-    },
-
-    async resetAllSentFast(dateStr = '') {
-      return adaptStage4PanelResponse(await Api.run('apiResetAllSentFast', { date: dateStr || '' }));
     },
 
     async sendPendingRows(options = {}) {
@@ -210,6 +198,8 @@
     runRepair: async (operationId, options = {}) => adaptStage4UtilityResponse(await Api.run('apiStage7RunRepair', operationId || '', options)),
     getAccessDescriptor: async () => adaptStage4UtilityResponse(await Api.run('apiStage7GetAccessDescriptor')),
     debugAccess: async () => adaptStage4UtilityResponse(await Api.run('apiStage7DebugAccess')),
+    listBindableCallsigns: async () => adaptStage4UtilityResponse(await Api.run('apiStage7ListBindableCallsigns')),
+    bindCurrentKeyToCallsign: async (callsign) => adaptStage4UtilityResponse(await Api.run('apiStage7BindCurrentKeyToCallsign', callsign || '')),
     applyProtections: async (options = {}) => adaptStage4UtilityResponse(await Api.run('apiStage7ApplyProtections', options)),
     bootstrapAccessSheet: async () => adaptStage4UtilityResponse(await Api.run('apiStage7BootstrapAccessSheet'))
   };

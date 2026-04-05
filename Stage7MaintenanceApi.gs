@@ -94,7 +94,7 @@ function apiStage7BootstrapAccessSheet() {
 
 function apiStage7GetAccessDescriptor() {
   const descriptor = (typeof AccessControl_ === 'object')
-    ? AccessControl_.describe()
+    ? AccessControl_.describe({ includeSensitiveDebug: false })
     : { role: 'guest', knownUser: false, reason: 'AccessControl_ недоступний' };
 
   const warnings = _stage7BuildDescriptorWarnings_(descriptor);
@@ -110,7 +110,7 @@ function apiStage7GetAccessDescriptor() {
 
 function apiStage7DebugAccess() {
   const descriptor = (typeof AccessControl_ === 'object')
-    ? AccessControl_.describe()
+    ? AccessControl_.describe({ includeSensitiveDebug: true })
     : { role: 'guest', knownUser: false, reason: 'AccessControl_ недоступний' };
 
   return _stage7BuildMaintenanceResponse_(
@@ -133,6 +133,43 @@ function apiStage7ReportAccessViolation(actionName, details) {
     'stage7ReportAccessViolation',
     [],
     { affectedSheets: [appGetCore('ALERTS_SHEET', 'ALERTS_LOG')] }
+  );
+}
+
+function apiStage7ListBindableCallsigns() {
+  const callsigns = (typeof AccessControl_ === 'object' && AccessControl_.listBindableCallsigns)
+    ? AccessControl_.listBindableCallsigns()
+    : [];
+  const descriptor = (typeof AccessControl_ === 'object')
+    ? AccessControl_.describe({ includeSensitiveDebug: false })
+    : { keyAvailable: false, registered: false, supportEmail: '' };
+
+  return _stage7BuildMaintenanceResponse_(
+    true,
+    callsigns.length ? 'Список позивних для входу отримано' : 'Немає доступних позивних для самостійного входу',
+    {
+      callsigns: callsigns,
+      count: callsigns.length,
+      supportEmail: descriptor.supportEmail || '',
+      keyAvailable: !!descriptor.keyAvailable,
+      registered: !!descriptor.registered
+    },
+    'stage7ListBindableCallsigns',
+    []
+  );
+}
+
+function apiStage7BindCurrentKeyToCallsign(callsign) {
+  const result = (typeof AccessControl_ === 'object' && AccessControl_.bindCurrentKeyToCallsign)
+    ? AccessControl_.bindCurrentKeyToCallsign(callsign || '')
+    : { success: false, message: 'AccessControl_ недоступний', code: 'access.self_bind.unavailable' };
+
+  return _stage7BuildMaintenanceResponse_(
+    result.success !== false,
+    result.message || (result.success ? 'Вхід виконано' : 'Не вдалося виконати вхід'),
+    result,
+    'stage7BindCurrentKeyToCallsign',
+    result.success ? [] : [_stage7NormalizeWarningText_(result.message) || 'Не вдалося прив’язати ключ до позивного']
   );
 }
 

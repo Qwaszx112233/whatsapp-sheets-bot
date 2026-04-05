@@ -311,33 +311,31 @@ const SendPanelRepository_ = (function() {
       panel.getRange(row, schema.columns.action).setValue(resolveSendPanelActionCellValue_(item.link || '', item.status || SendPanelConstants_.STATUS_READY, true));
     });
 
-    if (options.targetedVisualUpdate !== false) {
+    if (options.targetedVisualUpdate) {
       applyVisualStateToRows_(panel, eligibleRows);
     } else {
       applyVisualState_(panel, Math.max(0, panel.getLastRow() - (schema.dataStartRow - 1)));
     }
 
-    if (options.writeLogs !== false) {
-      const logs = beforeRows.filter(function(item) { return eligibleRows.indexOf(item.row) !== -1; }).map(function(item) {
-        return {
-          timestamp: new Date(),
-          reportDateStr: getSendPanelMetadata_(panel).date || _todayStr_(),
-          sheet: CONFIG.SEND_PANEL_SHEET,
-          cell: `ROW:${item.row}`,
-          fio: item.fio,
-          phone: item.phone,
-          code: item.code,
-          service: '',
-          place: '',
-          tasks: item.tasks || '',
-          message: `Автоматична відправка: ${item.code}`,
-          link: item.link || ''
-        };
-      });
+    const logs = beforeRows.filter(function(item) { return eligibleRows.indexOf(item.row) !== -1; }).map(function(item) {
+      return {
+        timestamp: new Date(),
+        reportDateStr: getSendPanelMetadata_(panel).date || _todayStr_(),
+        sheet: CONFIG.SEND_PANEL_SHEET,
+        cell: `ROW:${item.row}`,
+        fio: item.fio,
+        phone: item.phone,
+        code: item.code,
+        service: '',
+        place: '',
+        tasks: item.tasks || '',
+        message: `Автоматична відправка: ${item.code}`,
+        link: item.link || ''
+      };
+    });
 
-      if (logs.length) {
-        try { LogsRepository_.writeBatch(logs); } catch (_) {}
-      }
+    if (logs.length) {
+      try { LogsRepository_.writeBatch(logs); } catch (_) {}
     }
 
     if (options.returnRows === false) {
@@ -367,7 +365,9 @@ const SendPanelRepository_ = (function() {
     const validRows = getValidRows_(panel, rows);
     if (!validRows.length) throw new Error('Передано некоректні рядки SEND_PANEL');
 
-    const beforeRows = readRowsByNumbers_(panel, validRows);
+    const beforeRows = readRows().filter(function(item) {
+      return validRows.indexOf(item.row) !== -1;
+    });
     const byRow = {};
     beforeRows.forEach(function(item) { byRow[item.row] = item; });
 
@@ -378,11 +378,7 @@ const SendPanelRepository_ = (function() {
       panel.getRange(row, schema.columns.action).setValue(resolveSendPanelActionCellValue_(item.link || '', status, false));
     });
 
-    if (options.targetedVisualUpdate !== false) {
-      applyVisualStateToRows_(panel, validRows);
-    } else {
-      applyVisualState_(panel, Math.max(0, panel.getLastRow() - (schema.dataStartRow - 1)));
-    }
+    applyVisualState_(panel, Math.max(0, panel.getLastRow() - (schema.dataStartRow - 1)));
 
     const afterRows = readRows();
     return { updatedRows: validRows, rows: afterRows, stats: buildStats(afterRows) };

@@ -1,18 +1,13 @@
 <script>
-// Js.Security — rewritten access/ui fragment aligned with AccessControl contract.
-// IMPORTANT:
-// 1) UI expects identity.currentKeyHashFull from backend.
-// 2) UI never reconstructs a key from hash. It only shows/copies the FULL HASH if backend returns it.
+// Js.Security — access/ui fragment aligned with server-side key binding by callsign.
+// Regular users do not copy hashes manually: the key stays inside the system,
+// and login happens through a server-approved callsign picker.
 
 (function () {
   'use strict';
 
-  // ==================== БАЗОВІ FALLBACK-ХЕЛПЕРИ ====================
-
   if (typeof window.$id !== 'function') {
-    window.$id = function (id) {
-      return document.getElementById(id);
-    };
+    window.$id = function (id) { return document.getElementById(id); };
   }
 
   if (typeof window.escapeHtml !== 'function') {
@@ -70,33 +65,21 @@
       if (!error) return 'Невідома помилка';
       if (typeof error === 'string') return error;
       if (error.message) return error.message;
-      try {
-        return JSON.stringify(error);
-      } catch (_) {
-        return String(error);
-      }
+      try { return JSON.stringify(error); } catch (_) { return String(error); }
     };
   }
 
   if (typeof window.logToConsole !== 'function') {
-    window.logToConsole = function (message) {
-      console.log(message);
-    };
+    window.logToConsole = function (message) { console.log(message); };
   }
 
   if (typeof window.showToast !== 'function') {
-    window.showToast = function (message) {
-      console.log('[TOAST]', message);
-    };
+    window.showToast = function (message) { console.log('[TOAST]', message); };
   }
-
-  // ==================== STATE FALLBACK ====================
 
   if (typeof window.STATE !== 'object' || !window.STATE) {
     window.STATE = {};
   }
-
-  // ==================== УТИЛІТИ ====================
 
   function safeString_(value) {
     return String(value == null ? '' : value).trim();
@@ -117,7 +100,6 @@
   function fallbackCopyText_(text) {
     const value = safeString_(text);
     if (!value) return false;
-
     try {
       const ta = document.createElement('textarea');
       ta.value = value;
@@ -139,16 +121,12 @@
   async function copyText_(text) {
     const value = safeString_(text);
     if (!value) return false;
-
     if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
       try {
         await navigator.clipboard.writeText(value);
         return true;
-      } catch (_) {
-        // fallback below
-      }
+      } catch (_) {}
     }
-
     return fallbackCopyText_(value);
   }
 
@@ -160,8 +138,6 @@
     return value ? 'Дозволено' : 'Заблоковано';
   }
 
-  // ==================== НОРМАЛІЗАЦІЯ ACCESS-ДЕСКРИПТОРА ====================
-
   function normalizeAccessForUi_(raw) {
     raw = raw || {};
 
@@ -170,6 +146,7 @@
     const policy = raw.policy || {};
     const audit = raw.audit || {};
     const lockout = raw.lockout || raw.lockoutState || {};
+    const login = raw.login || {};
     const reasonObj = raw.reason && typeof raw.reason === 'object' ? raw.reason : null;
 
     const reasonMessage = reasonObj
@@ -180,57 +157,44 @@
       ? safeString_(reasonObj.code)
       : '';
 
-    const source = safeString_(raw.source || audit.source);
-    const detailedSource = source || safeString_(raw.matchSource);
-
-    const currentKeyHashFull = safeString_(
-      identity.currentKeyHashFull ||
-      raw.currentKeyHashFull ||
-      ''
-    );
-
+    const currentKeyHashFull = safeString_(identity.currentKeyHashFull || raw.currentKeyHashFull || '');
     const currentKeyHashMasked = safeString_(
       identity.currentKeyHashMasked ||
       raw.currentKeyHashMasked ||
+      login.currentKeyHashMasked ||
       maskHash_(currentKeyHashFull)
     );
 
+    const registered = raw.registered !== undefined ? !!raw.registered : !!access.registered;
+    const keyAvailable = login.keyAvailable !== undefined
+      ? !!login.keyAvailable
+      : !!(raw.keyAvailable || currentKeyHashFull || currentKeyHashMasked);
+
     return {
       raw: raw,
-
       role: safeString_(raw.role || access.role || 'guest').toLowerCase(),
       enabled: raw.enabled !== undefined ? !!raw.enabled : !!access.enabled,
       knownUser: raw.knownUser !== undefined ? !!raw.knownUser : !!access.knownUser,
-      registered: raw.registered !== undefined ? !!raw.registered : !!access.registered,
+      registered: registered,
       readOnly: raw.readOnly !== undefined ? !!raw.readOnly : !!access.readOnly,
       isAdmin: raw.isAdmin !== undefined ? !!raw.isAdmin : !!access.isAdmin,
       isOperator: raw.isOperator !== undefined ? !!raw.isOperator : !!access.isOperator,
       isMaintainer: raw.isMaintainer !== undefined ? !!raw.isMaintainer : !!access.isMaintainer,
-
       email: safeString_(raw.email || identity.email),
       displayName: safeString_(raw.displayName || identity.displayName),
       personCallsign: safeString_(raw.personCallsign || identity.personCallsign),
       note: safeString_(raw.note || identity.note),
-
-      source: detailedSource,
+      source: safeString_(raw.source || audit.source || raw.matchSource),
       matchedBy: safeString_(raw.matchedBy || audit.matchedBy),
       lastSeenAt: safeString_(raw.lastSeenAt || audit.lastSeenAt),
       lastRotatedAt: safeString_(raw.lastRotatedAt || audit.lastRotatedAt),
       failedAttempts: safeNumber_(raw.failedAttempts != null ? raw.failedAttempts : audit.failedAttempts, 0),
-
       mode: safeString_(raw.mode || policy.mode),
       strictUserKeyMode: raw.strictUserKeyMode !== undefined ? !!raw.strictUserKeyMode : !!policy.strictUserKeyMode,
       migrationModeEnabled: raw.migrationModeEnabled !== undefined ? !!raw.migrationModeEnabled : !!policy.migrationModeEnabled,
-      userKeyModeEnabled: raw.strictUserKeyMode !== undefined
-        ? !!raw.strictUserKeyMode
-        : !!policy.strictUserKeyMode,
-
-      reason: {
-        code: reasonCode,
-        message: reasonMessage
-      },
+      userKeyModeEnabled: raw.strictUserKeyMode !== undefined ? !!raw.strictUserKeyMode : !!policy.strictUserKeyMode,
+      reason: { code: reasonCode, message: reasonMessage },
       reasonString: reasonMessage,
-
       lockout: {
         locked: !!lockout.locked,
         disabledByAdmin: !!lockout.disabledByAdmin,
@@ -240,18 +204,17 @@
         lastAppliedLevel: safeNumber_(lockout.lastAppliedLevel, 0),
         lastReason: safeString_(lockout.lastReason)
       },
-
       rotationState: safeString_(raw.rotationState) || 'unknown',
       allowedActions: Array.isArray(raw.allowedActions) ? raw.allowedActions.slice() : [],
-
       currentKey: '',
-      keyAvailable: !!currentKeyHashFull,
+      keyAvailable: keyAvailable,
       currentKeyHashFull: currentKeyHashFull,
-      currentKeyHashMasked: currentKeyHashMasked
+      currentKeyHashMasked: currentKeyHashMasked,
+      supportEmail: safeString_(login.supportEmail || raw.supportEmail),
+      selfBindRequired: login.selfBindRequired !== undefined ? !!login.selfBindRequired : (keyAvailable && !registered),
+      canSelfBind: login.canSelfBind !== undefined ? !!login.canSelfBind : (keyAvailable && !registered)
     };
   }
-
-  // ==================== ОСНОВНІ ФУНКЦІЇ ДОСТУПУ ====================
 
   function isAdminRole() {
     return !!(STATE.access && STATE.access.isAdmin);
@@ -288,21 +251,10 @@
     return getAccessRoleRank_(access.role) >= getAccessRoleRank_(roleName) && access.enabled !== false;
   }
 
-  function hasDaySummaryAccess_() {
-    return hasRoleAtLeast_('operator');
-  }
-
-  function hasDetailedSummaryAccess_() {
-    return hasRoleAtLeast_('operator');
-  }
-
-  function hasWorkingAccess_() {
-    return hasRoleAtLeast_('maintainer');
-  }
-
-  function hasMaintainerAccess_() {
-    return hasRoleAtLeast_('maintainer');
-  }
+  function hasDaySummaryAccess_() { return hasRoleAtLeast_('operator'); }
+  function hasDetailedSummaryAccess_() { return hasRoleAtLeast_('operator'); }
+  function hasWorkingAccess_() { return hasRoleAtLeast_('maintainer'); }
+  function hasMaintainerAccess_() { return hasRoleAtLeast_('maintainer'); }
 
   function getViewerOwnCallsign_() {
     const access = STATE.access || {};
@@ -314,7 +266,6 @@
     const role = safeString_(access.role || 'guest').toLowerCase();
     const target = safeString_(callsign).toUpperCase();
     const own = getViewerOwnCallsign_().toUpperCase();
-
     if (!target) return false;
     if (access.isOperator || access.isAdmin) return true;
     if (role !== 'viewer') return false;
@@ -330,16 +281,11 @@
     }
   }
 
-  // ==================== UI ОБМЕЖЕНЬ ====================
-
   function updateRestrictedUi_() {
     const access = STATE.access || {};
-
     document.querySelectorAll('[data-role-min]').forEach(function (el) {
       const required = el.getAttribute('data-role-min') || 'guest';
-
       if (el.classList && el.classList.contains('header-tool-btn')) return;
-
       el.style.display = hasRoleAtLeast_(required) ? '' : 'none';
     });
 
@@ -355,33 +301,8 @@
     }
   }
 
-  // ==================== ДОПОМІЖНІ ФУНКЦІЇ ====================
-
   function getAccessReasonMessage_(access) {
     return safeString_((access && access.reason && access.reason.message) || (access && access.reasonString) || '');
-  }
-
-  function buildAccessBannerMessage_(descriptor) {
-    const access = descriptor || STATE.access || {};
-    const reason = getAccessReasonMessage_(access);
-    const note = safeString_(access.note);
-    const source = safeString_(access.source);
-    const parts = [];
-
-    if (reason) parts.push(reason);
-    if (note) parts.push('Примітка: ' + note);
-    if (source) parts.push('Джерело: ' + getAccessSourceLabel_(source));
-
-    return parts.join(' • ');
-  }
-
-  function getAccessReasonDisplay_(access) {
-    const reason = access && access.reason ? access.reason : {};
-    const code = safeString_(reason.code);
-    const message = safeString_(reason.message || access.reasonString);
-
-    if (!message && code === 'access.ok') return 'доступ підтверджено';
-    return message || 'немає';
   }
 
   function getAccessSourceLabel_(source) {
@@ -402,23 +323,37 @@
     return map[raw] || (raw || 'невідомо');
   }
 
+  function buildAccessBannerMessage_(descriptor) {
+    const access = descriptor || STATE.access || {};
+    const reason = getAccessReasonMessage_(access);
+    const note = safeString_(access.note);
+    const source = safeString_(access.source);
+    const parts = [];
+    if (reason) parts.push(reason);
+    if (note) parts.push('Примітка: ' + note);
+    if (source) parts.push('Джерело: ' + getAccessSourceLabel_(source));
+    return parts.join(' • ');
+  }
+
+  function getAccessReasonDisplay_(access) {
+    const reason = access && access.reason ? access.reason : {};
+    const code = safeString_(reason.code);
+    const message = safeString_(reason.message || access.reasonString);
+    if (!message && code === 'access.ok') return 'доступ підтверджено';
+    return message || 'немає';
+  }
+
   function buildAccessDebugExplanation_(access) {
     const role = safeString_((access && access.role) || 'guest').toLowerCase();
     const registered = !!(access && access.registered);
-    const keyMode = !!(access && access.userKeyModeEnabled);
     const keyAvailable = !!(access && access.keyAvailable);
-    const migrationMode = !!(access && access.migrationModeEnabled);
 
-    if (keyMode && !registered && !keyAvailable) {
-      return migrationMode
-        ? 'Система очікує user key. Аварійний email-міст увімкнено, але поточний сеанс не віддав ключ користувача, тому доступ знижено до safe-mode.'
-        : 'Система працює у строгому user key-режимі, але поточний сеанс не віддав ключ користувача. Через це доступ знижено до safe-mode.';
+    if (keyAvailable && !registered) {
+      return 'Система вже визначила поточний ключ користувача, але він ще не прив’язаний до жодного позивного. Далі вхід виконується не через копіювання hash, а через вибір свого позивного зі списку.';
     }
 
-    if (keyMode && !registered && keyAvailable) {
-      return migrationMode
-        ? 'Система отримала user key hash, але не знайшла його в ACCESS. Аварійний email-міст не зміг підтвердити користувача, тому доступ знижено до safe-mode.'
-        : 'Система отримала user key hash поточного користувача, але не знайшла його в ACCESS. Неявні fallback-схеми вимкнено, тому доступ знижено до safe-mode.';
+    if (!keyAvailable) {
+      return 'Система не змогла визначити поточний ключ користувача. Без цього неможливо автоматично прив’язати сеанс до позивного.';
     }
 
     if (role === 'owner') return 'Усе добре. Користувача впізнано як власника. Це найвищий рівень доступу в системі.';
@@ -433,29 +368,27 @@
   function buildAccessDebugAdvice_(access) {
     const role = safeString_((access && access.role) || 'guest').toLowerCase();
     const registered = !!(access && access.registered);
-    const keyMode = !!(access && access.userKeyModeEnabled);
     const keyAvailable = !!(access && access.keyAvailable);
-    const migrationMode = !!(access && access.migrationModeEnabled);
+    const canSelfBind = !!(access && access.canSelfBind);
+    const supportEmail = safeString_(access && access.supportEmail);
 
-    if (keyMode && !registered && keyAvailable) {
-      return migrationMode
-        ? 'Скопіюйте свій user key hash в ACCESS → user_key_current_hash. Аварійний email-міст краще вимкнути після завершення міграції.'
-        : 'Скопіюйте свій user key hash та внесіть його в ACCESS у колонку user_key_current_hash навпроти потрібної ролі. Якщо hash змінився — попередній можна тимчасово покласти в user_key_prev_hash.';
+    if (keyAvailable && !registered && canSelfBind) {
+      return 'Натисніть «Увійти», виберіть свій позивний, і система сама прив’яже поточний ключ до вашого рядка в ACCESS.';
     }
 
-    if (keyMode && !registered && !keyAvailable) {
-      return 'Перевірте, чи цей сеанс Google Apps Script віддає temporary user key. Без нього строгий user key-доступ не підтвердиться.';
+    if (keyAvailable && !registered && !canSelfBind) {
+      return 'Цей сеанс бачить ключ користувача, але самостійна прив’язка для нього недоступна. Зверніться до власника або адміністратора' + (supportEmail ? ' (' + supportEmail + ')' : '') + '.';
     }
 
-    if (role === 'guest') {
-      return 'Запишіть людині роль guest або підвищіть її до viewer / operator, якщо потрібен доступ до карток чи зведень.';
+    if (!keyAvailable) {
+      return 'Оновіть панель і повторіть перевірку. Якщо ключ знову не визначиться — зверніться до власника або адміністратора' + (supportEmail ? ' (' + supportEmail + ')' : '') + '.';
     }
 
     if (role === 'viewer') {
-      return 'Перевірте ACCESS: user_key_current_hash без пробілів, роль одна з guest/viewer/operator/maintainer/admin/sysadmin/owner, enabled = TRUE. Для viewer обов’язково заповніть person_callsign.';
+      return 'Для ролі viewer у ACCESS має бути заповнений власний person_callsign. Інших дій зараз не потрібно.';
     }
 
-    return 'Додаткових дій не потрібно. Якщо панель поводиться не так, як роль у звіті, проблема вже не в доступі, а в UI або окремій кнопці.';
+    return 'Додаткових дій не потрібно. Якщо панель поводиться не так, як роль у звіті, проблема вже не в доступі, а в окремій кнопці або серверному маршруті.';
   }
 
   function getAllowedActionsText_(access) {
@@ -473,10 +406,9 @@
     const displayName = safeString_((access && access.displayName) || '') || 'не визначено';
     const email = safeString_((access && access.email) || '') || 'не визначено';
     const keyMasked = safeString_((access && access.currentKeyHashMasked) || '') || 'не визначено';
-    const keyFullState = access && access.currentKeyHashFull ? 'доступний для копіювання кнопкою' : 'недоступний';
+    const keyState = access && access.keyAvailable ? 'визначено' : 'не визначено';
     const registeredLabel = access && access.registered ? 'так' : 'ні';
     const keyModeLabel = getRotationModeLabel_(access);
-    const keyAvailableLabel = access && access.keyAvailable ? 'так' : 'ні';
     const adminLabel = access && access.isAdmin ? 'так' : 'ні';
     const operatorLabel = access && access.isOperator ? 'так' : 'ні';
     const note = safeString_((access && access.note) || '') || 'немає';
@@ -486,17 +418,17 @@
     const lastSeenAt = safeString_((access && access.lastSeenAt) || '') || 'немає';
     const lastRotatedAt = safeString_((access && access.lastRotatedAt) || '') || 'немає';
     const rotationState = safeString_((access && access.rotationState) || '') || 'невідомо';
+    const supportEmail = safeString_((access && access.supportEmail) || '') || 'немає';
 
     return [
       'ПЕРЕВІРКА ДОСТУПУ',
       '=================',
       'Режим доступу: ' + roleLabel,
       'Схема доступу: ' + keyModeLabel,
-      'Хеш доступний: ' + keyAvailableLabel,
+      'Ключ користувача: ' + keyState,
       'Ключ користувача зареєстровано: ' + registeredLabel,
-      'Display name: ' + displayName,
       'Маска hash: ' + keyMasked,
-      'Повний hash: ' + keyFullState,
+      'Display name: ' + displayName,
       'Email (довідково): ' + email,
       'Джерело доступу: ' + sourceLabel,
       'Адмін-доступ: ' + adminLabel,
@@ -507,6 +439,7 @@
       'last_seen_at: ' + lastSeenAt,
       'last_rotated_at: ' + lastRotatedAt,
       'Стан ротації: ' + rotationState,
+      'Контакт для допомоги: ' + supportEmail,
       'Стан: ' + reason,
       '',
       'Що це означає:',
@@ -517,13 +450,9 @@
     ].join('\n');
   }
 
-  // ==================== ACCESS DEBUG STATE ====================
-
   function ensureAccessDebugState_() {
     if (!STATE.accessDebug) {
-      STATE.accessDebug = {
-        hashVisible: false
-      };
+      STATE.accessDebug = { hashVisible: false };
     }
     return STATE.accessDebug;
   }
@@ -538,40 +467,28 @@
     const toggleBtn = document.getElementById('accessDebugToggleHashBtn');
     const copyBtn = document.getElementById('accessDebugCopyHashBtn');
 
-    if (block) {
-      block.style.display = state.hashVisible && hashFull ? 'block' : 'none';
-    }
-
-    if (valueNode) {
-      valueNode.textContent = state.hashVisible && hashFull ? hashFull : '';
-    }
-
+    if (block) block.style.display = state.hashVisible && hashFull ? 'block' : 'none';
+    if (valueNode) valueNode.textContent = state.hashVisible && hashFull ? hashFull : '';
     if (toggleBtn) {
       toggleBtn.textContent = state.hashVisible && hashFull ? 'Сховати повний hash' : 'Показати повний hash';
       toggleBtn.disabled = !hashFull;
     }
-
     if (copyBtn) {
       copyBtn.disabled = !hashFull;
       copyBtn.textContent = 'Копіювати повний hash';
     }
-
     const maskedNode = document.getElementById('accessDebugMaskedHashValue');
-    if (maskedNode) {
-      maskedNode.textContent = hashMasked || 'не визначено';
-    }
+    if (maskedNode) maskedNode.textContent = hashMasked || 'не визначено';
   }
 
   function toggleAccessDebugHash() {
     const state = ensureAccessDebugState_();
     const access = STATE.access || {};
     const hashFull = safeString_(access.currentKeyHashFull);
-
     if (!hashFull) {
       showToast('Повний hash недоступний');
       return;
     }
-
     state.hashVisible = !state.hashVisible;
     updateAccessDebugHashUi_();
   }
@@ -580,25 +497,181 @@
     try {
       const access = STATE.access || {};
       const hashFull = safeString_(access.currentKeyHashFull);
-
       if (!hashFull) {
         showToast('Повний hash недоступний');
         return;
       }
-
       const copied = await copyText_(hashFull);
-      if (copied) {
-        showToast('Повний hash скопійовано');
-      } else {
-        showToast('Не вдалося скопіювати повний hash');
-      }
+      showToast(copied ? 'Повний hash скопійовано' : 'Не вдалося скопіювати повний hash');
     } catch (error) {
       logToConsole('✕ Не вдалося скопіювати повний hash: ' + normalizeError(error), 'error');
       showToast('Не вдалося скопіювати повний hash');
     }
   }
 
-  // ==================== RENDER ACCESS DEBUG ====================
+  function ensureAccessLoginState_() {
+    if (!STATE.accessLogin) {
+      STATE.accessLogin = { loading: false, modalOpen: false, lastCallsigns: [] };
+    }
+    return STATE.accessLogin;
+  }
+
+  function ensureAccessLoginModal_() {
+    let modal = document.getElementById('accessLoginModal');
+    if (modal) return modal;
+
+    modal = document.createElement('div');
+    modal.id = 'accessLoginModal';
+    modal.style.display = 'none';
+    modal.style.position = 'fixed';
+    modal.style.inset = '0';
+    modal.style.zIndex = '9999';
+    modal.innerHTML = [
+      '<div id="accessLoginModalBackdrop" style="position:absolute; inset:0; background:rgba(0,0,0,0.55);"></div>',
+      '<div style="position:relative; max-width:420px; margin:36px auto; background:var(--surface-color, #111827); color:var(--text-primary, #fff); border:1px solid var(--border-color, rgba(255,255,255,0.12)); border-radius:16px; box-shadow:0 18px 48px rgba(0,0,0,0.35); overflow:hidden;">',
+      '  <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:16px 18px; border-bottom:1px solid var(--border-color, rgba(255,255,255,0.12));">',
+      '    <div>',
+      '      <div style="font-size:1rem; font-weight:700;">Увійти за позивним</div>',
+      '      <div id="accessLoginModalSubtext" style="font-size:0.82rem; color:var(--text-secondary, #9ca3af); margin-top:4px;">Виберіть свій позивний зі списку</div>',
+      '    </div>',
+      '    <button type="button" id="btnCloseAccessLoginModal" class="btn" style="min-width:auto; padding:6px 10px;">✕</button>',
+      '  </div>',
+      '  <div style="padding:16px 18px;">',
+      '    <div id="accessLoginModalMessage" style="display:none; margin-bottom:12px; font-size:0.85rem; line-height:1.45;"></div>',
+      '    <div id="accessLoginModalBody" style="display:grid; gap:8px;"></div>',
+      '  </div>',
+      '</div>'
+    ].join('');
+
+    document.body.appendChild(modal);
+
+    const backdrop = document.getElementById('accessLoginModalBackdrop');
+    const closeBtn = document.getElementById('btnCloseAccessLoginModal');
+    if (backdrop) backdrop.addEventListener('click', closeAccessLoginModal);
+    if (closeBtn) closeBtn.addEventListener('click', closeAccessLoginModal);
+    window.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') {
+        const state = ensureAccessLoginState_();
+        if (state.modalOpen) closeAccessLoginModal();
+      }
+    });
+
+    return modal;
+  }
+
+  function setAccessLoginModalMessage_(message, isError) {
+    const box = document.getElementById('accessLoginModalMessage');
+    if (!box) return;
+    const text = safeString_(message);
+    box.style.display = text ? 'block' : 'none';
+    box.style.color = isError ? 'var(--danger-color, #f87171)' : 'var(--text-secondary, #9ca3af)';
+    box.textContent = text;
+  }
+
+  function closeAccessLoginModal() {
+    const modal = document.getElementById('accessLoginModal');
+    const state = ensureAccessLoginState_();
+    state.modalOpen = false;
+    if (modal) modal.style.display = 'none';
+  }
+
+  function renderAccessLoginCallsigns_(callsigns, supportEmail) {
+    const body = document.getElementById('accessLoginModalBody');
+    if (!body) return;
+
+    const items = Array.isArray(callsigns) ? callsigns : [];
+    if (!items.length) {
+      body.innerHTML = '<div style="font-size:0.9rem; color:var(--text-secondary, #9ca3af);">Немає доступних позивних для самостійного входу.</div>';
+      setAccessLoginModalMessage_(supportEmail ? ('Зверніться по допомогу: ' + supportEmail) : '', false);
+      return;
+    }
+
+    body.innerHTML = items.map(function (callsign) {
+      const esc = escapeHtml(callsign);
+      const attr = escapeJsString(callsign);
+      return '<button type="button" class="btn" style="justify-content:flex-start; width:100%;" onclick="submitAccessLoginCallsign_(\'' + attr + '\')">' + esc + '</button>';
+    }).join('');
+
+    setAccessLoginModalMessage_(supportEmail ? ('Якщо ваш позивний уже зайнятий або відсутній — зверніться: ' + supportEmail) : '', false);
+  }
+
+  async function openAccessLoginFlow() {
+    const access = normalizeAccessForUi_(STATE.access || {});
+    const state = ensureAccessLoginState_();
+
+    if (!access.keyAvailable) {
+      showToast('Спочатку треба визначити ключ користувача');
+      return;
+    }
+
+    if (!access.selfBindRequired && !access.canSelfBind) {
+      showToast('Вхід уже підтверджено');
+      return;
+    }
+
+    if (state.loading) {
+      showToast('Список позивних уже завантажується');
+      return;
+    }
+
+    const modal = ensureAccessLoginModal_();
+    modal.style.display = 'block';
+    state.modalOpen = true;
+    state.loading = true;
+    const body = document.getElementById('accessLoginModalBody');
+    if (body) {
+      body.innerHTML = '<div style="font-size:0.9rem; color:var(--text-secondary, #9ca3af);">Завантажую список позивних...</div>';
+    }
+    setAccessLoginModalMessage_('', false);
+
+    try {
+      const result = await MaintenanceApi.listBindableCallsigns();
+      if (!result || !result.success) {
+        throw new Error(result && (result.error || result.message) || 'Не вдалося отримати список позивних');
+      }
+      const data = result.data || {};
+      state.lastCallsigns = Array.isArray(data.callsigns) ? data.callsigns.slice() : [];
+      renderAccessLoginCallsigns_(state.lastCallsigns, safeString_(data.supportEmail || access.supportEmail));
+    } catch (error) {
+      if (body) {
+        body.innerHTML = '<div style="font-size:0.9rem; color:var(--danger-color, #f87171);">' + escapeHtml(normalizeError(error)) + '</div>';
+      }
+      setAccessLoginModalMessage_(access.supportEmail ? ('Зверніться по допомогу: ' + access.supportEmail) : '', true);
+    } finally {
+      state.loading = false;
+    }
+  }
+
+  async function submitAccessLoginCallsign_(callsign) {
+    const state = ensureAccessLoginState_();
+    if (state.loading) return;
+    state.loading = true;
+    setAccessLoginModalMessage_('Підтверджую вхід для позивного ' + safeString_(callsign) + '...', false);
+
+    try {
+      const result = await MaintenanceApi.bindCurrentKeyToCallsign(callsign || '');
+      const data = result && result.data ? result.data : {};
+      if (!result || !result.success) {
+        const message = result && (result.error || result.message) || 'Не вдалося виконати вхід';
+        const supportEmail = safeString_(data.supportEmail || (STATE.access && STATE.access.supportEmail));
+        setAccessLoginModalMessage_(message + (supportEmail ? ' Зверніться: ' + supportEmail : ''), true);
+        showToast(message);
+        return;
+      }
+
+      STATE.access = normalizeAccessForUi_(data.descriptor || {});
+      closeAccessLoginModal();
+      applyAccessPolicyUI();
+      showToast(data.message || ('Вхід виконано: ' + safeString_(callsign)));
+      logToConsole('✓ Вхід підтверджено для позивного ' + safeString_(callsign), 'success');
+    } catch (error) {
+      const message = normalizeError(error);
+      setAccessLoginModalMessage_(message, true);
+      showToast(message);
+    } finally {
+      state.loading = false;
+    }
+  }
 
   function renderAccessDebugResult_(accessRaw) {
     const access = normalizeAccessForUi_(accessRaw);
@@ -627,6 +700,8 @@
     const explanation = buildAccessDebugExplanation_(access);
     const advice = buildAccessDebugAdvice_(access);
     const reportText = buildAccessDebugReportText_(access);
+    const supportEmail = access.supportEmail || 'Немає';
+    const showHashButtons = !!access.currentKeyHashFull && !!access.isAdmin;
 
     return `
       <div class="result-item">
@@ -634,8 +709,9 @@
         <div class="result-value">
           <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
             <button class="btn btn-primary" type="button" onclick="SidebarApp.copyResultText('${escapeJsString(reportText)}')">Копіювати звіт</button>
-            <button class="btn" type="button" id="accessDebugToggleHashBtn" onclick="toggleAccessDebugHash()" ${!access.currentKeyHashFull ? 'disabled' : ''}>Показати повний hash</button>
-            <button class="btn" type="button" id="accessDebugCopyHashBtn" onclick="copyAccessDebugHash()" ${!access.currentKeyHashFull ? 'disabled' : ''}>Копіювати повний hash</button>
+            ${access.selfBindRequired && access.canSelfBind ? '<button class="btn" type="button" onclick="openAccessLoginFlow()">Увійти за позивним</button>' : ''}
+            ${showHashButtons ? '<button class="btn" type="button" id="accessDebugToggleHashBtn" onclick="toggleAccessDebugHash()">Показати повний hash</button>' : ''}
+            ${showHashButtons ? '<button class="btn" type="button" id="accessDebugCopyHashBtn" onclick="copyAccessDebugHash()">Копіювати повний hash</button>' : ''}
           </div>
 
           <div style="display:grid; gap:10px;">
@@ -648,17 +724,15 @@
               <div style="font-size:0.78rem; color:var(--text-secondary);">Ідентифікація користувача</div>
               <div style="margin-top:6px; line-height:1.5;">
                 <div><b>Режим:</b> ${escapeHtml(keyModeLabel)}</div>
-                <div><b>Hash доступний:</b> ${escapeHtml(keyAvailableLabel)}</div>
-                <div><b>Hash зареєстровано:</b> ${escapeHtml(registeredLabel)}</div>
+                <div><b>Ключ доступний:</b> ${escapeHtml(keyAvailableLabel)}</div>
+                <div><b>Ключ зареєстровано:</b> ${escapeHtml(registeredLabel)}</div>
                 <div><b>Маска hash:</b> <span id="accessDebugMaskedHashValue">${escapeHtml(maskedHash)}</span></div>
-                <div><b>Повний hash доступний для копіювання:</b> ${escapeHtml(fullHashAvailable)}</div>
-                <div id="accessDebugHashBlock" style="display:none; margin-top:6px; word-break:break-all;">
-                  <b>Поточний повний hash:</b>
-                  <div id="accessDebugHashValue" style="margin-top:6px; font-family:monospace; font-size:0.82rem;"></div>
-                </div>
+                <div><b>Повний hash доступний:</b> ${escapeHtml(fullHashAvailable)}</div>
+                ${showHashButtons ? '<div id="accessDebugHashBlock" style="display:none; margin-top:6px; word-break:break-all;"><b>Поточний повний hash:</b><div id="accessDebugHashValue" style="margin-top:6px; font-family:monospace; font-size:0.82rem;"></div></div>' : ''}
                 <div><b>Email (довідково):</b> ${escapeHtml(email)}</div>
                 <div><b>Display name:</b> ${escapeHtml(displayName)}</div>
                 <div><b>Джерело доступу:</b> ${escapeHtml(sourceLabel)}</div>
+                <div><b>Контакт для допомоги:</b> ${escapeHtml(supportEmail)}</div>
               </div>
             </div>
 
@@ -682,13 +756,13 @@
             </div>
 
             <div style="padding:10px; border:1px solid var(--border-color); border-radius:12px; background:var(--bg-glass);">
-              <div style="font-size:0.78rem; color:var(--text-secondary);">Як заповнювати ACCESS тепер</div>
+              <div style="font-size:0.78rem; color:var(--text-secondary);">Як працює вхід тепер</div>
               <div style="margin-top:6px; line-height:1.55;">
-                <div>1. У рядку користувача залиш role та enabled.</div>
-                <div>2. У колонку <b>user_key_current_hash</b> встав поточний hash користувача.</div>
-                <div>3. Якщо hash змінився, попередній тимчасово поклади в <b>user_key_prev_hash</b>.</div>
-                <div>4. Колонку <b>email</b> можеш залишити як довідкову, але доступ тепер іде не по ній.</div>
-                <div>5. Аварійний email-міст тримай вимкненим і вмикай лише на коротку міграцію.</div>
+                <div>1. Система сама визначає поточний ключ користувача.</div>
+                <div>2. Якщо ключ ще не прив’язано, користувач натискає <b>Увійти</b> і вибирає свій позивний.</div>
+                <div>3. Роль на клієнті не вибирається і не показується — її бере сервер із ACCESS.</div>
+                <div>4. Якщо позивний уже зайнятий іншим ключем, вхід блокується і показується контакт для допомоги.</div>
+                <div>5. Для ручного debug повний hash лишається тільки у технічному режимі для адміністратора.</div>
               </div>
             </div>
 
@@ -711,8 +785,6 @@
     `;
   }
 
-  // ==================== ACCESS POLICY UI ====================
-
   function applyAccessPolicyUI() {
     const banner = $id('accessBanner');
     const message = $id('accessBannerText');
@@ -724,47 +796,50 @@
     });
 
     STATE.access = access;
-
     if (!banner || !message) return;
 
     banner.style.display = 'block';
     banner.classList.remove(
-      'is-guest',
-      'is-viewer',
-      'is-operator',
-      'is-maintainer',
-      'is-admin',
-      'is-sysadmin',
-      'is-owner',
-      'is-safe-mode'
+      'is-guest', 'is-viewer', 'is-operator', 'is-maintainer', 'is-admin', 'is-sysadmin', 'is-owner', 'is-safe-mode'
     );
     banner.classList.add('is-' + String(access.role || 'guest').toLowerCase());
-
-    if (!access.knownUser) {
-      banner.classList.add('is-safe-mode');
-    }
+    if (!access.knownUser) banner.classList.add('is-safe-mode');
 
     const roleLabel = getAccessRoleLabel_(access.role);
-    message.textContent = 'Режим доступу : ' + roleLabel;
-    message.style.display = 'block';
+    const parts = ['<span>Режим доступу : ' + escapeHtml(roleLabel) + '</span>'];
+    if (access.selfBindRequired && access.canSelfBind) {
+      parts.push('<button type="button" class="btn" style="min-width:auto; padding:6px 10px;" onclick="openAccessLoginFlow()">Увійти</button>');
+    } else if (!access.keyAvailable && !access.registered) {
+      parts.push('<button type="button" class="btn" style="min-width:auto; padding:6px 10px;" onclick="loadAccessDescriptor()">Повторити</button>');
+    }
+
+    message.innerHTML = parts.join(' ');
+    message.style.display = 'flex';
+    message.style.alignItems = 'center';
+    message.style.flexWrap = 'wrap';
+    message.style.gap = '8px';
 
     const consoleMessage = buildAccessBannerMessage_(access);
     if (consoleMessage) {
-      logToConsole(consoleMessage, access.knownUser ? 'info' : 'warning');
+      logToConsole('🛡 ' + consoleMessage, access.knownUser ? 'info' : 'warning');
     }
 
     updateRestrictedUi_();
   }
 
   async function loadAccessDescriptor() {
+    const requestId = safeNumber_(STATE._accessDescriptorRequestId, 0) + 1;
+    STATE._accessDescriptorRequestId = requestId;
+
     try {
       const descriptor = await MaintenanceApi.getAccessDescriptor();
       const raw = descriptor && descriptor.data
         ? descriptor.data
         : { role: 'guest', isAdmin: false, knownUser: false, reasonString: '' };
-
+      if (STATE._accessDescriptorRequestId !== requestId) return;
       STATE.access = normalizeAccessForUi_(raw);
     } catch (error) {
+      if (STATE._accessDescriptorRequestId !== requestId) return;
       STATE.access = normalizeAccessForUi_({
         role: 'guest',
         isAdmin: false,
@@ -779,8 +854,6 @@
 
     applyAccessPolicyUI();
   }
-
-  // ==================== ПЕРЕВІРКА ДОСТУПУ ДО ДІЙ ====================
 
   function getActionRequiredRole_(actionName) {
     const map = {
@@ -812,18 +885,19 @@
     const required = getActionRequiredRole_(actionName);
     if (!required || hasRoleAtLeast_(required)) return true;
 
-    await reportAccessViolation_('sidebarActionUiDenied', {
-      source: 'sidebar-menu',
-      requestedAction: String(actionName || ''),
-      requiredRole: required,
-      currentRole: String((STATE.access && STATE.access.role) || 'guest')
-    });
-
     showToast('Недостатньо прав для дії: ' + getActionName(actionName));
     logToConsole(
       'Недостатньо прав для дії ' + getActionName(actionName) + '. Потрібна роль: ' + getAccessRoleLabel_(required),
       'warning'
     );
+
+    Promise.resolve(reportAccessViolation_('sidebarActionUiDenied', {
+      source: 'sidebar-menu',
+      requestedAction: String(actionName || ''),
+      requiredRole: required,
+      currentRole: String((STATE.access && STATE.access.role) || 'guest')
+    })).catch(function () {});
+
     return false;
   }
 
@@ -849,8 +923,6 @@
     throw new Error(message);
   }
 
-  // ==================== EXPORTS ====================
-
   window.normalizeAccessForUi_ = normalizeAccessForUi_;
   window.isAdminRole = isAdminRole;
   window.hasRoleAtLeast_ = hasRoleAtLeast_;
@@ -875,6 +947,9 @@
   window.updateAccessDebugHashUi_ = updateAccessDebugHashUi_;
   window.toggleAccessDebugHash = toggleAccessDebugHash;
   window.copyAccessDebugHash = copyAccessDebugHash;
+  window.openAccessLoginFlow = openAccessLoginFlow;
+  window.closeAccessLoginModal = closeAccessLoginModal;
+  window.submitAccessLoginCallsign_ = submitAccessLoginCallsign_;
   window.renderAccessDebugResult_ = renderAccessDebugResult_;
   window.applyAccessPolicyUI = applyAccessPolicyUI;
   window.loadAccessDescriptor = loadAccessDescriptor;
