@@ -44,7 +44,7 @@ const AccessControl_ = (function () {
   ]);
 
   const MAX_FAILED_ATTEMPTS_SHEET = 5;
-  const MAX_SHEET_ROWS = 200;
+  const MAX_SHEET_ROWS = 30;
   const ROTATION_PERIOD_DAYS = 30;
 
   const ROLE_VALUES = Object.freeze([
