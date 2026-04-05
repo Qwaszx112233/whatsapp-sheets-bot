@@ -351,6 +351,26 @@ function runStage7DiagnosticsByMode_(options) {
   return runStage5FullDiagnostics_(opts);
 }
 
+function apiStage7QuickHealthCheck(options) {
+  _stage7AssertRole_('maintainer', 'quick health check');
+  const opts = Object.assign({}, options || {}, {
+    mode: 'quick',
+    shallow: true,
+    includeStage3Base: false,
+    includeCompatibilityLayer: false,
+    includeReconciliationPreview: false
+  });
+
+  const report = runStage7DiagnosticsByMode_(opts);
+  return _stage7BuildMaintenanceResponse_(
+    report.ok,
+    report.summary || 'Швидку перевірку системи завершено',
+    report,
+    'stage7QuickHealthCheck',
+    report.warnings || []
+  );
+}
+
 function apiStage7HealthCheck(options) {
   _stage7AssertRole_('maintainer', 'health check');
   const opts = Object.assign({}, options || {});
