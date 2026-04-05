@@ -724,12 +724,3 @@ function runStage5SmokeTests(options) {
 
   return report;
 }
-
-
-function RunSmokeTests(options) {
-  return runSmokeTests(options || {});
-}
-
-function RunScenarioTests(options) {
-  return runScenarioTests(options || {});
-}
