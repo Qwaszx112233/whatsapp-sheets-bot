@@ -1,4 +1,4 @@
-<script>
+
 // Js.Security — access/ui fragment aligned with server-side key binding by identifier + callsign.
 // Regular users do not copy hashes manually: the key stays inside the system,
 // and login happens through a server-approved pair: email/phone + callsign.
@@ -1100,4 +1100,3 @@
   window.assertActionAccess_ = assertActionAccess_;
   window.assertAdminAction_ = assertAdminAction_;
 })();
-</script>

@@ -160,9 +160,13 @@ function apiStage7ListBindableCallsigns() {
 }
 
 
-function apiStage7LoginByIdentifierAndCallsign(identifier, callsign) {
+function apiStage7LoginByIdentifierAndCallsign(identifierOrPayload, callsign, loginMeta) {
+  const payload = (identifierOrPayload && typeof identifierOrPayload === 'object' && !Array.isArray(identifierOrPayload))
+    ? Object.assign({}, identifierOrPayload)
+    : { identifier: identifierOrPayload || '', callsign: callsign || '', loginMeta: loginMeta || {} };
+
   const result = (typeof AccessControl_ === 'object' && AccessControl_.loginByIdentifierAndCallsign)
-    ? AccessControl_.loginByIdentifierAndCallsign(identifier || '', callsign || '')
+    ? AccessControl_.loginByIdentifierAndCallsign(payload)
     : { success: false, message: 'AccessControl_ недоступний', code: 'access.self_bind.unavailable' };
 
   return _stage7BuildMaintenanceResponse_(

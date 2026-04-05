@@ -1,4 +1,4 @@
-<script>
+
   // Js.Api — active Stage 7.1 runtime fragment.
 
   var Stage7Api = {
@@ -240,4 +240,3 @@
     healthCheck: MaintenanceApi.healthCheck,
     runRegressionTests: MaintenanceApi.runRegressionTests
   };
-</script>

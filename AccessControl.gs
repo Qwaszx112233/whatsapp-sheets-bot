@@ -178,6 +178,29 @@ const AccessControl_ = (function () {
     return 'Зверніться за допомогою до ШАХТАРЯ';
   }
 
+  function _normalizeLoginMeta_(meta) {
+    const raw = meta && typeof meta === 'object' ? meta : {};
+    const geo = raw.geo && typeof raw.geo === 'object' ? raw.geo : {};
+    const coords = geo.coords && typeof geo.coords === 'object' ? geo.coords : null;
+
+    return {
+      enteredAtIso: String(raw.enteredAtIso || '').trim(),
+      enteredAtText: String(raw.enteredAtText || '').trim() || 'Невідомий час входу',
+      utcOffset: String(raw.utcOffset || '').trim(),
+      loginPointText: String(raw.loginPointText || '').trim() || 'Точка входу: GPS недоступна',
+      geo: {
+        ok: !!geo.ok,
+        text: String(geo.text || '').trim(),
+        reason: String(geo.reason || '').trim(),
+        coords: coords ? {
+          lat: Number(coords.lat || 0),
+          lng: Number(coords.lng || 0),
+          accuracy: Number(coords.accuracy || 0)
+        } : null
+      }
+    };
+  }
+
   function _selfBindLoginPropKey_(currentKeyHash) {
     const keyHash = normalizeStoredHash_(currentKeyHash);
     return keyHash ? (SELF_BIND_LOGIN_PROP_PREFIX + keyHash) : '';
@@ -272,6 +295,7 @@ const AccessControl_ = (function () {
 
     const publicState = _getSelfBindLoginPublicState_(currentKeyHash);
     const remainingAttempts = Math.max(MAX_SELF_BIND_LOGIN_ATTEMPTS - nextAttempts, 0);
+    const loginMeta = _normalizeLoginMeta_(context && context.loginMeta);
 
     _reportSelfBindViolation_(locked ? 'selfBindLoginBlocked' : 'selfBindLoginDenied', {
       reasonCode: String(context && context.reasonCode || ''),
@@ -282,7 +306,12 @@ const AccessControl_ = (function () {
       attemptNumber: nextAttempts,
       remainingAttempts: remainingAttempts,
       blocked: locked,
-      blockDurationMinutes: _minutesText_(SELF_BIND_LOCK_DURATION_MS)
+      blockDurationMinutes: _minutesText_(SELF_BIND_LOCK_DURATION_MS),
+      enteredAtIso: loginMeta.enteredAtIso,
+      enteredAtText: loginMeta.enteredAtText,
+      utcOffset: loginMeta.utcOffset,
+      loginPointText: loginMeta.loginPointText,
+      geo: loginMeta.geo
     });
 
     return {
@@ -290,7 +319,8 @@ const AccessControl_ = (function () {
       attempts: locked ? MAX_SELF_BIND_LOGIN_ATTEMPTS : nextAttempts,
       remainingAttempts: remainingAttempts,
       remainingMinutes: locked ? _minutesText_(SELF_BIND_LOCK_DURATION_MS) : publicState.remainingMinutes,
-      lockedUntilMs: locked ? nextState.lockedUntilMs : 0
+      lockedUntilMs: locked ? nextState.lockedUntilMs : 0,
+      loginMeta: loginMeta
     };
   }
 
@@ -1253,9 +1283,16 @@ const AccessControl_ = (function () {
       .sort();
   }
 
-  function loginByIdentifierAndCallsign(identifier, callsign) {
+  function loginByIdentifierAndCallsign(identifierOrPayload, callsignMaybe, loginMetaMaybe) {
+    const payload = (identifierOrPayload && typeof identifierOrPayload === 'object' && !Array.isArray(identifierOrPayload))
+      ? Object.assign({}, identifierOrPayload)
+      : { identifier: identifierOrPayload, callsign: callsignMaybe, loginMeta: loginMetaMaybe };
+
     const currentKeyHash = getCurrentUserKeyHash_();
     const supportCallsign = getPrimarySupportCallsign_();
+    const identifier = String(payload.identifier || '').trim();
+    const callsign = String(payload.callsign || '').trim();
+    const loginMeta = _normalizeLoginMeta_(payload.loginMeta || {});
     const identifierType = detectIdentifierType_(identifier);
     const normalizedIdentifier = normalizeIdentifierValue_(identifier);
     const normalizedCallsign = normalizeCallsign_(callsign);
@@ -1265,7 +1302,8 @@ const AccessControl_ = (function () {
         success: false,
         code: REASON_CODES.SELF_BIND_KEY_UNAVAILABLE,
         message: 'Не вдалося визначити ключ користувача. Оновіть панель і спробуйте ще раз.',
-        supportCallsign: supportCallsign
+        supportCallsign: supportCallsign,
+        loginMeta: loginMeta
       };
     }
 
@@ -1276,7 +1314,8 @@ const AccessControl_ = (function () {
         code: REASON_CODES.SELF_BIND_LOGIN_BLOCKED,
         message: 'Ваш вхід тимчасово заблоковано на ' + loginState.remainingMinutes + ' хв. ' + getSelfBindHelpText_() + '.',
         supportCallsign: supportCallsign,
-        loginLockout: loginState
+        loginLockout: loginState,
+        loginMeta: loginMeta
       };
     }
 
@@ -1285,7 +1324,8 @@ const AccessControl_ = (function () {
         success: false,
         code: REASON_CODES.SELF_BIND_IDENTIFIER_REQUIRED,
         message: 'Введіть email або телефон.',
-        supportCallsign: supportCallsign
+        supportCallsign: supportCallsign,
+        loginMeta: loginMeta
       };
     }
 
@@ -1294,7 +1334,8 @@ const AccessControl_ = (function () {
         success: false,
         code: REASON_CODES.SELF_BIND_CALLSIGN_NOT_FOUND,
         message: 'Введіть свій позивний.',
-        supportCallsign: supportCallsign
+        supportCallsign: supportCallsign,
+        loginMeta: loginMeta
       };
     }
 
@@ -1321,7 +1362,8 @@ const AccessControl_ = (function () {
             code: REASON_CODES.OK,
             message: 'Вхід підтверджено для позивного ' + currentCallsign + '.',
             supportCallsign: supportCallsign,
-            descriptor: describe({ includeSensitiveDebug: false })
+            descriptor: describe({ includeSensitiveDebug: false }),
+            loginMeta: loginMeta
           };
         }
       }
@@ -1332,14 +1374,16 @@ const AccessControl_ = (function () {
           identifierValue: normalizedIdentifier,
           callsign: normalizedCallsign,
           reasonCode: REASON_CODES.SELF_BIND_IDENTIFIER_NOT_FOUND,
-          reasonMessage: 'Не знайдено жодного доступного запису для вказаного ідентифікатора.'
+          reasonMessage: 'Не знайдено жодного доступного запису для вказаного ідентифікатора.',
+          loginMeta: loginMeta
         });
         return {
           success: false,
           code: failure.blocked ? REASON_CODES.SELF_BIND_LOGIN_BLOCKED : REASON_CODES.SELF_BIND_IDENTIFIER_NOT_FOUND,
           message: _failureMessageForSelfBind_(REASON_CODES.SELF_BIND_IDENTIFIER_NOT_FOUND, normalizedCallsign, failure),
           supportCallsign: supportCallsign,
-          loginLockout: failure
+          loginLockout: failure,
+          loginMeta: loginMeta
         };
       }
 
@@ -1349,14 +1393,16 @@ const AccessControl_ = (function () {
           identifierValue: normalizedIdentifier,
           callsign: normalizedCallsign,
           reasonCode: REASON_CODES.SELF_BIND_IDENTIFIER_MISMATCH,
-          reasonMessage: 'Позивний не збігається з указаним email або телефоном.'
+          reasonMessage: 'Позивний не збігається з указаним email або телефоном.',
+          loginMeta: loginMeta
         });
         return {
           success: false,
           code: failure.blocked ? REASON_CODES.SELF_BIND_LOGIN_BLOCKED : REASON_CODES.SELF_BIND_IDENTIFIER_MISMATCH,
           message: _failureMessageForSelfBind_(REASON_CODES.SELF_BIND_IDENTIFIER_MISMATCH, normalizedCallsign, failure),
           supportCallsign: supportCallsign,
-          loginLockout: failure
+          loginLockout: failure,
+          loginMeta: loginMeta
         };
       }
 
@@ -1365,7 +1411,8 @@ const AccessControl_ = (function () {
           success: false,
           code: REASON_CODES.SELF_BIND_CALLSIGN_DISABLED,
           message: 'Цей позивний тимчасово вимкнено. ' + getSelfBindHelpText_() + '.',
-          supportCallsign: supportCallsign
+          supportCallsign: supportCallsign,
+          loginMeta: loginMeta
         };
       }
 
@@ -1374,7 +1421,8 @@ const AccessControl_ = (function () {
           success: false,
           code: REASON_CODES.SELF_BIND_CALLSIGN_NOT_ALLOWED,
           message: 'Для цього позивного самостійний вхід вимкнено. ' + getSelfBindHelpText_() + '.',
-          supportCallsign: supportCallsign
+          supportCallsign: supportCallsign,
+          loginMeta: loginMeta
         };
       }
 
@@ -1383,7 +1431,8 @@ const AccessControl_ = (function () {
           success: false,
           code: REASON_CODES.DENIED_TIMED_LOCKOUT,
           message: 'Цей позивний тимчасово заблоковано. ' + getSelfBindHelpText_() + '.',
-          supportCallsign: supportCallsign
+          supportCallsign: supportCallsign,
+          loginMeta: loginMeta
         };
       }
 
@@ -1394,14 +1443,16 @@ const AccessControl_ = (function () {
           identifierValue: normalizedIdentifier,
           callsign: normalizedCallsign,
           reasonCode: REASON_CODES.SELF_BIND_CALLSIGN_OCCUPIED,
-          reasonMessage: 'Позивний уже зайнятий іншим ключем.'
+          reasonMessage: 'Позивний уже зайнятий іншим ключем.',
+          loginMeta: loginMeta
         });
         return {
           success: false,
           code: failure.blocked ? REASON_CODES.SELF_BIND_LOGIN_BLOCKED : REASON_CODES.SELF_BIND_CALLSIGN_OCCUPIED,
           message: _failureMessageForSelfBind_(REASON_CODES.SELF_BIND_CALLSIGN_OCCUPIED, normalizedCallsign, failure),
           supportCallsign: supportCallsign,
-          loginLockout: failure
+          loginLockout: failure,
+          loginMeta: loginMeta
         };
       }
 
@@ -1423,7 +1474,8 @@ const AccessControl_ = (function () {
         code: REASON_CODES.OK,
         message: 'Вхід підтверджено для позивного ' + normalizedCallsign + '.',
         supportCallsign: supportCallsign,
-        descriptor: describe({ includeSensitiveDebug: false })
+        descriptor: describe({ includeSensitiveDebug: false }),
+        loginMeta: loginMeta
       };
     } finally {
       lock.releaseLock();
