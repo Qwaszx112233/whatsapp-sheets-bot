@@ -1,7 +1,7 @@
 <script>
-// Js.Security — access/ui fragment aligned with server-side key binding by callsign.
+// Js.Security — access/ui fragment aligned with server-side key binding by identifier + callsign.
 // Regular users do not copy hashes manually: the key stays inside the system,
-// and login happens through a server-approved callsign picker.
+// and login happens through a server-approved pair: email/phone + callsign.
 
 (function () {
   'use strict';
@@ -92,7 +92,7 @@
 
 
   function getSupportHelpText_() {
-    return 'Зверніться по допомогу до ШАХТАРА';
+    return 'Зверніться за допомогою до ШАХТАРЯ';
   }
 
   function maskHash_(value) {
@@ -216,8 +216,15 @@
       currentKeyHashFull: currentKeyHashFull,
       currentKeyHashMasked: currentKeyHashMasked,
       supportEmail: safeString_(login.supportEmail || raw.supportEmail),
+      supportCallsign: safeString_(login.supportCallsign || raw.supportCallsign || 'ШАХТАР'),
       selfBindRequired: login.selfBindRequired !== undefined ? !!login.selfBindRequired : (keyAvailable && !registered),
-      canSelfBind: login.canSelfBind !== undefined ? !!login.canSelfBind : (keyAvailable && !registered)
+      canSelfBind: login.canSelfBind !== undefined ? !!login.canSelfBind : (keyAvailable && !registered),
+      loginLockout: {
+        locked: !!((login.lockout || raw.loginLockout || {}).locked),
+        remainingMinutes: safeNumber_((login.lockout || raw.loginLockout || {}).remainingMinutes, 0),
+        attempts: safeNumber_((login.lockout || raw.loginLockout || {}).attempts, 0),
+        maxAttempts: safeNumber_((login.lockout || raw.loginLockout || {}).maxAttempts, 0)
+      }
     };
   }
 
@@ -232,7 +239,7 @@
       operator: 'Оператор',
       maintainer: 'Редактор',
       admin: 'Адмін',
-      sysadmin: 'Сис. адмін',
+      sysadmin: 'Сисадмін',
       owner: 'Власник'
     };
     return map[safeString_(role || 'guest').toLowerCase()] || 'Гість';
@@ -362,7 +369,7 @@
     }
 
     if (role === 'owner') return 'Усе добре. Користувача впізнано як власника. Це найвищий рівень доступу в системі.';
-    if (role === 'sysadmin') return 'Усе добре. Користувача впізнано як сис. адміністратора. Повний системний блок має бути доступний.';
+    if (role === 'sysadmin') return 'Усе добре. Користувача впізнано як сисадміна. Повний системний блок має бути доступний.';
     if (role === 'admin') return 'Усе добре. Користувача впізнано як адміністратора. Адмінські дії мають бути доступні.';
     if (role === 'maintainer') return 'Усе добре. Користувача впізнано як редактора. Розширені робочі дії дозволені, але системне адміністрування приховане.';
     if (role === 'operator') return 'Усе добре. Користувача впізнано як оператора. Доступні всі картки та зведення, а SEND_PANEL і робочі дії приховані.';
@@ -378,7 +385,7 @@
     const supportEmail = safeString_(access && access.supportEmail);
 
     if (keyAvailable && !registered && canSelfBind) {
-      return 'Натисніть «Увійти», виберіть свій позивний, і система сама прив’яже поточний ключ до вашого рядка в ACCESS.';
+      return 'Натисніть «Увійти», введіть email або телефон та свій позивний, і система сама перевірить збіг перед входом.';
     }
 
     if (keyAvailable && !registered && !canSelfBind) {
@@ -516,7 +523,7 @@
 
   function ensureAccessLoginState_() {
     if (!STATE.accessLogin) {
-      STATE.accessLogin = { loading: false, modalOpen: false, lastCallsigns: [] };
+      STATE.accessLogin = { loading: false, modalOpen: false };
     }
     return STATE.accessLogin;
   }
@@ -533,14 +540,26 @@
       '<div class="access-login-modal__dialog">',
       '  <div class="access-login-modal__header">',
       '    <div>',
-      '      <div class="access-login-modal__title">Увійти за позивним</div>',
-      '      <div id="accessLoginModalSubtext" class="access-login-modal__subtext">Виберіть свій позивний зі списку</div>',
+      '      <div class="access-login-modal__title">Увійти</div>',
+      '      <div class="access-login-modal__subtext">Введіть email або телефон і свій позивний</div>',
       '    </div>',
       '    <button type="button" id="btnCloseAccessLoginModal" class="access-login-modal__close">Вихід</button>',
       '  </div>',
       '  <div class="access-login-modal__content">',
       '    <div id="accessLoginModalMessage" class="access-login-modal__message"></div>',
-      '    <div id="accessLoginModalBody" class="access-login-modal__body is-single"></div>',
+      '    <div id="accessLoginModalBody" class="access-login-modal__body is-form">',
+      '      <label class="access-login-modal__field">',
+      '        <span class="access-login-modal__label">Email або телефон</span>',
+      '        <input id="accessLoginIdentifierInput" class="access-login-modal__input" type="text" autocomplete="username" placeholder="Введіть email або телефон">',
+      '      </label>',
+      '      <label class="access-login-modal__field">',
+      '        <span class="access-login-modal__label">Позивний</span>',
+      '        <input id="accessLoginCallsignInput" class="access-login-modal__input access-login-modal__input--callsign" type="text" autocomplete="off" placeholder="Введіть свій позивний">',
+      '      </label>',
+      '      <div class="access-login-modal__actions">',
+      '        <button type="button" id="accessLoginSubmitBtn" class="access-login-modal__submit">Увійти</button>',
+      '      </div>',
+      '    </div>',
       '  </div>',
       '</div>'
     ].join('');
@@ -549,8 +568,24 @@
 
     const backdrop = document.getElementById('accessLoginModalBackdrop');
     const closeBtn = document.getElementById('btnCloseAccessLoginModal');
+    const submitBtn = document.getElementById('accessLoginSubmitBtn');
+    const identifierInput = document.getElementById('accessLoginIdentifierInput');
+    const callsignInput = document.getElementById('accessLoginCallsignInput');
+
     if (backdrop) backdrop.addEventListener('click', closeAccessLoginModal);
     if (closeBtn) closeBtn.addEventListener('click', closeAccessLoginModal);
+    if (submitBtn) submitBtn.addEventListener('click', submitAccessLoginForm_);
+
+    [identifierInput, callsignInput].forEach(function (input) {
+      if (!input) return;
+      input.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          submitAccessLoginForm_();
+        }
+      });
+    });
+
     window.addEventListener('keydown', function (event) {
       if (event.key === 'Escape') {
         const state = ensureAccessLoginState_();
@@ -570,39 +605,29 @@
     box.textContent = text;
   }
 
+  function setAccessLoginLoading_(isLoading) {
+    const state = ensureAccessLoginState_();
+    state.loading = !!isLoading;
+    const identifierInput = document.getElementById('accessLoginIdentifierInput');
+    const callsignInput = document.getElementById('accessLoginCallsignInput');
+    const submitBtn = document.getElementById('accessLoginSubmitBtn');
+    if (identifierInput) identifierInput.disabled = !!isLoading;
+    if (callsignInput) callsignInput.disabled = !!isLoading;
+    if (submitBtn) {
+      submitBtn.disabled = !!isLoading;
+      submitBtn.textContent = isLoading ? 'Перевіряю...' : 'Увійти';
+    }
+  }
+
   function closeAccessLoginModal() {
     const modal = document.getElementById('accessLoginModal');
     const state = ensureAccessLoginState_();
     state.modalOpen = false;
+    state.loading = false;
     if (modal) modal.style.display = 'none';
   }
 
-  function renderAccessLoginCallsigns_(callsigns, supportEmail) {
-    const body = document.getElementById('accessLoginModalBody');
-    if (!body) return;
-
-    const items = Array.isArray(callsigns)
-      ? callsigns.map(function (v) { return safeString_(v); }).filter(Boolean)
-      : [];
-
-    body.className = 'access-login-modal__body ' + (items.length <= 1 ? 'is-single' : 'is-multi');
-
-    if (!items.length) {
-      body.innerHTML = '<div class="access-login-modal__empty">Немає доступних позивних для самостійного входу.</div>';
-      setAccessLoginModalMessage_(getSupportHelpText_() + '.', false);
-      return;
-    }
-
-    body.innerHTML = items.map(function (callsign) {
-      const esc = escapeHtml(callsign);
-      const attr = escapeJsString(callsign);
-      return '<button type="button" class="access-login-modal__btn" onclick="submitAccessLoginCallsign_(\'' + attr + '\')">' + esc + '</button>';
-    }).join('');
-
-    setAccessLoginModalMessage_('Якщо ваш позивний уже зайнятий або відсутній — ' + getSupportHelpText_().toLowerCase() + '.', false);
-  }
-
-  async function openAccessLoginFlow() {
+  function openAccessLoginFlow() {
     const access = normalizeAccessForUi_(STATE.access || {});
     const state = ensureAccessLoginState_();
 
@@ -611,73 +636,77 @@
       return;
     }
 
-    if (!access.selfBindRequired && !access.canSelfBind) {
-      showToast('Вхід уже підтверджено');
+    if (access.loginLockout && access.loginLockout.locked) {
+      const lockMessage = 'Вхід тимчасово заблоковано на ' + safeNumber_(access.loginLockout.remainingMinutes, 0) + ' хв. ' + getSupportHelpText_() + '.';
+      showToast(lockMessage);
       return;
     }
 
-    if (state.loading) {
-      showToast('Список позивних уже завантажується');
+    if (!access.selfBindRequired && !access.canSelfBind) {
+      showToast('Вхід уже підтверджено');
       return;
     }
 
     const modal = ensureAccessLoginModal_();
     modal.style.display = 'block';
     state.modalOpen = true;
-    state.loading = true;
-    const body = document.getElementById('accessLoginModalBody');
-    if (body) {
-      body.className = 'access-login-modal__body is-single';
-      body.innerHTML = '<div class="access-login-modal__empty">Завантажую список позивних...</div>';
-    }
-    setAccessLoginModalMessage_('', false);
+    setAccessLoginLoading_(false);
+    setAccessLoginModalMessage_('Введіть email або телефон та свій позивний. Якщо виникне помилка — ' + getSupportHelpText_().toLowerCase() + '.', false);
 
-    try {
-      const result = await MaintenanceApi.listBindableCallsigns();
-      if (!result || !result.success) {
-        throw new Error(result && (result.error || result.message) || 'Не вдалося отримати список позивних');
-      }
-      const data = result.data || {};
-      state.lastCallsigns = Array.isArray(data.callsigns) ? data.callsigns.slice() : [];
-      renderAccessLoginCallsigns_(state.lastCallsigns, safeString_(data.supportEmail || access.supportEmail));
-    } catch (error) {
-      if (body) {
-        body.className = 'access-login-modal__body is-single';
-        body.innerHTML = '<div class="access-login-modal__empty" style="color:var(--danger-color, #f87171);">' + escapeHtml(normalizeError(error)) + '</div>';
-      }
-      setAccessLoginModalMessage_(getSupportHelpText_() + '.', true);
-    } finally {
-      state.loading = false;
-    }
+    const identifierInput = document.getElementById('accessLoginIdentifierInput');
+    const callsignInput = document.getElementById('accessLoginCallsignInput');
+    if (identifierInput) identifierInput.value = '';
+    if (callsignInput) callsignInput.value = '';
+    if (identifierInput) identifierInput.focus();
   }
 
-  async function submitAccessLoginCallsign_(callsign) {
+  async function submitAccessLoginForm_() {
     const state = ensureAccessLoginState_();
     if (state.loading) return;
-    state.loading = true;
-    setAccessLoginModalMessage_('Підтверджую вхід для позивного ' + safeString_(callsign) + '...', false);
+
+    const identifierInput = document.getElementById('accessLoginIdentifierInput');
+    const callsignInput = document.getElementById('accessLoginCallsignInput');
+    const identifier = safeString_(identifierInput && identifierInput.value);
+    const callsign = safeString_(callsignInput && callsignInput.value).toUpperCase();
+
+    if (!identifier) {
+      setAccessLoginModalMessage_('Введіть email або телефон.', true);
+      if (identifierInput) identifierInput.focus();
+      return;
+    }
+
+    if (!callsign) {
+      setAccessLoginModalMessage_('Введіть свій позивний.', true);
+      if (callsignInput) callsignInput.focus();
+      return;
+    }
+
+    setAccessLoginLoading_(true);
+    setAccessLoginModalMessage_('Перевіряю дані входу...', false);
 
     try {
-      const result = await MaintenanceApi.bindCurrentKeyToCallsign(callsign || '');
+      const result = await MaintenanceApi.loginByIdentifierAndCallsign(identifier, callsign);
       const data = result && result.data ? result.data : {};
+
       if (!result || !result.success) {
         const message = result && (result.error || result.message) || 'Не вдалося виконати вхід';
-        setAccessLoginModalMessage_(message + ' ' + getSupportHelpText_() + '.', true);
+        setAccessLoginModalMessage_(message, true);
         showToast(message);
+        await loadAccessDescriptor();
         return;
       }
 
       STATE.access = normalizeAccessForUi_(data.descriptor || {});
       closeAccessLoginModal();
       applyAccessPolicyUI();
-      showToast(data.message || ('Вхід виконано: ' + safeString_(callsign)));
-      logToConsole('✓ Вхід підтверджено для позивного ' + safeString_(callsign), 'success');
+      showToast(data.message || ('Вхід виконано: ' + callsign));
+      logToConsole('✓ Вхід підтверджено для позивного ' + callsign, 'success');
     } catch (error) {
       const message = normalizeError(error);
       setAccessLoginModalMessage_(message, true);
       showToast(message);
     } finally {
-      state.loading = false;
+      setAccessLoginLoading_(false);
     }
   }
 
@@ -717,7 +746,7 @@
         <div class="result-value">
           <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
             <button class="btn btn-primary" type="button" onclick="SidebarApp.copyResultText('${escapeJsString(reportText)}')">Копіювати звіт</button>
-            ${access.selfBindRequired && access.canSelfBind ? '<button class="btn" type="button" onclick="openAccessLoginFlow()">Увійти за позивним</button>' : ''}
+            ${access.selfBindRequired && access.canSelfBind ? '<button class="btn" type="button" onclick="openAccessLoginFlow()">Увійти</button>' : ''}
             ${showHashButtons ? '<button class="btn" type="button" id="accessDebugToggleHashBtn" onclick="toggleAccessDebugHash()">Показати повний hash</button>' : ''}
             ${showHashButtons ? '<button class="btn" type="button" id="accessDebugCopyHashBtn" onclick="copyAccessDebugHash()">Копіювати повний hash</button>' : ''}
           </div>
@@ -815,7 +844,9 @@
 
     const roleLabel = getAccessRoleLabel_(access.role);
     const parts = ['<span>Режим доступу : ' + escapeHtml(roleLabel) + '</span>'];
-    if (access.selfBindRequired && access.canSelfBind) {
+    if (access.loginLockout && access.loginLockout.locked) {
+      parts.push('<span class="status-badge__meta">Вхід заблоковано на ' + escapeHtml(String(access.loginLockout.remainingMinutes || 0)) + ' хв</span>');
+    } else if (access.selfBindRequired && access.canSelfBind) {
       parts.push('<button type="button" class="btn" style="min-width:auto; padding:6px 10px;" onclick="openAccessLoginFlow()">Увійти</button>');
     } else if (!access.keyAvailable && !access.registered) {
       parts.push('<button type="button" class="btn" style="min-width:auto; padding:6px 10px;" onclick="loadAccessDescriptor()">Повторити</button>');
@@ -957,7 +988,7 @@
   window.copyAccessDebugHash = copyAccessDebugHash;
   window.openAccessLoginFlow = openAccessLoginFlow;
   window.closeAccessLoginModal = closeAccessLoginModal;
-  window.submitAccessLoginCallsign_ = submitAccessLoginCallsign_;
+  window.submitAccessLoginForm_ = submitAccessLoginForm_;
   window.renderAccessDebugResult_ = renderAccessDebugResult_;
   window.applyAccessPolicyUI = applyAccessPolicyUI;
   window.loadAccessDescriptor = loadAccessDescriptor;

@@ -1745,26 +1745,69 @@
 
   .access-login-modal__body {
     display: grid;
-    gap: 10px;
+    gap: 14px;
   }
 
-  .access-login-modal__body.is-single {
+  .access-login-modal__body.is-form {
     grid-template-columns: 1fr;
   }
 
-  .access-login-modal__body.is-multi {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .access-login-modal__field {
+    display: grid;
+    gap: 8px;
   }
 
-  .access-login-modal__btn {
+  .access-login-modal__label {
+    color: var(--text-secondary, #9ca3af);
+    font-size: 0.84rem;
+    line-height: 1.35;
+  }
+
+  .access-login-modal__input {
+    width: 100%;
+    min-height: 46px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    border: 1px solid var(--border-color, rgba(255,255,255,0.12));
+    background: rgba(15, 23, 42, 0.88);
+    color: var(--text-primary, #fff);
+    font: inherit;
+    transition: 0.18s ease;
+    box-sizing: border-box;
+  }
+
+  .access-login-modal__input::placeholder {
+    color: var(--text-muted, #94a3b8);
+  }
+
+  .access-login-modal__input:focus {
+    outline: none;
+    border-color: var(--whatsapp-teal, #0ea5e9);
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.16);
+  }
+
+  .access-login-modal__input--callsign {
+    text-transform: uppercase;
+    text-align: center;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  .access-login-modal__actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .access-login-modal__submit {
     min-height: 52px;
     width: 100%;
     padding: 12px 14px;
     border-radius: 14px;
-    border: 1px solid var(--border-color, rgba(255,255,255,0.12));
-    background: var(--bg-secondary, rgba(255,255,255,0.04));
+    border: 1px solid rgba(14, 165, 233, 0.28);
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.22), rgba(37, 99, 235, 0.22));
     color: var(--text-primary, #fff);
-    font-weight: 700;
+    font-weight: 800;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1774,10 +1817,16 @@
     word-break: break-word;
   }
 
-  .access-login-modal__btn:hover {
+  .access-login-modal__submit:hover {
     border-color: var(--whatsapp-teal, #0ea5e9);
-    background: var(--bg-hover, rgba(255,255,255,0.08));
-    color: var(--whatsapp-teal, #0ea5e9);
+    transform: translateY(-1px);
+    box-shadow: 0 10px 24px rgba(14, 165, 233, 0.18);
+  }
+
+  .access-login-modal__submit:disabled,
+  .access-login-modal__input:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
   }
 
   .access-login-modal__empty {

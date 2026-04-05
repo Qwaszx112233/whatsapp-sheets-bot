@@ -15,12 +15,15 @@ const AccessControl_ = (function () {
   // Script properties keys
   const LOCKOUT_PROP_PREFIX = 'WASB_ACCESS_LOCKOUT_V1__';
   const MIGRATION_EMAIL_BRIDGE_PROP = 'WASB_ACCESS_MIGRATION_EMAIL_BRIDGE';
+  const SELF_BIND_LOGIN_PROP_PREFIX = 'WASB_ACCESS_SELF_BIND_LOGIN_V1__';
 
   // Lockout configuration
   const MINUTE_MS = 60 * 1000;
   const HOUR_MS = 60 * MINUTE_MS;
 
   const LOCKOUT_DURATION_MS = 15 * MINUTE_MS;
+  const SELF_BIND_LOCK_DURATION_MS = 30 * MINUTE_MS;
+  const MAX_SELF_BIND_LOGIN_ATTEMPTS = 5;
   const LOCKOUT_ESCALATION_MS = Object.freeze([
     LOCKOUT_DURATION_MS,
     30 * MINUTE_MS,
@@ -64,6 +67,7 @@ const AccessControl_ = (function () {
 
   const SHEET_HEADERS = Object.freeze([
     'email',
+    'phone',
     'role',
     'enabled',
     'note',
@@ -95,7 +99,11 @@ const AccessControl_ = (function () {
     SELF_BIND_CALLSIGN_DISABLED: 'access.self_bind.callsign_disabled',
     SELF_BIND_CALLSIGN_NOT_ALLOWED: 'access.self_bind.callsign_not_allowed',
     SELF_BIND_CALLSIGN_OCCUPIED: 'access.self_bind.callsign_occupied',
-    SELF_BIND_KEY_ALREADY_BOUND: 'access.self_bind.key_already_bound'
+    SELF_BIND_KEY_ALREADY_BOUND: 'access.self_bind.key_already_bound',
+    SELF_BIND_IDENTIFIER_REQUIRED: 'access.self_bind.identifier_required',
+    SELF_BIND_IDENTIFIER_NOT_FOUND: 'access.self_bind.identifier_not_found',
+    SELF_BIND_IDENTIFIER_MISMATCH: 'access.self_bind.identifier_mismatch',
+    SELF_BIND_LOGIN_BLOCKED: 'access.self_bind.login_blocked'
   });
 
   // ==================== UTILITIES ====================
@@ -128,6 +136,23 @@ const AccessControl_ = (function () {
     return String(value || '').trim().toUpperCase();
   }
 
+  function normalizePhone_(value) {
+    return String(value || '').replace(/^'+/, '').replace(/\D+/g, '').trim();
+  }
+
+  function detectIdentifierType_(value) {
+    const raw = String(value || '').trim();
+    if (!raw) return '';
+    return raw.indexOf('@') !== -1 ? 'email' : 'phone';
+  }
+
+  function normalizeIdentifierValue_(value) {
+    const type = detectIdentifierType_(value);
+    if (type === 'email') return normalizeEmail_(value);
+    if (type === 'phone') return normalizePhone_(value);
+    return '';
+  }
+
   function defaultSelfBindAllowedForRole_(role) {
     const normalizedRole = normalizeRole_(role);
     return ['viewer', 'operator', 'maintainer'].indexOf(normalizedRole) !== -1;
@@ -143,6 +168,144 @@ const AccessControl_ = (function () {
     const admins = listNotificationEmails();
     if (admins && admins.length) return String(admins[0] || '').trim();
     return safeGetUserEmail_() || '';
+  }
+
+  function getPrimarySupportCallsign_() {
+    return 'ШАХТАР';
+  }
+
+  function getSelfBindHelpText_() {
+    return 'Зверніться за допомогою до ШАХТАРЯ';
+  }
+
+  function _selfBindLoginPropKey_(currentKeyHash) {
+    const keyHash = normalizeStoredHash_(currentKeyHash);
+    return keyHash ? (SELF_BIND_LOGIN_PROP_PREFIX + keyHash) : '';
+  }
+
+  function _readSelfBindLoginState_(currentKeyHash) {
+    const base = {
+      attempts: 0,
+      lockedUntilMs: 0,
+      lastIdentifierType: '',
+      lastIdentifierValue: '',
+      lastCallsign: '',
+      lastReason: ''
+    };
+    const propKey = _selfBindLoginPropKey_(currentKeyHash);
+    if (!propKey) return base;
+    const raw = _getProperties_().getProperty(propKey);
+    if (!raw) return base;
+    try {
+      const parsed = JSON.parse(raw);
+      return {
+        attempts: parseInt(parsed && parsed.attempts || '0', 10) || 0,
+        lockedUntilMs: parseInt(parsed && parsed.lockedUntilMs || '0', 10) || 0,
+        lastIdentifierType: String(parsed && parsed.lastIdentifierType || ''),
+        lastIdentifierValue: String(parsed && parsed.lastIdentifierValue || ''),
+        lastCallsign: String(parsed && parsed.lastCallsign || ''),
+        lastReason: String(parsed && parsed.lastReason || '')
+      };
+    } catch (_) {
+      return base;
+    }
+  }
+
+  function _writeSelfBindLoginState_(currentKeyHash, state) {
+    const propKey = _selfBindLoginPropKey_(currentKeyHash);
+    if (!propKey) return;
+    _getProperties_().setProperty(propKey, JSON.stringify({
+      attempts: parseInt(state && state.attempts || '0', 10) || 0,
+      lockedUntilMs: parseInt(state && state.lockedUntilMs || '0', 10) || 0,
+      lastIdentifierType: String(state && state.lastIdentifierType || ''),
+      lastIdentifierValue: String(state && state.lastIdentifierValue || ''),
+      lastCallsign: String(state && state.lastCallsign || ''),
+      lastReason: String(state && state.lastReason || '')
+    }));
+  }
+
+  function _clearSelfBindLoginState_(currentKeyHash) {
+    const propKey = _selfBindLoginPropKey_(currentKeyHash);
+    if (propKey) _getProperties_().deleteProperty(propKey);
+  }
+
+  function _isSelfBindLoginLocked_(currentKeyHash) {
+    const state = _readSelfBindLoginState_(currentKeyHash);
+    return !!state.lockedUntilMs && state.lockedUntilMs > _nowMs_();
+  }
+
+  function _getSelfBindLoginPublicState_(currentKeyHash) {
+    const state = _readSelfBindLoginState_(currentKeyHash);
+    const remainingMs = state.lockedUntilMs > _nowMs_() ? Math.max(state.lockedUntilMs - _nowMs_(), 0) : 0;
+    return {
+      locked: remainingMs > 0,
+      remainingMs: remainingMs,
+      remainingMinutes: _minutesText_(remainingMs),
+      attempts: remainingMs > 0 ? MAX_SELF_BIND_LOGIN_ATTEMPTS : state.attempts,
+      maxAttempts: MAX_SELF_BIND_LOGIN_ATTEMPTS
+    };
+  }
+
+  function _reportSelfBindViolation_(actionName, details, descriptorOpt) {
+    try {
+      if (typeof AccessEnforcement_ === 'object' && typeof AccessEnforcement_.reportViolation === 'function') {
+        AccessEnforcement_.reportViolation(actionName, details || {}, descriptorOpt || describe({ includeSensitiveDebug: false }));
+      }
+    } catch (error) {
+      Logger.log('[AccessControl] self-bind violation report failed: ' + (error && error.message ? error.message : String(error)));
+    }
+  }
+
+  function _registerSelfBindFailure_(currentKeyHash, context) {
+    const existing = _readSelfBindLoginState_(currentKeyHash);
+    const nextAttempts = Math.max(0, Number(existing.attempts || 0)) + 1;
+    const locked = nextAttempts >= MAX_SELF_BIND_LOGIN_ATTEMPTS;
+    const nextState = {
+      attempts: locked ? 0 : nextAttempts,
+      lockedUntilMs: locked ? (_nowMs_() + SELF_BIND_LOCK_DURATION_MS) : 0,
+      lastIdentifierType: String(context && context.identifierType || ''),
+      lastIdentifierValue: String(context && context.identifierValue || ''),
+      lastCallsign: String(context && context.callsign || ''),
+      lastReason: String(context && context.reasonCode || '')
+    };
+    _writeSelfBindLoginState_(currentKeyHash, nextState);
+
+    const publicState = _getSelfBindLoginPublicState_(currentKeyHash);
+    const remainingAttempts = Math.max(MAX_SELF_BIND_LOGIN_ATTEMPTS - nextAttempts, 0);
+
+    _reportSelfBindViolation_(locked ? 'selfBindLoginBlocked' : 'selfBindLoginDenied', {
+      reasonCode: String(context && context.reasonCode || ''),
+      reasonMessage: String(context && context.reasonMessage || ''),
+      identifierType: String(context && context.identifierType || ''),
+      identifierValue: String(context && context.identifierValue || ''),
+      enteredCallsign: String(context && context.callsign || ''),
+      attemptNumber: nextAttempts,
+      remainingAttempts: remainingAttempts,
+      blocked: locked,
+      blockDurationMinutes: _minutesText_(SELF_BIND_LOCK_DURATION_MS)
+    });
+
+    return {
+      blocked: locked || publicState.locked,
+      attempts: locked ? MAX_SELF_BIND_LOGIN_ATTEMPTS : nextAttempts,
+      remainingAttempts: remainingAttempts,
+      remainingMinutes: locked ? _minutesText_(SELF_BIND_LOCK_DURATION_MS) : publicState.remainingMinutes,
+      lockedUntilMs: locked ? nextState.lockedUntilMs : 0
+    };
+  }
+
+  function _failureMessageForSelfBind_(reasonCode, callsign, failureState) {
+    const normalizedCallsign = normalizeCallsign_(callsign);
+    const blocked = !!(failureState && failureState.blocked);
+    if (blocked) {
+      return 'Ваш вхід тимчасово заблоковано на ' + (failureState.remainingMinutes || _minutesText_(SELF_BIND_LOCK_DURATION_MS)) + ' хв. ' + getSelfBindHelpText_() + '.';
+    }
+
+    if (reasonCode === REASON_CODES.SELF_BIND_CALLSIGN_OCCUPIED) {
+      return 'Цей позивний уже зайнятий. Якщо це ваш позивний — ' + getSelfBindHelpText_().toLowerCase() + '. Залишилось спроб: ' + Math.max(Number(failureState && failureState.remainingAttempts || 0), 0) + '.';
+    }
+
+    return 'Дані не збігаються. Перевірте email або телефон і позивний. Залишилось спроб: ' + Math.max(Number(failureState && failureState.remainingAttempts || 0), 0) + '. Якщо це ваш позивний — ' + getSelfBindHelpText_().toLowerCase() + '.';
   }
 
   function _timezone_() {
@@ -342,6 +505,7 @@ const AccessControl_ = (function () {
 
     return {
       email: normalizeEmail_(read('email')),
+      phone: normalizePhone_(read('phone')),
       role: normalizeRole_(read('role')),
       enabled: isEnabledValue_(read('enabled')),
       note: String(read('note') || ''),
@@ -431,6 +595,7 @@ const AccessControl_ = (function () {
   function _writeEntryByHeaderMap_(sheetRow, entry) {
     const updates = {};
     if (entry.email !== undefined) updates.email = entry.email;
+    if (entry.phone !== undefined) updates.phone = normalizePhone_(entry.phone);
     if (entry.role !== undefined) updates.role = normalizeRole_(entry.role);
     if (entry.enabled !== undefined) updates.enabled = entry.enabled ? 'TRUE' : 'FALSE';
     if (entry.note !== undefined) updates.note = entry.note;
@@ -459,6 +624,7 @@ const AccessControl_ = (function () {
     const mapped = Object.assign({}, currentEntry);
 
     if (Object.prototype.hasOwnProperty.call(updates, 'email')) mapped.email = normalizeEmail_(updates.email);
+    if (Object.prototype.hasOwnProperty.call(updates, 'phone')) mapped.phone = normalizePhone_(updates.phone);
     if (Object.prototype.hasOwnProperty.call(updates, 'role')) mapped.role = normalizeRole_(updates.role);
     if (Object.prototype.hasOwnProperty.call(updates, 'enabled')) mapped.enabled = !!updates.enabled;
     if (Object.prototype.hasOwnProperty.call(updates, 'note')) mapped.note = String(updates.note || '');
@@ -1026,6 +1192,28 @@ const AccessControl_ = (function () {
     return null;
   }
 
+  function _findEntriesByIdentifier_(identifierType, identifierValue, options = {}) {
+    const type = String(identifierType || '').trim().toLowerCase();
+    const normalizedValue = type === 'email' ? normalizeEmail_(identifierValue) : normalizePhone_(identifierValue);
+    if (!normalizedValue) return [];
+
+    const includeLocked = options.includeLocked || false;
+    const includeDisabled = options.includeDisabled || false;
+
+    return _readSheetEntries_().filter(function (entry) {
+      if (!includeDisabled && _isAdminDisabled_(entry)) return false;
+      if (!includeLocked && _isTimedLocked_(entry)) return false;
+      if (type === 'email') return normalizeEmail_(entry.email) === normalizedValue;
+      if (type === 'phone') return normalizePhone_(entry.phone) === normalizedValue;
+      return false;
+    }).map(function (entry) {
+      return Object.assign({}, entry, {
+        source: ACCESS_SHEET,
+        matchedBy: type
+      });
+    });
+  }
+
   function _findByCallsign_(callsign, options = {}) {
     const normalizedCallsign = normalizeCallsign_(callsign);
     if (!normalizedCallsign) return null;
@@ -1065,17 +1253,39 @@ const AccessControl_ = (function () {
       .sort();
   }
 
-  function bindCurrentKeyToCallsign(callsign) {
-    const normalizedCallsign = normalizeCallsign_(callsign);
+  function loginByIdentifierAndCallsign(identifier, callsign) {
     const currentKeyHash = getCurrentUserKeyHash_();
-    const supportEmail = getPrimarySupportEmail_();
+    const supportCallsign = getPrimarySupportCallsign_();
+    const identifierType = detectIdentifierType_(identifier);
+    const normalizedIdentifier = normalizeIdentifierValue_(identifier);
+    const normalizedCallsign = normalizeCallsign_(callsign);
 
     if (!currentKeyHash) {
       return {
         success: false,
         code: REASON_CODES.SELF_BIND_KEY_UNAVAILABLE,
         message: 'Не вдалося визначити ключ користувача. Оновіть панель і спробуйте ще раз.',
-        supportEmail: supportEmail
+        supportCallsign: supportCallsign
+      };
+    }
+
+    const loginState = _getSelfBindLoginPublicState_(currentKeyHash);
+    if (loginState.locked) {
+      return {
+        success: false,
+        code: REASON_CODES.SELF_BIND_LOGIN_BLOCKED,
+        message: 'Ваш вхід тимчасово заблоковано на ' + loginState.remainingMinutes + ' хв. ' + getSelfBindHelpText_() + '.',
+        supportCallsign: supportCallsign,
+        loginLockout: loginState
+      };
+    }
+
+    if (!normalizedIdentifier || !identifierType) {
+      return {
+        success: false,
+        code: REASON_CODES.SELF_BIND_IDENTIFIER_REQUIRED,
+        message: 'Введіть email або телефон.',
+        supportCallsign: supportCallsign
       };
     }
 
@@ -1083,81 +1293,115 @@ const AccessControl_ = (function () {
       return {
         success: false,
         code: REASON_CODES.SELF_BIND_CALLSIGN_NOT_FOUND,
-        message: 'Позивний не вибрано.',
-        supportEmail: supportEmail
+        message: 'Введіть свій позивний.',
+        supportCallsign: supportCallsign
       };
     }
 
     const lock = LockService.getScriptLock();
     lock.waitLock(5000);
-
     try {
       const alreadyBound = _findByUserKey_(currentKeyHash, { includeLocked: true, includeDisabled: true, matchPrev: true });
+      const matchedEntries = _findEntriesByIdentifier_(identifierType, normalizedIdentifier, { includeLocked: true, includeDisabled: true });
+      const matchedEntry = matchedEntries.find(function (entry) {
+        return normalizeCallsign_(entry.personCallsign) === normalizedCallsign;
+      }) || null;
+
       if (alreadyBound) {
         const currentCallsign = normalizeCallsign_(alreadyBound.personCallsign);
-        if (currentCallsign !== normalizedCallsign) {
+        const identifierMatches = (identifierType === 'email')
+          ? normalizeEmail_(alreadyBound.email) === normalizedIdentifier
+          : normalizePhone_(alreadyBound.phone) === normalizedIdentifier;
+
+        if (currentCallsign === normalizedCallsign && identifierMatches) {
+          _clearSelfBindLoginState_(currentKeyHash);
+          _applySuccessfulAuth_(alreadyBound, currentKeyHash);
           return {
-            success: false,
-            code: REASON_CODES.SELF_BIND_KEY_ALREADY_BOUND,
-            message: 'Цей ключ уже прив’язано до іншого позивного: ' + currentCallsign + '.',
-            supportEmail: supportEmail,
-            currentCallsign: currentCallsign
+            success: true,
+            code: REASON_CODES.OK,
+            message: 'Вхід підтверджено для позивного ' + currentCallsign + '.',
+            supportCallsign: supportCallsign,
+            descriptor: describe({ includeSensitiveDebug: false })
           };
         }
-
-        return {
-          success: true,
-          code: REASON_CODES.OK,
-          message: 'Вхід підтверджено для позивного ' + currentCallsign + '.',
-          supportEmail: supportEmail,
-          descriptor: describe({ includeSensitiveDebug: false })
-        };
       }
 
-      const entry = _findByCallsign_(normalizedCallsign, { includeLocked: true, includeDisabled: true });
-      if (!entry) {
+      if (!matchedEntries.length) {
+        const failure = _registerSelfBindFailure_(currentKeyHash, {
+          identifierType: identifierType,
+          identifierValue: normalizedIdentifier,
+          callsign: normalizedCallsign,
+          reasonCode: REASON_CODES.SELF_BIND_IDENTIFIER_NOT_FOUND,
+          reasonMessage: 'Не знайдено жодного доступного запису для вказаного ідентифікатора.'
+        });
         return {
           success: false,
-          code: REASON_CODES.SELF_BIND_CALLSIGN_NOT_FOUND,
-          message: 'Позивний ' + normalizedCallsign + ' не знайдено у списку доступу.',
-          supportEmail: supportEmail
+          code: failure.blocked ? REASON_CODES.SELF_BIND_LOGIN_BLOCKED : REASON_CODES.SELF_BIND_IDENTIFIER_NOT_FOUND,
+          message: _failureMessageForSelfBind_(REASON_CODES.SELF_BIND_IDENTIFIER_NOT_FOUND, normalizedCallsign, failure),
+          supportCallsign: supportCallsign,
+          loginLockout: failure
         };
       }
 
-      if (!entry.enabled || _isAdminDisabled_(entry)) {
+      if (!matchedEntry) {
+        const failure = _registerSelfBindFailure_(currentKeyHash, {
+          identifierType: identifierType,
+          identifierValue: normalizedIdentifier,
+          callsign: normalizedCallsign,
+          reasonCode: REASON_CODES.SELF_BIND_IDENTIFIER_MISMATCH,
+          reasonMessage: 'Позивний не збігається з указаним email або телефоном.'
+        });
+        return {
+          success: false,
+          code: failure.blocked ? REASON_CODES.SELF_BIND_LOGIN_BLOCKED : REASON_CODES.SELF_BIND_IDENTIFIER_MISMATCH,
+          message: _failureMessageForSelfBind_(REASON_CODES.SELF_BIND_IDENTIFIER_MISMATCH, normalizedCallsign, failure),
+          supportCallsign: supportCallsign,
+          loginLockout: failure
+        };
+      }
+
+      if (!matchedEntry.enabled || _isAdminDisabled_(matchedEntry)) {
         return {
           success: false,
           code: REASON_CODES.SELF_BIND_CALLSIGN_DISABLED,
-          message: 'Позивний ' + normalizedCallsign + ' тимчасово вимкнено. Зверніться по допомогу.',
-          supportEmail: supportEmail
+          message: 'Цей позивний тимчасово вимкнено. ' + getSelfBindHelpText_() + '.',
+          supportCallsign: supportCallsign
         };
       }
 
-      if (!entry.selfBindAllowed) {
+      if (!matchedEntry.selfBindAllowed) {
         return {
           success: false,
           code: REASON_CODES.SELF_BIND_CALLSIGN_NOT_ALLOWED,
-          message: 'Для позивного ' + normalizedCallsign + ' самостійний вхід вимкнено.',
-          supportEmail: supportEmail
+          message: 'Для цього позивного самостійний вхід вимкнено. ' + getSelfBindHelpText_() + '.',
+          supportCallsign: supportCallsign
         };
       }
 
-      if (_isTimedLocked_(entry)) {
+      if (_isTimedLocked_(matchedEntry)) {
         return {
           success: false,
           code: REASON_CODES.DENIED_TIMED_LOCKOUT,
-          message: 'Позивний ' + normalizedCallsign + ' тимчасово заблоковано.',
-          supportEmail: supportEmail
+          message: 'Цей позивний тимчасово заблоковано. ' + getSelfBindHelpText_() + '.',
+          supportCallsign: supportCallsign
         };
       }
 
-      const occupantHash = normalizeStoredHash_(entry.userKeyCurrentHash);
+      const occupantHash = normalizeStoredHash_(matchedEntry.userKeyCurrentHash);
       if (occupantHash && occupantHash !== currentKeyHash) {
+        const failure = _registerSelfBindFailure_(currentKeyHash, {
+          identifierType: identifierType,
+          identifierValue: normalizedIdentifier,
+          callsign: normalizedCallsign,
+          reasonCode: REASON_CODES.SELF_BIND_CALLSIGN_OCCUPIED,
+          reasonMessage: 'Позивний уже зайнятий іншим ключем.'
+        });
         return {
           success: false,
-          code: REASON_CODES.SELF_BIND_CALLSIGN_OCCUPIED,
-          message: 'Позивний ' + normalizedCallsign + ' уже зайнятий іншим користувачем.',
-          supportEmail: supportEmail
+          code: failure.blocked ? REASON_CODES.SELF_BIND_LOGIN_BLOCKED : REASON_CODES.SELF_BIND_CALLSIGN_OCCUPIED,
+          message: _failureMessageForSelfBind_(REASON_CODES.SELF_BIND_CALLSIGN_OCCUPIED, normalizedCallsign, failure),
+          supportCallsign: supportCallsign,
+          loginLockout: failure
         };
       }
 
@@ -1168,18 +1412,17 @@ const AccessControl_ = (function () {
         failed_attempts: 0,
         locked_until_ms: 0
       };
-
-      if (!entry.lastRotatedAt) {
+      if (!matchedEntry.lastRotatedAt) {
         updates.last_rotated_at = nowText;
       }
-
-      _updateEntryFields_(entry.sheetRow, updates);
+      _updateEntryFields_(matchedEntry.sheetRow, updates);
+      _clearSelfBindLoginState_(currentKeyHash);
 
       return {
         success: true,
         code: REASON_CODES.OK,
-        message: 'Позивний ' + normalizedCallsign + ' успішно прив’язано до поточного ключа.',
-        supportEmail: supportEmail,
+        message: 'Вхід підтверджено для позивного ' + normalizedCallsign + '.',
+        supportCallsign: supportCallsign,
         descriptor: describe({ includeSensitiveDebug: false })
       };
     } finally {
@@ -1187,7 +1430,9 @@ const AccessControl_ = (function () {
     }
   }
 
-  // ==================== PUBLIC RESPONSE BUILDER ====================
+  function bindCurrentKeyToCallsign(callsign) {
+    return loginByIdentifierAndCallsign('', callsign || '');
+  }
 
   function _rotationState_(source, keyAvailable, registered) {
     if (source === 'ACCESS-user-key-rotated') return 'rotated-and-promoted';
@@ -1234,7 +1479,9 @@ const AccessControl_ = (function () {
         keyAvailable: !!context.currentKeyHash,
         selfBindRequired: !!context.currentKeyHash && !registered,
         canSelfBind: !!context.currentKeyHash && !registered,
-        supportEmail: getPrimarySupportEmail_()
+        supportEmail: getPrimarySupportEmail_(),
+        supportCallsign: getPrimarySupportCallsign_(),
+        lockout: _getSelfBindLoginPublicState_(context.currentKeyHash)
       },
       policy: {
         mode: policy.mode,
@@ -1275,8 +1522,10 @@ const AccessControl_ = (function () {
       failedAttempts: entry && entry.failedAttempts ? entry.failedAttempts : 0,
       keyAvailable: !!context.currentKeyHash,
       supportEmail: getPrimarySupportEmail_(),
+      supportCallsign: getPrimarySupportCallsign_(),
       selfBindRequired: !!context.currentKeyHash && !registered,
       canSelfBind: !!context.currentKeyHash && !registered,
+      loginLockout: _getSelfBindLoginPublicState_(context.currentKeyHash),
       rotationState: _rotationState_(auditSource, context.keyAvailable, registered),
       rotationPolicy: {
         rotationPeriodDays: ROTATION_PERIOD_DAYS,
@@ -1310,13 +1559,6 @@ const AccessControl_ = (function () {
 
     const policy = _getAccessPolicy_();
     const descriptor = _resolveAccessSubject_(context);
-
-    if (!descriptor.matchFound && context.currentKeyHash) {
-      const entryToRecord = _resolveEntryForAccessFailure_(context);
-      if (entryToRecord && entryToRecord.enabled && !_isEntryLocked_(entryToRecord)) {
-        _applyFailedAuth_(entryToRecord, 'authFailed', descriptor.reasonCode);
-      }
-    }
 
     return _buildPublicAccessResponse_(descriptor, context, policy, opts);
   }
@@ -1534,7 +1776,7 @@ const AccessControl_ = (function () {
         duplicatePrevKeys: [],
         currentEqualsPrev: [],
         prevCollidesWithCurrent: [],
-        emptyEmailWithActiveRole: [],
+        emptyIdentifierWithActiveRole: [],
         invalidRoleValues: [],
         invalidEnabledValues: [],
         brokenLockedUntil: []
@@ -1551,7 +1793,7 @@ const AccessControl_ = (function () {
         lockedUsersCount: entries.filter(e => _isTimedLocked_(e)).length,
         adminDisabledUsersCount: entries.filter(e => _isAdminDisabled_(e)).length,
         usersWithoutCurrentKey: entries.filter(e => !e.userKeyCurrentHash).length,
-        usersWithOnlyEmailAccess: entries.filter(e => !e.userKeyCurrentHash && !e.userKeyPrevHash && e.email).length,
+        usersWithOnlyIdentifierAccess: entries.filter(e => !e.userKeyCurrentHash && !e.userKeyPrevHash && (e.email || e.phone)).length,
         selfBindableUsersCount: entries.filter(e => e.enabled && e.selfBindAllowed && !!normalizeCallsign_(e.personCallsign)).length
       }
     };
@@ -1583,7 +1825,7 @@ const AccessControl_ = (function () {
       if (e.userKeyPrevHash && prevKeyMap.get(e.userKeyPrevHash).length > 1) diagnostics.dataIntegrity.duplicatePrevKeys.push({ hash: e.userKeyPrevHash, rows: prevKeyMap.get(e.userKeyPrevHash) });
       if (e.userKeyCurrentHash && e.userKeyPrevHash && e.userKeyCurrentHash === e.userKeyPrevHash) diagnostics.dataIntegrity.currentEqualsPrev.push(row);
       if (e.userKeyPrevHash && currentKeyMap.has(e.userKeyPrevHash)) diagnostics.dataIntegrity.prevCollidesWithCurrent.push({ row: row, prevHash: e.userKeyPrevHash, collidesWithRows: currentKeyMap.get(e.userKeyPrevHash) });
-      if (!e.email && e.role !== 'guest') diagnostics.dataIntegrity.emptyEmailWithActiveRole.push(row);
+      if (!e.email && !e.phone && e.role !== 'guest') diagnostics.dataIntegrity.emptyIdentifierWithActiveRole.push(row);
       if (e.lockedUntilMs && e.lockedUntilMs < _nowMs_() && e.lockedUntilMs > 0) diagnostics.dataIntegrity.brokenLockedUntil.push({ row: row, lockedUntilMs: e.lockedUntilMs });
     });
 
@@ -1731,8 +1973,9 @@ const AccessControl_ = (function () {
 
     // 3. Header constants
     assert(SHEET_HEADERS.includes('email'), 'SHEET_HEADERS includes email');
+    assert(SHEET_HEADERS.includes('phone'), 'SHEET_HEADERS includes phone');
     assert(SHEET_HEADERS.includes('user_key_current_hash'), 'SHEET_HEADERS includes user_key_current_hash');
-    assert(SHEET_HEADERS.length === 13, 'SHEET_HEADERS has 13 columns');
+    assert(SHEET_HEADERS.length === 14, 'SHEET_HEADERS has 14 columns');
 
     // 4. Utility functions
     const hashed = hashRawUserKey_('test-key');
@@ -1815,6 +2058,7 @@ const AccessControl_ = (function () {
     assertRoleAtLeast: assertRoleAtLeast,
     listBindableCallsigns: listBindableCallsigns,
     bindCurrentKeyToCallsign: bindCurrentKeyToCallsign,
+    loginByIdentifierAndCallsign: loginByIdentifierAndCallsign,
 
     // Sheet management
     bootstrapSheet: bootstrapSheet,
@@ -1836,6 +2080,7 @@ const AccessControl_ = (function () {
     getRoleNoteTemplate: getRoleNoteTemplate_,
     normalizeRole: normalizeRole_,
     normalizeEmail: normalizeEmail_,
+    normalizePhone: normalizePhone_,
     isMigrationBridgeEnabled: function () { return _getAccessPolicy_().migrationModeEnabled; },
 
     // Utilities
@@ -1906,8 +2151,9 @@ function testAccessControl_() {
 
   // 3. Header constants
   assert(AccessControl_.SHEET_HEADERS.includes('email'), 'SHEET_HEADERS includes email');
+  assert(AccessControl_.SHEET_HEADERS.includes('phone'), 'SHEET_HEADERS includes phone');
   assert(AccessControl_.SHEET_HEADERS.includes('user_key_current_hash'), 'SHEET_HEADERS includes user_key_current_hash');
-  assert(AccessControl_.SHEET_HEADERS.length === 13, 'SHEET_HEADERS has 13 columns');
+  assert(AccessControl_.SHEET_HEADERS.length === 14, 'SHEET_HEADERS has 14 columns');
 
   // 4. Utility functions
   const hashed = AccessControl_.hashRawUserKey('test-key');

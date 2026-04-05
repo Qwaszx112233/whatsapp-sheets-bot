@@ -159,6 +159,21 @@ function apiStage7ListBindableCallsigns() {
   );
 }
 
+
+function apiStage7LoginByIdentifierAndCallsign(identifier, callsign) {
+  const result = (typeof AccessControl_ === 'object' && AccessControl_.loginByIdentifierAndCallsign)
+    ? AccessControl_.loginByIdentifierAndCallsign(identifier || '', callsign || '')
+    : { success: false, message: 'AccessControl_ недоступний', code: 'access.self_bind.unavailable' };
+
+  return _stage7BuildMaintenanceResponse_(
+    result.success !== false,
+    result.message || (result.success ? 'Вхід виконано' : 'Не вдалося виконати вхід'),
+    result,
+    'stage7LoginByIdentifierAndCallsign',
+    result.success ? [] : [_stage7NormalizeWarningText_(result.message) || 'Не вдалося виконати вхід через email/телефон і позивний']
+  );
+}
+
 function apiStage7BindCurrentKeyToCallsign(callsign) {
   const result = (typeof AccessControl_ === 'object' && AccessControl_.bindCurrentKeyToCallsign)
     ? AccessControl_.bindCurrentKeyToCallsign(callsign || '')

@@ -21,7 +21,7 @@ var AccessEnforcement_ = AccessEnforcement_ || (function() {
     operator: 'Оператор',
     maintainer: 'Редактор',
     admin: 'Адмін',
-    sysadmin: 'Сис. адмін',
+    sysadmin: 'Сисадмін',
     owner: 'Власник'
   };
 
