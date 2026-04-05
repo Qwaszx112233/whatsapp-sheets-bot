@@ -746,6 +746,7 @@
     }
 
     const modal = ensureAccessLoginModal_();
+    if (typeof hideToast === 'function') hideToast();
     modal.style.display = 'block';
     state.modalOpen = true;
     setAccessLoginLoading_(false, 'Підтверджую вхід...');
@@ -795,6 +796,7 @@
         const message = result && (result.error || result.message) || 'Не вдалося виконати вхід';
         setAccessLoginLoading_(false, 'Підтверджую вхід...');
         setAccessLoginModalMessage_(message, true);
+        if (typeof hideToast === 'function') hideToast();
         await loadAccessDescriptor();
         if (callsignInput) {
           callsignInput.disabled = false;
@@ -815,7 +817,7 @@
       const message = normalizeError(error);
       setAccessLoginLoading_(false, 'Підтверджую вхід...');
       setAccessLoginModalMessage_(message, true);
-      showToast(message);
+      if (typeof hideToast === 'function') hideToast();
       if (callsignInput) {
         callsignInput.disabled = false;
         callsignInput.focus();
