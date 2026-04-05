@@ -12,6 +12,18 @@
 const AccessControl_ = (function () {
   const ACCESS_SHEET = appGetCore('ACCESS_SHEET', 'ACCESS');
 
+  // Runtime-local caches (per single Apps Script execution).
+  let _sheetCache = null;
+  let _entriesCache = null;
+  let _policyCache = null;
+
+  function _invalidateAccessCaches_(options) {
+    const opts = options || {};
+    _entriesCache = null;
+    _policyCache = null;
+    if (opts.resetSheet) _sheetCache = null;
+  }
+
   // Script properties keys
   const LOCKOUT_PROP_PREFIX = 'WASB_ACCESS_LOCKOUT_V1__';
   const MIGRATION_EMAIL_BRIDGE_PROP = 'WASB_ACCESS_MIGRATION_EMAIL_BRIDGE';
@@ -81,12 +93,6 @@ const AccessControl_ = (function () {
     'failed_attempts',
     'locked_until_ms'
   ]);
-
-
-// Runtime-local caches (per GAS execution only)
-let _sheetCache = null;
-let _entriesCache = null;
-let _policyCache = null;
 
   // ==================== REASON CODES ====================
   const REASON_CODES = Object.freeze({
@@ -421,27 +427,24 @@ let _policyCache = null;
 
   // ==================== SHEET OPERATIONS (HEADER-BASED SAFE READS/WRITES) ====================
 
-function _invalidateAccessCaches_() {
-  _sheetCache = null;
-  _entriesCache = null;
-  _policyCache = null;
-}
+  function _getSheet_(createIfMissing) {
+    if (_sheetCache && _sheetCache.getParent()) {
+      return _sheetCache;
+    }
 
-function _getSheet_(createIfMissing) {
-  if (_sheetCache) return _sheetCache;
-
-  const ss = SpreadsheetApp.getActive();
-  let sh = ss.getSheetByName(ACCESS_SHEET);
-  if (!sh && createIfMissing) {
-    sh = ss.insertSheet(ACCESS_SHEET);
-    Logger.log('[AccessControl] Created ACCESS sheet');
+    const ss = SpreadsheetApp.getActive();
+    let sh = ss.getSheetByName(ACCESS_SHEET);
+    if (!sh && createIfMissing) {
+      sh = ss.insertSheet(ACCESS_SHEET);
+      Logger.log('[AccessControl] Created ACCESS sheet');
+      _invalidateAccessCaches_({ resetSheet: true });
+    }
+    if (sh) _ensureSheetSchema_(sh);
+    _sheetCache = sh || null;
+    return _sheetCache;
   }
-  if (sh) _ensureSheetSchema_(sh);
-  _sheetCache = sh || null;
-  return _sheetCache;
-}
 
-function _getHeaderMap_(sh) {
+  function _getHeaderMap_(sh) {
     const lastColumn = Math.max(sh.getLastColumn(), SHEET_HEADERS.length);
     const headers = sh.getRange(1, 1, 1, lastColumn).getValues()[0];
     const map = {};
@@ -478,8 +481,6 @@ function _getHeaderMap_(sh) {
         changed = true;
       });
     }
-
-    if (changed) _invalidateAccessCaches_();
 
     if (changed || sh.getFrozenRows() < 1) {
       sh.setFrozenRows(1);
@@ -570,28 +571,28 @@ function _getHeaderMap_(sh) {
     };
   }
 
-function _readSheetEntries_() {
-  if (_entriesCache) return _entriesCache.slice();
+  function _readSheetEntries_() {
+    if (_entriesCache) return _entriesCache.slice();
 
-  const sh = _getSheet_(false);
-  if (!sh || sh.getLastRow() < 2) {
-    _entriesCache = [];
-    return [];
+    const sh = _getSheet_(false);
+    if (!sh || sh.getLastRow() < 2) {
+      _entriesCache = [];
+      return [];
+    }
+
+    const headerMap = _getHeaderMap_(sh);
+    const rowCount = sh.getLastRow() - 1;
+    const colCount = sh.getLastColumn();
+    const values = sh.getRange(2, 1, rowCount, colCount).getValues();
+    const result = [];
+    for (let i = 0; i < values.length; i++) {
+      result.push(_rowToEntry_(values[i], i + 2, headerMap));
+    }
+    _entriesCache = result;
+    return result.slice();
   }
 
-  const headerMap = _getHeaderMap_(sh);
-  const rowCount = sh.getLastRow() - 1;
-  const colCount = sh.getLastColumn();
-  const values = sh.getRange(2, 1, rowCount, colCount).getValues();
-  const result = [];
-  for (let i = 0; i < values.length; i++) {
-    result.push(_rowToEntry_(values[i], i + 2, headerMap));
-  }
-  _entriesCache = result;
-  return result.slice();
-}
-
-function _getEntryBySheetRow_(sheetRow) {
+  function _getEntryBySheetRow_(sheetRow) {
     const sh = _getSheet_(false);
     if (!sh || !sheetRow || sheetRow < 2 || sheetRow > sh.getLastRow()) return null;
     const headerMap = _getHeaderMap_(sh);
@@ -1011,32 +1012,30 @@ function _getEntryBySheetRow_(sheetRow) {
 
   // ==================== ACCESS POLICY ====================
 
-function _getAccessPolicy_() {
-  if (_policyCache) return Object.assign({}, _policyCache);
+  function _getAccessPolicy_() {
+    if (_policyCache) return Object.assign({}, _policyCache);
 
-  const entries = _readSheetEntries_();
-  const hasAdminConfigured = entries.some(function(e) {
-    return e.enabled && ['admin', 'sysadmin', 'owner'].indexOf(e.role) !== -1;
-  });
-  const migrationModeEnabled = parseBoolean_(_getProperties_().getProperty(MIGRATION_EMAIL_BRIDGE_PROP), false);
-  const accessSheetPresent = !!_getSheet_(false);
+    const entries = _readSheetEntries_();
+    const hasAdminConfigured = entries.some(function(e) { return e.enabled && ['admin', 'sysadmin', 'owner'].includes(e.role); });
+    const migrationModeEnabled = parseBoolean_(_getProperties_().getProperty(MIGRATION_EMAIL_BRIDGE_PROP), false);
+    const accessSheetPresent = !!_getSheet_(false);
 
-  _policyCache = {
-    mode: migrationModeEnabled ? 'user-key+email-bridge' : 'strict-user-key',
-    strictUserKeyMode: !migrationModeEnabled,
-    migrationModeEnabled: migrationModeEnabled,
-    allowEmailBridge: migrationModeEnabled,
-    allowScriptPropertiesFallback: false,
-    bootstrapAllowed: !hasAdminConfigured && (accessSheetPresent ? entries.length === 0 : true),
-    adminConfigured: hasAdminConfigured,
-    accessSheetPresent: accessSheetPresent,
-    registeredKeysCount: entries.filter(function(e) { return e.userKeyCurrentHash || e.userKeyPrevHash; }).length
-  };
+    _policyCache = {
+      mode: migrationModeEnabled ? 'user-key+email-bridge' : 'strict-user-key',
+      strictUserKeyMode: !migrationModeEnabled,
+      migrationModeEnabled: migrationModeEnabled,
+      allowEmailBridge: migrationModeEnabled,
+      allowScriptPropertiesFallback: false,
+      bootstrapAllowed: !hasAdminConfigured && (accessSheetPresent ? entries.length === 0 : true),
+      adminConfigured: hasAdminConfigured,
+      accessSheetPresent: accessSheetPresent,
+      registeredKeysCount: entries.filter(function(e) { return e.userKeyCurrentHash || e.userKeyPrevHash; }).length
+    };
 
-  return Object.assign({}, _policyCache);
-}
+    return Object.assign({}, _policyCache);
+  }
 
-// ==================== UNIFIED USER RESOLVER ====================
+  // ==================== UNIFIED USER RESOLVER ====================
 
   function _resolveAccessSubject_(context, options = {}) {
     const policy = _getAccessPolicy_();
@@ -1104,41 +1103,40 @@ function _getAccessPolicy_() {
     return _buildUnknownDescriptor_(context, policy);
   }
 
+  function _resolveAccessSubjectReadOnly_(context) {
+    const policy = _getAccessPolicy_();
+    const currentKeyHash = context.currentKeyHash;
+    const sessionEmail = context.sessionEmail;
 
-function _resolveAccessSubjectReadOnly_(context) {
-  const policy = _getAccessPolicy_();
-  const currentKeyHash = context.currentKeyHash;
-  const sessionEmail = context.sessionEmail;
+    let match = null;
 
-  let match = null;
-
-  if (currentKeyHash) {
-    match = _findByUserKey_(currentKeyHash, { includeLocked: true, includeDisabled: true });
-    if (match) {
-      return _buildDescriptorFromMatch_(match, 'access', 'user_key_current_hash', match.source, policy, context);
+    if (currentKeyHash) {
+      match = _findByUserKey_(currentKeyHash, { includeLocked: true, includeDisabled: true });
+      if (match) {
+        return _buildDescriptorFromMatch_(match, 'access', 'user_key_current_hash', match.source, policy, context);
+      }
     }
-  }
 
-  if (currentKeyHash) {
-    match = _findByUserKey_(currentKeyHash, { includeLocked: true, includeDisabled: true, matchPrev: true });
-    if (match) {
-      return _buildDescriptorFromMatch_(match, 'access', 'user_key_prev_hash', match.source, policy, context);
+    if (currentKeyHash) {
+      match = _findByUserKey_(currentKeyHash, { includeLocked: true, includeDisabled: true, matchPrev: true });
+      if (match) {
+        return _buildDescriptorFromMatch_(match, 'access', 'user_key_prev_hash', match.source, policy, context);
+      }
     }
-  }
 
-  if (policy.allowEmailBridge && sessionEmail) {
-    match = _findByEmailInSheet_(sessionEmail, { includeLocked: true, includeDisabled: true });
-    if (match) {
-      return _buildDescriptorFromMatch_(match, 'access', 'email-bridge', match.source, policy, context);
+    if (policy.allowEmailBridge && sessionEmail) {
+      match = _findByEmailInSheet_(sessionEmail, { includeLocked: true, includeDisabled: true });
+      if (match) {
+        return _buildDescriptorFromMatch_(match, 'access', 'email-bridge', match.source, policy, context);
+      }
     }
-  }
 
-  if (policy.bootstrapAllowed && (currentKeyHash || sessionEmail)) {
-    return _buildBootstrapDescriptor_(context, policy);
-  }
+    if (policy.bootstrapAllowed && (currentKeyHash || sessionEmail)) {
+      return _buildBootstrapDescriptor_(context, policy);
+    }
 
-  return _buildUnknownDescriptor_(context, policy);
-}
+    return _buildUnknownDescriptor_(context, policy);
+  }
 
   function _buildDescriptorFromMatch_(entry, sourceType, matchedBy, matchSource, policy, context) {
     const role = normalizeRole_(entry.role);
@@ -2010,6 +2008,7 @@ function _resolveAccessSubjectReadOnly_(context) {
     _applyRoleValidation_(sh);
     _applyEmailValidation_(sh);
     _applyEnabledValidation_(sh);
+    _invalidateAccessCaches_();
     return {
       success: true,
       sheet: ACCESS_SHEET,
@@ -2024,6 +2023,7 @@ function _resolveAccessSubjectReadOnly_(context) {
     _applyRoleValidation_(sh);
     _applyEmailValidation_(sh);
     _applyEnabledValidation_(sh);
+    _invalidateAccessCaches_();
     return {
       success: true,
       sheet: ACCESS_SHEET,
@@ -2060,6 +2060,8 @@ function _resolveAccessSubjectReadOnly_(context) {
         SpreadsheetApp.getActive().toast('Некоректний email', 'Помилка', 3);
       }
     }
+
+    _invalidateAccessCaches_();
   }
 
   // ==================== TESTS ====================
