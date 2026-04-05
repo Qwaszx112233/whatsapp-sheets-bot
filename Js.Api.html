@@ -18,39 +18,39 @@
         raw: response
       };
     },
-async bootstrapSidebar() {
-  const response = await Api.run('apiStage7BootstrapSidebar');
-  const result = unwrapStage4Result(response) || {};
-  return {
-    success: !!response?.success,
-    message: response?.message || '',
-    error: response?.error || null,
-    data: result,
-    access: result.access || null,
-    months: Array.isArray(result.months) ? result.months : [],
-    current: result.current || '',
-    warnings: Array.isArray(response?.warnings) ? response.warnings : [],
-    context: response?.context || null,
-    meta: unwrapStage4Meta(response),
-    raw: response
-  };
-},
 
-async getAccessDescriptorLite() {
-  const response = await Api.run('apiStage7GetAccessDescriptorLite');
-  const result = unwrapStage4Result(response) || {};
-  return {
-    success: !!response?.success,
-    message: response?.message || '',
-    error: response?.error || null,
-    data: result,
-    warnings: Array.isArray(response?.warnings) ? response.warnings : [],
-    context: response?.context || null,
-    meta: unwrapStage4Meta(response),
-    raw: response
-  };
-},
+    async bootstrapSidebar() {
+      const response = await Api.run('apiStage7BootstrapSidebar');
+      const result = unwrapStage4Result(response) || {};
+      return {
+        success: !!response?.success,
+        message: response?.message || '',
+        error: response?.error || null,
+        data: result,
+        access: result.access || null,
+        months: Array.isArray(result.months) ? result.months : [],
+        current: result.current || '',
+        warnings: Array.isArray(response?.warnings) ? response.warnings : [],
+        context: response?.context || null,
+        meta: unwrapStage4Meta(response),
+        raw: response
+      };
+    },
 
+    async getAccessDescriptorLite() {
+      const response = await Api.run('apiStage7GetAccessDescriptorLite');
+      const result = unwrapStage4Result(response) || {};
+      return {
+        success: !!response?.success,
+        message: response?.message || '',
+        error: response?.error || null,
+        data: result,
+        warnings: Array.isArray(response?.warnings) ? response.warnings : [],
+        context: response?.context || null,
+        meta: unwrapStage4Meta(response),
+        raw: response
+      };
+    },
 
     async getSidebarData(dateStr = '') {
       const response = await Api.run('apiStage7GetSidebarData', dateStr || '');
