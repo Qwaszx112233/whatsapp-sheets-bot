@@ -18,6 +18,39 @@
         raw: response
       };
     },
+async bootstrapSidebar() {
+  const response = await Api.run('apiStage7BootstrapSidebar');
+  const result = unwrapStage4Result(response) || {};
+  return {
+    success: !!response?.success,
+    message: response?.message || '',
+    error: response?.error || null,
+    data: result,
+    access: result.access || null,
+    months: Array.isArray(result.months) ? result.months : [],
+    current: result.current || '',
+    warnings: Array.isArray(response?.warnings) ? response.warnings : [],
+    context: response?.context || null,
+    meta: unwrapStage4Meta(response),
+    raw: response
+  };
+},
+
+async getAccessDescriptorLite() {
+  const response = await Api.run('apiStage7GetAccessDescriptorLite');
+  const result = unwrapStage4Result(response) || {};
+  return {
+    success: !!response?.success,
+    message: response?.message || '',
+    error: response?.error || null,
+    data: result,
+    warnings: Array.isArray(response?.warnings) ? response.warnings : [],
+    context: response?.context || null,
+    meta: unwrapStage4Meta(response),
+    raw: response
+  };
+},
+
 
     async getSidebarData(dateStr = '') {
       const response = await Api.run('apiStage7GetSidebarData', dateStr || '');
@@ -40,24 +73,6 @@
 
     async getSendPanelData() {
       return adaptStage4PanelResponse(await Api.run('apiStage7GetSendPanelData'));
-    },
-
-    async bootstrapSidebar() {
-      const response = await Api.run('apiStage7BootstrapSidebar');
-      const result = response?.data || {};
-      return {
-        success: !!response?.success,
-        message: response?.message || '',
-        error: response?.error || null,
-        data: result,
-        access: result.access || null,
-        months: Array.isArray(result.months) ? result.months : [],
-        current: result.current || '',
-        panel: result.panel || {},
-        warnings: Array.isArray(response?.warnings) ? response.warnings : [],
-        context: response?.context || null,
-        raw: response
-      };
     },
 
     async generatePanelForDate(options = {}) {
@@ -214,20 +229,7 @@
     listPendingRepairs: async (filters = {}) => adaptStage4UtilityResponse(await Api.run('apiStage7ListPendingRepairs', filters)),
     getOperationDetails: async (operationId) => adaptStage4UtilityResponse(await Api.run('apiStage7GetOperationDetails', operationId || '')),
     runRepair: async (operationId, options = {}) => adaptStage4UtilityResponse(await Api.run('apiStage7RunRepair', operationId || '', options)),
-    getAccessDescriptor: async () => {
-      const response = await Api.run('apiStage7GetAccessDescriptorLite');
-      return {
-        success: !!response?.success,
-        ok: !!response?.success,
-        message: response?.message || '',
-        error: response?.error || null,
-        data: response?.data || {},
-        warnings: Array.isArray(response?.warnings) ? response.warnings : [],
-        context: response?.context || null,
-        meta: null,
-        raw: response
-      };
-    },
+    getAccessDescriptor: async () => adaptStage4UtilityResponse(await Api.run('apiStage7GetAccessDescriptor')),
     debugAccess: async () => adaptStage4UtilityResponse(await Api.run('apiStage7DebugAccess')),
     listBindableCallsigns: async () => adaptStage4UtilityResponse(await Api.run('apiStage7ListBindableCallsigns')),
     bindCurrentKeyToCallsign: async (callsign) => adaptStage4UtilityResponse(await Api.run('apiStage7BindCurrentKeyToCallsign', callsign || '')),
