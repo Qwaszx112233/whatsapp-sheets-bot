@@ -210,11 +210,24 @@ var PersonsRepository_ = PersonsRepository_ || (function() {
     const matrix = SheetSchemas_.get('MONTHLY').matrix;
     const width = matrix.endCol - matrix.startCol + 1;
     const values = sh.getRange(Number(CONFIG.DATE_ROW) || 1, matrix.startCol, 1, width).getDisplayValues()[0];
-    return values.map(function(value) {
-      return DateUtils_.normalizeDate(value, value);
-    }).filter(function(value) {
-      return /^\d{2}\.\d{2}\.\d{4}$/.test(String(value || '').trim());
+    const dates = [];
+    const seen = Object.create(null);
+
+    values.forEach(function(value) {
+      const raw = String(value || '').trim();
+      if (!raw) return;
+      try {
+        const normalized = DateUtils_.normalizeDate(raw, raw);
+        if (/^\d{2}\.\d{2}\.\d{4}$/.test(normalized) && !seen[normalized]) {
+          seen[normalized] = true;
+          dates.push(normalized);
+        }
+      } catch (_) {
+        // Пропускаємо порожні/сміттєві значення у рядку дат замість падіння всього smoke-suite.
+      }
     });
+
+    return dates;
   }
 
   return {
