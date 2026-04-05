@@ -579,18 +579,25 @@
     const body = document.getElementById('accessLoginModalBody');
     if (!body) return;
 
-    const items = Array.isArray(callsigns) ? callsigns : [];
+    const items = Array.isArray(callsigns)
+      ? callsigns.map(function (value) { return safeString_(value); }).filter(Boolean)
+      : [];
+
     if (!items.length) {
-      body.innerHTML = '<div style="font-size:0.9rem; color:var(--text-secondary, #9ca3af);">Немає доступних позивних для самостійного входу.</div>';
+      body.innerHTML = '<div class="access-login-modal__empty">Немає доступних позивних для самостійного входу.</div>';
       setAccessLoginModalMessage_(supportEmail ? ('Зверніться по допомогу: ' + supportEmail) : '', false);
       return;
     }
 
-    body.innerHTML = items.map(function (callsign) {
+    const gridClass = items.length === 1
+      ? 'access-login-modal__callsigns access-login-modal__callsigns--single'
+      : 'access-login-modal__callsigns access-login-modal__callsigns--multi';
+
+    body.innerHTML = '<div class="' + gridClass + '">' + items.map(function (callsign) {
       const esc = escapeHtml(callsign);
       const attr = escapeJsString(callsign);
-      return '<button type="button" class="btn" style="justify-content:flex-start; width:100%;" onclick="submitAccessLoginCallsign_(\'' + attr + '\')">' + esc + '</button>';
-    }).join('');
+      return '<button type="button" class="access-login-modal__callsign-btn" onclick="submitAccessLoginCallsign_(\'' + attr + '\')"><span>' + esc + '</span></button>';
+    }).join('') + '</div>';
 
     setAccessLoginModalMessage_(supportEmail ? ('Якщо ваш позивний уже зайнятий або відсутній — зверніться: ' + supportEmail) : '', false);
   }

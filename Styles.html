@@ -1581,6 +1581,66 @@
     color: var(--text-primary);
   }
 
+
+  .access-login-modal__empty {
+    padding: 12px 4px;
+    font-size: 0.9rem;
+    line-height: 1.45;
+    color: var(--text-secondary);
+    text-align: center;
+  }
+
+  .access-login-modal__callsigns {
+    display: grid;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .access-login-modal__callsigns--single {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .access-login-modal__callsigns--multi {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .access-login-modal__callsign-btn {
+    width: 100%;
+    min-height: 56px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: 0.18s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    box-sizing: border-box;
+    font-weight: 700;
+    font-size: 1rem;
+    line-height: 1.2;
+  }
+
+  .access-login-modal__callsign-btn span {
+    display: block;
+    width: 100%;
+    text-align: center;
+    word-break: break-word;
+  }
+
+  .access-login-modal__callsign-btn:hover {
+    background: var(--bg-hover);
+    border-color: var(--border-strong);
+    color: var(--text-primary);
+  }
+
+  .access-login-modal__callsign-btn:active {
+    transform: translateY(1px);
+  }
+
   .personnel-modal__controls {
     padding: 12px 16px;
     border-bottom: 1px solid var(--border-color);
