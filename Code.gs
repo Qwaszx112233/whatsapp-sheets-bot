@@ -1,7 +1,7 @@
 /************ КОНФІГУРАЦІЯ ************/
 const CONFIG = {
   // Основні налаштування аркушів
-  TARGET_SHEET: '03',
+  TARGET_SHEET: '04',
   PHONES_SHEET: 'PHONES',
   DICT_SHEET: 'DICT',
   DICT_SUM_SHEET: 'DICT_SUM',
