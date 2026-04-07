@@ -92,7 +92,7 @@ function switchBotToSheet() {
 
   const html = HtmlService.createHtmlOutput(`
     <div style="font-family:Arial;padding:16px">
-      <h3 style="margin:0 0 12px;color:#075e54">🔁 Перемкнути бота на місяць</h3>
+      <h3 style="margin:0 0 12px;color:#075e54">⇄ Перемкнути бота на місяць</h3>
       <div style="margin:10px 0">
         <div style="font-size:12px;color:#666;margin-bottom:6px">Поточний: <b>${HtmlUtils_.escapeHtml(current)}</b></div>
         <select id="m" style="padding:10px;width:100%;border:1px solid #ddd;border-radius:10px;font-size:16px">
@@ -112,7 +112,7 @@ function switchBotToSheet() {
     </div>
   `).setWidth(420).setHeight(240);
 
-  SpreadsheetApp.getUi().showModalDialog(html, '🔁 Перемикання');
+  SpreadsheetApp.getUi().showModalDialog(html, '⇄ Перемикання');
 }
 
 function switchBotToMonth_(monthSheetName) {

@@ -632,7 +632,7 @@
         retryDelayMs: 450,
         reason: 'manual-reload'
       });
-      logToConsole(`🔄 SEND_PANEL перечитано: ${Array.isArray(rows) ? rows.length : 0} рядків`, 'success');
+      logToConsole(`⟲ SEND_PANEL перечитано: ${Array.isArray(rows) ? rows.length : 0} рядків`, 'success');
       showSendPanel();
     } catch (error) {
       logToConsole(`✕ Не вдалося перечитати SEND_PANEL: ${normalizeError(error)}`, 'error');
