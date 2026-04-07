@@ -6,3 +6,5 @@ backup/
 
 *.bak
 *.bak.*
+
+_tmp/
