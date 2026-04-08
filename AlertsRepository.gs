@@ -111,35 +111,6 @@ const AlertsRepository_ = (function () {
       Logger.log('[AlertsRepository] Filter create skipped: ' + e.message);
     }
   }
-  }  let changed = false;
-
-  for (let i = 0; i < headerLabels.length; i++) {
-    const current = String(existingHeaders[i] || '').trim();
-    if (current !== headerLabels[i]) {
-      sh.getRange(1, i + 1).setValue(headerLabels[i]);
-      changed = true;
-    }
-  }
-
-  if (changed || sh.getLastRow() >= 1) {
-    if (typeof stage7ApplyTableTheme_ === 'function') {
-      stage7ApplyTableTheme_(sh, 1, HEADERS.length, { freeze: false, createFilter: true, headerBackground: '#fde68a' });
-    } else {
-      sh.getRange(1, 1, 1, HEADERS.length)
-        .setFontWeight('bold')
-        .setBackground('#fde68a');
-    }
-  }
-
-  if (!sh.getFilter() && sh.getLastRow() >= 1) {
-    try {
-      sh.getRange(1, 1, Math.max(sh.getLastRow(), 1), HEADERS.length).createFilter();
-    } catch (e) {
-      Logger.log('[AlertsRepository] Filter create skipped: ' + e.message);
-    }
-  }
-
-  function _normalizeNumber_(value, fallback) {
     const n = Number(value);
     return isFinite(n) && n > 0 ? Math.floor(n) : fallback;
   }
