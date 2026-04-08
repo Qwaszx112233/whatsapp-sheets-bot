@@ -138,7 +138,8 @@ const AlertsRepository_ = (function () {
       Logger.log('[AlertsRepository] Filter create skipped: ' + e.message);
     }
   }
-  }  function _normalizeNumber_(value, fallback) {
+
+  function _normalizeNumber_(value, fallback) {
     const n = Number(value);
     return isFinite(n) && n > 0 ? Math.floor(n) : fallback;
   }
