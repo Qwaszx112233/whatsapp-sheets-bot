@@ -140,8 +140,7 @@ const OperationRepository_ = (function() {
     stage7ApplyTableTheme_(sh, 1, headerLabels.length, { freeze: false });
   }
 
-  return sh;
-  }  function ensureServiceSheets() {
+  function ensureServiceSheets() {
     return {
       ops: _sheet(SHEETS.OPS, OPS_HEADERS).getName(),
       active: _sheet(SHEETS.ACTIVE, ACTIVE_HEADERS).getName(),
@@ -175,7 +174,7 @@ const OperationRepository_ = (function() {
     headers.forEach(function(header, hIdx) { out[header] = row[hIdx]; });
     return out;
   });
-  }  function _sameOperationId(left, right) {
+  function _sameOperationId(left, right) {
     var a = _normalizeOperationId(left);
     var b = _normalizeOperationId(right);
     return !!a && !!b && a === b;
