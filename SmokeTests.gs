@@ -284,24 +284,24 @@ function runStage4ScenarioTests(options) {
   });
 
   _smokePush_(report, 'jobs api contract suite', function () {
-    [apiListStage4Jobs(), apiInstallStage4Jobs()].forEach(function (result, idx) {
+    [apiListStage7Jobs(), apiInstallStage7Jobs()].forEach(function (result, idx) {
       _assertStage4Meta_(result, 'jobs#' + (idx + 1));
     });
-    _assertUnifiedContract_(apiRunStage4Job(STAGE7_CONFIG.JOBS.SCHEDULED_HEALTHCHECK, { dryRun: true }), 'apiRunStage4Job');
+    _assertUnifiedContract_(apiRunStage7Job(STAGE7_CONFIG.JOBS.SCHEDULED_HEALTHCHECK, { dryRun: true }), 'apiRunStage7Job');
     return 'jobs-contracts-ok';
   }, { skipOnError: true });
 
-  _smokePush_(report, 'compatibility registry sanity', function () {
-    const registry = getStage4CompatibilityMap_();
-    _smokeAssert_(Array.isArray(registry) && registry.length >= 10, 'Compatibility registry надто малий');
+  _smokePush_(report, 'deprecated registry sanity', function () {
+    const registry = getDeprecatedRegistry_();
+    _smokeAssert_(Array.isArray(registry) && registry.length >= 5, 'Deprecated registry надто малий');
     registry.forEach(function (item) {
-      _smokeAssert_(!!item.name && !!item.replacement, 'Compatibility record пошкоджений');
+      _smokeAssert_(!!item.name && !!item.replacement, 'Deprecated registry record пошкоджений');
     });
-    return `compat=${registry.length}`;
+    return `deprecated=${registry.length}`;
   });
 
-  _smokePush_(report, 'compatibility wrappers lead to canonical api', function () {
-    getStage4CompatibilityMap_()
+  _smokePush_(report, 'deprecated registry tokens resolve sanely', function () {
+    getDeprecatedRegistry_()
       .filter(function (item) { return !!item.verifySourceToken; })
       .forEach(function (item) {
         const resolved = _smokeResolveFn_(item.name);

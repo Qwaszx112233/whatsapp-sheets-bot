@@ -183,11 +183,11 @@ function runHistoricalCompatibilityDiagnosticsInternal_(options) {
   const opts = options || {};
   const checks = [];
   const warnings = [];
-  const registry = typeof getStage4CompatibilityMap_ === 'function' ? getStage4CompatibilityMap_() : [];
+  const registry = typeof getDeprecatedRegistry_ === 'function' ? getDeprecatedRegistry_() : [];
 
   _stage7PushCheck_(
     checks,
-    'Compatibility registry',
+    'Deprecated registry',
     registry.length ? 'PSEUDO' : 'FAIL',
     registry.length ? `entries=${registry.length}` : 'Реєстр порожній',
     'Оновіть DeprecatedRegistry.gs'
@@ -200,7 +200,7 @@ function runHistoricalCompatibilityDiagnosticsInternal_(options) {
       `Compatibility function ${item.name}`,
       exists ? 'PSEUDO' : 'FAIL',
       exists ? `${item.scope || 'unknown scope'} -> ${item.replacement || ''}` : 'Функцію не знайдено',
-      exists ? 'Нейтральний compatibility-only alias; не canonical-path' : 'Перевірте DeprecatedRegistry.gs / відповідний файл'
+      exists ? 'Нейтральний deprecated-helper-wrapper alias; не canonical-path' : 'Перевірте DeprecatedRegistry.gs / відповідний файл'
     );
 
     if (!exists || !item.verifySourceToken) return;
@@ -223,7 +223,7 @@ function runHistoricalCompatibilityDiagnosticsInternal_(options) {
       _stage7PushCheck_(
         checks,
         `UI-ban marker ${item.name}`,
-        item.status === 'compatibility-only' ? 'PSEUDO' : 'WARN',
+        item.status === 'deprecated-helper-wrapper' ? 'PSEUDO' : 'WARN',
         `uiAllowed=${item.uiAllowed}, status=${item.status}`,
         'Compatibility wrapper не повинен повертатися як canonical UI route'
       );

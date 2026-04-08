@@ -10,7 +10,7 @@ function _stage7PushCheck_(checks, name, status, details, recommendation) {
     lowerName.indexOf('compatibility ') === 0 ||
     lowerName.indexOf('wrapper source ') === 0 ||
     lowerName.indexOf('ui-ban marker ') === 0 ||
-    lowerDetails.indexOf('compatibility-only') !== -1 ||
+    lowerDetails.indexOf('deprecated-helper-wrapper') !== -1 ||
     lowerDetails.indexOf('замінити на ') !== -1 ||
     lowerDetails.indexOf('compatibility wrappers intentionally remain') !== -1;
 
@@ -57,12 +57,6 @@ function _isProjectDocPath_(path) {
   if (!value) return false;
   if (/^[A-Z0-9_\-]+\.md$/i.test(value)) return true;
   return value.indexOf('_extras/history/') === 0;
-}
-function _isArchivePath_(path) {
-  return _isProjectDocPath_(path);
-}
-function _isReferencePath_(path) {
-  return _isProjectDocPath_(path);
 }
 function _diagPushPathCheck_(checks, name, path, expectedKind) {
   const present = _projectBundleHas_(path);
@@ -181,9 +175,6 @@ function _diagResolveSymbolStage7_(name) {
 function _fnExists_(name) {
   return typeof _diagResolveSymbolStage7_(name) === 'function';
 }
-function _stage7ResolveSymbol_(name) {
-  return _diagResolveSymbolStage7_(name);
-}
 function _stage7HasFn_(name) {
   return typeof _diagResolveSymbolStage7_(name) === 'function';
 }
@@ -222,7 +213,7 @@ function _diagIsPseudoLikeCheck_(check) {
     title.indexOf('compatibility ') === 0 ||
     title.indexOf('wrapper source ') === 0 ||
     title.indexOf('ui-ban marker ') === 0 ||
-    details.indexOf('compatibility-only') !== -1 ||
+    details.indexOf('deprecated-helper-wrapper') !== -1 ||
     details.indexOf('замінити на ') !== -1 ||
     details.indexOf('compatibility wrappers intentionally remain') !== -1;
 }
@@ -395,7 +386,6 @@ function _diagBuildStage7CoreChecks_(options) {
   var hasRetentionCleanup = _stage7HasFn_('apiStage7RunLifecycleRetentionCleanup');
   _stage7PushCheck_(checks, 'Lifecycle maintenance API', hasList && hasRepair ? 'OK' : 'FAIL', 'list=' + hasList + ', repair=' + hasRepair, 'Додайте maintenance API для repair flow');
   _stage7PushCheck_(checks, 'Lifecycle retention cleanup API', hasRetentionCleanup ? 'OK' : 'WARN', 'cleanup=' + hasRetentionCleanup, 'Додайте окремий maintenance flow для lifecycle retention cleanup');
-  _stage7PushCheck_(checks, 'Stage7 compatibility facade declared', _stage7HasFn_('apiStage4ClearCache') && _stage7HasFn_('apiStage4HealthCheck') ? 'OK' : 'WARN', 'wrappers preserved=' + (_stage7HasFn_('apiStage4ClearCache') && _stage7HasFn_('apiStage4HealthCheck')), 'Compatibility wrappers можуть лишатися лише для зовнішніх історичних викликів');
 
   ['OPS_LOG', 'ACTIVE_OPERATIONS', 'CHECKPOINTS'].forEach(function(name) {
     _diagServiceSheetCheck_(checks, name);

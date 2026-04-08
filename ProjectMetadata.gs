@@ -263,9 +263,9 @@ const PROJECT_STAGE7_CLIENT_ROUTING_GROUPS_ = Object.freeze({
 const PROJECT_MAINTENANCE_POLICY_ = Object.freeze({
   policy: 'canonical-stage7-maintenance-with-stage7-compat-facade',
   canonicalFile: 'Stage7MaintenanceApi.gs',
-  compatibilityFile: 'LegacyMaintenanceAliases.gs',
+  compatibilityFile: '',
   canonicalMaintenanceApi: 'Stage7MaintenanceApi.gs',
-  compatibilityFacade: 'LegacyMaintenanceAliases.gs',
+  compatibilityFacade: '',
   diagnosticsEntrypoint: 'apiRunStage7Diagnostics',
   healthEntrypoint: 'apiStage7HealthCheck'
 });
@@ -403,8 +403,8 @@ const PROJECT_BUNDLE_FILE_INDEX_ = Object.freeze([
   "Actions.gs",
   "Dialogs.gs",
   "SendPanelFastPaths.gs",
-  "LegacyApiAliases.gs",
-  "LegacyMaintenanceAliases.gs",
+  
+  
   "_extras/README.md",
   "_extras/backups/AccessControl.gs.bak",
   "_extras/history/CANONICALIZATION_AUDIT_2026-03-29.md",

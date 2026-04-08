@@ -336,24 +336,6 @@ function runDiagnostics() {
   DIAGNOSTICS.results.summary = summary;
   return summary;
 }
-function runAllDiagnostics() {
-  return runDiagnostics();
-}
-function runSheetsCheck() {
-  return checkSheets();
-}
-function runFilesCheck() {
-  return checkFiles();
-}
-function runDuplicatesCheck() {
-  return checkDuplicates();
-}
-function runTestsCheck() {
-  return testFunctions();
-}
-function runFullDiagnostics() {
-  return runDiagnostics();
-}
 
 /**
  * Stage 7 diagnostics — перевірка схем, repository і data-contract.
