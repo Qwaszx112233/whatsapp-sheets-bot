@@ -51,7 +51,7 @@ const Stage7AuditTrail_ = (function () {
     return {
       AUDIT_SHEET: DEFAULT_AUDIT_SHEET,
       AUDIT_HEADER_ROW: DEFAULT_HEADER_ROW
-    };
+    }
   }
 
   function _normalizeSheetName_(value) {
@@ -75,7 +75,7 @@ const Stage7AuditTrail_ = (function () {
     return {
       sheetName: _normalizeSheetName_(cfg.AUDIT_SHEET),
       headerRow: _normalizeHeaderRow_(cfg.AUDIT_HEADER_ROW)
-    };
+    }
   }
 
   function _asArray_(value) {
@@ -220,50 +220,7 @@ const Stage7AuditTrail_ = (function () {
       }
 
       return true;
-    } else {
-        sheet.getRange(headerRow, 1, 1, HEADERS.length)
-          .setFontWeight('bold')
-          .setBackground('#e8eaed');
-      }
-
-      return true;
     }
-
-    return true;
-  }
-
-  function _ensureSheet_() {
-    const cfg = _getSheetConfig_();
-    const sh = _getOrCreateSheet_();
-    _ensureHeader_(sh, cfg.headerRow);
-    return sh;
-  }
-
-  function _normalizeEntry_(entry) {
-    const e = _sanitizeEntry_(entry || {});
-    return {
-      timestamp: e.timestamp || _now_(),
-      operationId: String(e.operationId || ''),
-      scenario: String(e.scenario || ''),
-      level: String(e.level || DEFAULT_LEVEL),
-      status: String(e.status || ''),
-      initiator: String(e.initiator || ''),
-      dryRun: _toBoolean_(e.dryRun),
-      partial: _toBoolean_(e.partial),
-      affectedSheets: _asArray_(e.affectedSheets),
-      affectedEntities: _asArray_(e.affectedEntities),
-      appliedChangesCount: _toCount_(e.appliedChangesCount),
-      skippedChangesCount: _toCount_(e.skippedChangesCount),
-      warnings: _asArray_(e.warnings),
-      payload: e.payload,
-      before: e.before,
-      after: e.after,
-      changes: e.changes,
-      diagnostics: e.diagnostics,
-      message: String(e.message || ''),
-      error: _safeErrorString_(e.error),
-      context: e.context || {}
-    };
   }
 
   function _rowFromEntry_(entry) {
@@ -321,7 +278,7 @@ const Stage7AuditTrail_ = (function () {
         success: true,
         written: 0,
         sheet: _getSheetConfig_().sheetName
-      };
+      }
     }
 
     return _withDocumentLock_(function () {
@@ -335,7 +292,7 @@ const Stage7AuditTrail_ = (function () {
         sheet: sh.getName(),
         fromRow: targetRow,
         toRow: targetRow + rows.length - 1
-      };
+      }
     });
   }
 
@@ -350,14 +307,14 @@ const Stage7AuditTrail_ = (function () {
         sheet: sh.getName(),
         lastRow: sh.getLastRow(),
         headers: HEADERS.slice()
-      };
+      }
     } catch (e) {
       const errMsg = e && e.message ? e.message : String(e);
       Logger.log('[Stage7AuditTrail] ensureSheet error: ' + errMsg);
       return {
         success: false,
         error: errMsg
-      };
+      }
     }
   }
 
@@ -367,7 +324,7 @@ const Stage7AuditTrail_ = (function () {
         success: false,
         error: 'Entry is empty',
         written: 0
-      };
+      }
     }
 
     try {
@@ -379,7 +336,7 @@ const Stage7AuditTrail_ = (function () {
         success: false,
         error: errMsg,
         written: 0
-      };
+      }
     }
   }
 
@@ -394,7 +351,7 @@ const Stage7AuditTrail_ = (function () {
         success: false,
         error: errMsg,
         written: 0
-      };
+      }
     }
   }
 
@@ -409,7 +366,7 @@ const Stage7AuditTrail_ = (function () {
         return {
           success: false,
           error: 'LogsRepository not available'
-        };
+        }
       }
 
       const e = _normalizeEntry_(entry || {});
@@ -431,7 +388,7 @@ const Stage7AuditTrail_ = (function () {
           1000
         ),
         link: ''
-      };
+      }
 
       return LogsRepository_.writeBatch([legacyRow]);
     } catch (err) {
@@ -440,7 +397,7 @@ const Stage7AuditTrail_ = (function () {
       return {
         success: false,
         error: errMsg
-      };
+      }
     }
   }
 
