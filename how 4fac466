@@ -1,0 +1,2053 @@
+[33m86c722d[m [32mWed Apr 8 18:24:09 2026[m [36mAverixor[m 7.1.2
+M	OperationRepository.gs
+
+[33m06fb826[m [32mWed Apr 8 18:19:51 2026[m [36mAverixor[m 7.1.2
+M	OperationRepository.gs
+
+[33m0d8bef0[m [32mWed Apr 8 18:17:26 2026[m [36mAverixor[m 7.1.2
+M	AuditTrail.gs
+
+[33m8a3690b[m [32mWed Apr 8 18:13:29 2026[m [36mAverixor[m 7.1.2
+M	AuditTrail.gs
+
+[33m3e06cc1[m [32mWed Apr 8 18:06:30 2026[m [36mAverixor[m 7.1.2
+M	AlertsRepository.gs
+
+[33mb077f26[m [32mWed Apr 8 18:02:12 2026[m [36mAverixor[m Ignore backup files
+M	.gitignore
+
+[33m4fac466[m [32mWed Apr 8 17:58:45 2026[m [36mAverixor[m Phase 1: Ukrainian headers + freeze removal (all service sheets)
+M	AccessControl.PublicApi.gs
+M	AccessControl.SheetRepository.gs
+M	AlertsRepository.gs
+M	AuditTrail.gs
+M	JobRuntimeRepository.gs
+M	Log.gs
+M	OperationRepository.gs
+M	ServiceSheetsBootstrap.gs
+M	SheetStandards.gs
+M	Templates.gs
+
+[33m46a8aec[m [32mTue Apr 7 21:58:39 2026[m [36mAverixor[m 7.1.2
+M	Js.Actions.html
+M	Js.Diagnostics.html
+M	Js.State.html
+M	MonthSheets.gs
+
+[33m7c35dcd[m [32mTue Apr 7 21:34:33 2026[m [36mAverixor[m 7.1.2
+M	AccessControl.PublicApi.gs
+M	DataAccess.gs
+M	Diagnostics.BasicChecks.gs
+M	Diagnostics.Health.gs
+M	Js.Actions.html
+M	Js.Diagnostics.html
+M	Js.Helpers.html
+M	Js.Render.html
+M	Js.State.html
+M	refactor/access-control.chunks/16_tests.part.gs
+M	refactor/access-control.final/AccessControl.PublicApi.gs
+M	refactor/access-control.modules/AccessControl.PublicApi.part.gs
+M	refactor/access-control.runtime.bak/AccessControl.PublicApi.gs
+M	refactor/access-control.runtime/AccessControl.PublicApi.gs
+M	refactor/diagnostics.chunks/checkDuplicates.part.gs
+M	refactor/diagnostics.chunks/checkSheets.part.gs
+M	refactor/diagnostics.chunks/healthCheck.part.gs
+M	refactor/diagnostics.final/Diagnostics.BasicChecks.gs
+M	refactor/diagnostics.final/Diagnostics.Health.gs
+M	refactor/diagnostics.modules/Diagnostics.BasicChecks.part.gs
+M	refactor/diagnostics.modules/Diagnostics.Health.part.gs
+M	refactor/diagnostics.runtime/Diagnostics.BasicChecks.gs
+M	refactor/diagnostics.runtime/Diagnostics.Health.gs
+
+[33m44ea228[m [32mTue Apr 7 21:04:19 2026[m [36mAverixor[m 7.1.2
+M	.gitignore
+D	_tmp/refactor/legacy-api-refs.txt
+D	_tmp/refactor/stage-debt.after.txt
+D	_tmp/refactor/stage-debt.before.txt
+
+[33m745190d[m [32mTue Apr 7 21:01:06 2026[m [36mAverixor[m 7.1.2
+M	DeprecatedRegistry.gs
+M	Diagnostics.Stage7.Baseline.gs
+M	Diagnostics.Stage7.Core.gs
+M	Diagnostics.Stage7.Historical.gs
+M	DomainTests.gs
+R096	Stage7CompatibilityApi.gs	LegacyApiAliases.gs
+R097	Stage7CompatibilityMaintenanceApi.gs	LegacyMaintenanceAliases.gs
+M	ProjectMetadata.gs
+M	RoutingRegistry.gs
+M	SendPanelFastPaths.gs
+M	SmokeTests.gs
+M	Stage7MaintenanceApi.gs
+M	Stage7ServerApi.gs
+M	UseCases.gs
+M	WorkflowOrchestrator.gs
+A	_tmp/refactor/legacy-api-refs.txt
+A	_tmp/refactor/stage-debt.after.txt
+A	_tmp/refactor/stage-debt.before.txt
+M	refactor/diagnostics.chunks/diagHasRouteApi.part.gs
+M	refactor/diagnostics.chunks/runHistoricalStructuralDiagnosticsInternal.part.gs
+M	refactor/diagnostics.chunks/runStage5FullDiagnostics.part.gs
+M	refactor/diagnostics.chunks/runStage5FullVerboseDiagnostics.part.gs
+M	refactor/diagnostics.chunks/runStage5MetadataConsistencyCheck.part.gs
+M	refactor/diagnostics.chunks/runStage5OperationalDiagnostics.part.gs
+M	refactor/diagnostics.chunks/runStage5QuickDiagnostics.part.gs
+M	refactor/diagnostics.chunks/runStage5StructuralDiagnostics.part.gs
+M	refactor/diagnostics.chunks/runStage5SunsetDiagnostics.part.gs
+M	refactor/diagnostics.chunks/runStage6AHardeningDiagnostics.part.gs
+M	refactor/diagnostics.final/Diagnostics.Stage7.Baseline.gs
+M	refactor/diagnostics.final/Diagnostics.Stage7.Core.gs
+M	refactor/diagnostics.final/Diagnostics.Stage7.Historical.gs
+M	refactor/diagnostics.modules/Diagnostics.Stage7.Baseline.part.gs
+M	refactor/diagnostics.modules/Diagnostics.Stage7.Core.part.gs
+M	refactor/diagnostics.modules/Diagnostics.Stage7.Historical.part.gs
+M	refactor/diagnostics.runtime/Diagnostics.Stage7.Baseline.gs
+M	refactor/diagnostics.runtime/Diagnostics.Stage7.Core.gs
+M	refactor/diagnostics.runtime/Diagnostics.Stage7.Historical.gs
+
+[33m978c104[m [32mTue Apr 7 00:18:03 2026[m [36mAverixor[m 7.1.2
+M	appsscript.json
+
+[33m9aea81a[m [32mTue Apr 7 00:10:50 2026[m [36mAverixor[m 7.1.2
+D	-1 Styles.full.backup.html Styles.html Styles_00_Base.html Styles_30_Personnel.html Styles_40_SystemPanels.html Styles_50_Modals.html Styles_60_Health.html Styles_99_Responsive.html
+A	changes.diff
+D	tatus
+D	tatus --short
+
+[33m89fa4cc[m [32mMon Apr 6 23:57:21 2026[m [36mAverixor[m Merge branch 'split-styles'
+[33mf3c5968[m [32mMon Apr 6 23:57:18 2026[m [36mAverixor[m 7.1.2
+A	.vscode/settings.json
+
+[33mad1ff1f[m [32mMon Apr 6 23:56:25 2026[m [36mAverixor[m Merge branch 'split-styles'
+[33m8d59303[m [32mMon Apr 6 23:56:23 2026[m [36mAverixor[m 7.1.2
+D	.vscode/settings.json
+
+[33m23f5980[m [32mMon Apr 6 23:50:10 2026[m [36mAverixor[m 7.1.2
+A	.vscode/settings.json
+
+[33m6381793[m [32mMon Apr 6 23:44:51 2026[m [36mAverixor[m 7.1.2
+M	Sidebar.html
+
+[33m1f43b6e[m [32mMon Apr 6 23:38:31 2026[m [36mAverixor[m 7.1.2
+A	-1 Styles.full.backup.html Styles.html Styles_00_Base.html Styles_30_Personnel.html Styles_40_SystemPanels.html Styles_50_Modals.html Styles_60_Health.html Styles_99_Responsive.html
+A	tatus --short
+
+[33m851123c[m [32mMon Apr 6 23:38:31 2026[m [36mAverixor[m 7.1.2
+A	Styles.full.backup.html
+M	Styles.html
+A	Styles_00_Base.html
+A	Styles_30_Personnel.html
+A	Styles_40_SystemPanels.html
+A	Styles_50_Modals.html
+A	Styles_60_Health.html
+A	Styles_99_Responsive.html
+
+[33mbdfca4c[m [32mMon Apr 6 23:15:59 2026[m [36mAverixor[m 7.1.2
+M	Styles.html
+
+[33m334030a[m [32mMon Apr 6 22:39:05 2026[m [36mAverixor[m 7.1.2
+D	Styles.Core.html
+D	Styles.Features.html
+D	Styles.Responsive.html
+
+[33m7f67942[m [32mMon Apr 6 22:32:02 2026[m [36mAverixor[m 7.1.2
+M	.gitignore
+D	Styles.Access.html
+D	Styles.Base.html
+D	Styles.Calendar.html
+D	Styles.Console.html
+A	Styles.Core.html
+A	Styles.Features.html
+D	Styles.Health.html
+D	Styles.Layout.html
+D	Styles.Menu.html
+D	Styles.Modals.html
+D	Styles.Person.html
+M	Styles.Responsive.html
+D	Styles.Tokens.html
+M	Styles.html
+
+[33m532058b[m [32mMon Apr 6 22:18:14 2026[m [36mAverixor[m 7.1.2
+M	.gitignore
+
+[33m099b673[m [32mMon Apr 6 22:11:36 2026[m [36mAverixor[m 7.1.2
+A	Styles.Access.html
+A	Styles.Base.html
+A	Styles.Calendar.html
+A	Styles.Console.html
+A	Styles.Health.html
+A	Styles.Layout.html
+A	Styles.Menu.html
+A	Styles.Modals.html
+A	Styles.Person.html
+A	Styles.Responsive.html
+A	Styles.Tokens.html
+M	Styles.html
+M	tatus
+
+[33ma2b2172[m [32mMon Apr 6 21:51:40 2026[m [36mAverixor[m Delete Js.Security.html.bak.20260406_170556
+D	Js.Security.html.bak.20260406_170556
+
+[33m69a7d82[m [32mMon Apr 6 21:51:06 2026[m [36mAverixor[m Delete AccessControl.gs.disabled
+D	AccessControl.gs.disabled
+
+[33m2d8f344[m [32mMon Apr 6 21:50:55 2026[m [36mAverixor[m Delete AccessControl.gs.bak
+D	AccessControl.gs.bak
+
+[33m05c2726[m [32mMon Apr 6 21:50:31 2026[m [36mAverixor[m Delete Styles.html.bak.20260406_170556
+D	Styles.html.bak.20260406_170556
+
+[33mf7efe5d[m [32mMon Apr 6 17:07:21 2026[m [36mAverixor[m 7.1.2
+M	Js.Security.html
+A	Js.Security.html.bak.20260406_170556
+M	Styles.html
+A	Styles.html.bak.20260406_170556
+D	backup/access-control-integration/AccessControl.gs.legacy
+A	tatus
+
+[33ma36db3b[m [32mMon Apr 6 14:02:18 2026[m [36mAverixor[m 7.1.2
+A	.gitignore
+D	backup/Js.Render.html.20260406-135058.bak
+
+[33mfd5951c[m [32mMon Apr 6 13:57:50 2026[m [36mAverixor[m 7.1.2
+A	backup/Js.Render.html.20260406-135058.bak
+
+[33m40a57d1[m [32mMon Apr 6 13:13:20 2026[m [36mAverixor[m Merge branch 'refactor/split-diagnostics'
+[33me1b8735[m [32mMon Apr 6 12:54:45 2026[m [36mAverixor[m 7.1.2
+A	Diagnostics.BasicChecks.gs
+A	Diagnostics.Core.gs
+A	Diagnostics.Debug.gs
+A	Diagnostics.Health.gs
+A	Diagnostics.Stage7.Baseline.gs
+A	Diagnostics.Stage7.Core.gs
+A	Diagnostics.Stage7.Historical.gs
+D	Diagnostics.gs
+D	Diagnostics.gs.bak
+D	Diagnostics.gs.disabled
+
+[33m4d36be8[m [32mMon Apr 6 12:42:41 2026[m [36mAverixor[m refactor(diagnostics): split diagnostics into modular files
+A	Diagnostics.gs.bak
+A	Diagnostics.gs.disabled
+A	refactor/diagnostics.chunks/00_preamble.part.gs
+A	refactor/diagnostics.chunks/addHealthCheck.part.gs
+A	refactor/diagnostics.chunks/checkDuplicates.part.gs
+A	refactor/diagnostics.chunks/checkFiles.part.gs
+A	refactor/diagnostics.chunks/checkSheets.part.gs
+A	refactor/diagnostics.chunks/debugAccess.part.gs
+A	refactor/diagnostics.chunks/debugSendPanelBridge.part.gs
+A	refactor/diagnostics.chunks/debugSendPanelNow.part.gs
+A	refactor/diagnostics.chunks/diagAppendCompatibilitySplitCheck.part.gs
+A	refactor/diagnostics.chunks/diagAppendLifecyclePolicyCheck.part.gs
+A	refactor/diagnostics.chunks/diagAppendPendingRepairsCheck.part.gs
+A	refactor/diagnostics.chunks/diagBuildCounts.part.gs
+A	refactor/diagnostics.chunks/diagBuildReport.part.gs
+A	refactor/diagnostics.chunks/diagBuildStage7CoreChecks.part.gs
+A	refactor/diagnostics.chunks/diagBuildWarningsFromChecks.part.gs
+A	refactor/diagnostics.chunks/diagGlobal.part.gs
+A	refactor/diagnostics.chunks/diagHasRouteApi.part.gs
+A	refactor/diagnostics.chunks/diagIsPseudoLikeCheck.part.gs
+A	refactor/diagnostics.chunks/diagMergeChecks.part.gs
+A	refactor/diagnostics.chunks/diagNormalizeCheck.part.gs
+A	refactor/diagnostics.chunks/diagNormalizeReportChecks.part.gs
+A	refactor/diagnostics.chunks/diagNormalizeStatus.part.gs
+A	refactor/diagnostics.chunks/diagPushPathCheck.part.gs
+A	refactor/diagnostics.chunks/diagResolveKnownSymbolStage7.part.gs
+A	refactor/diagnostics.chunks/diagResolvePath.part.gs
+A	refactor/diagnostics.chunks/diagResolveSeverity.part.gs
+A	refactor/diagnostics.chunks/diagResolveSymbolStage7.part.gs
+A	refactor/diagnostics.chunks/diagResolveUiGroup.part.gs
+A	refactor/diagnostics.chunks/diagServiceSheetCheck.part.gs
+A	refactor/diagnostics.chunks/ensureSendPanelTechnicalSheet.part.gs
+A	refactor/diagnostics.chunks/errMsg.part.gs
+A	refactor/diagnostics.chunks/fnExists.part.gs
+A	refactor/diagnostics.chunks/getSS.part.gs
+A	refactor/diagnostics.chunks/global.part.gs
+A	refactor/diagnostics.chunks/healthCheck.part.gs
+A	refactor/diagnostics.chunks/isArchivePath.part.gs
+A	refactor/diagnostics.chunks/isProjectDocPath.part.gs
+A	refactor/diagnostics.chunks/isReferencePath.part.gs
+A	refactor/diagnostics.chunks/isTestMode.part.gs
+A	refactor/diagnostics.chunks/makeReport.part.gs
+A	refactor/diagnostics.chunks/projectBundleHas.part.gs
+A	refactor/diagnostics.chunks/projectBundleMissing.part.gs
+A	refactor/diagnostics.chunks/pushCheck.part.gs
+A	refactor/diagnostics.chunks/releaseStageLabel.part.gs
+A	refactor/diagnostics.chunks/runAllDiagnostics.part.gs
+A	refactor/diagnostics.chunks/runDiagnostics.part.gs
+A	refactor/diagnostics.chunks/runDuplicatesCheck.part.gs
+A	refactor/diagnostics.chunks/runFilesCheck.part.gs
+A	refactor/diagnostics.chunks/runFullDiagnostics.part.gs
+A	refactor/diagnostics.chunks/runHealthCheckItem.part.gs
+A	refactor/diagnostics.chunks/runHistoricalCompatibilityDiagnosticsInternal.part.gs
+A	refactor/diagnostics.chunks/runHistoricalFullDiagnosticsInternal.part.gs
+A	refactor/diagnostics.chunks/runHistoricalQuickDiagnosticsInternal.part.gs
+A	refactor/diagnostics.chunks/runHistoricalStructuralDiagnosticsInternal.part.gs
+A	refactor/diagnostics.chunks/runSheetsCheck.part.gs
+A	refactor/diagnostics.chunks/runStage3HealthCheck.part.gs
+A	refactor/diagnostics.chunks/runStage41ProjectConsistencyCheck.part.gs
+A	refactor/diagnostics.chunks/runStage4HealthCheck.part.gs
+A	refactor/diagnostics.chunks/runStage5FullDiagnostics.part.gs
+A	refactor/diagnostics.chunks/runStage5FullVerboseDiagnostics.part.gs
+A	refactor/diagnostics.chunks/runStage5MetadataConsistencyCheck.part.gs
+A	refactor/diagnostics.chunks/runStage5OperationalDiagnostics.part.gs
+A	refactor/diagnostics.chunks/runStage5QuickDiagnostics.part.gs
+A	refactor/diagnostics.chunks/runStage5StructuralDiagnostics.part.gs
+A	refactor/diagnostics.chunks/runStage5SunsetDiagnostics.part.gs
+A	refactor/diagnostics.chunks/runStage6AHardeningDiagnostics.part.gs
+A	refactor/diagnostics.chunks/runTestsCheck.part.gs
+A	refactor/diagnostics.chunks/safeErr.part.gs
+A	refactor/diagnostics.chunks/setTestMode.part.gs
+A	refactor/diagnostics.chunks/stage7HasFn.part.gs
+A	refactor/diagnostics.chunks/stage7PushCheck.part.gs
+A	refactor/diagnostics.chunks/stage7ResolveSymbol.part.gs
+A	refactor/diagnostics.chunks/testFunctions.part.gs
+A	refactor/diagnostics.chunks/zz_leftovers.part.gs
+A	refactor/diagnostics.final/Diagnostics.BasicChecks.gs
+A	refactor/diagnostics.final/Diagnostics.Core.gs
+A	refactor/diagnostics.final/Diagnostics.Debug.gs
+A	refactor/diagnostics.final/Diagnostics.Health.gs
+A	refactor/diagnostics.final/Diagnostics.Stage7.Baseline.gs
+A	refactor/diagnostics.final/Diagnostics.Stage7.Core.gs
+A	refactor/diagnostics.final/Diagnostics.Stage7.Historical.gs
+A	refactor/diagnostics.modules/Diagnostics.BasicChecks.part.gs
+A	refactor/diagnostics.modules/Diagnostics.Core.part.gs
+A	refactor/diagnostics.modules/Diagnostics.Debug.part.gs
+A	refactor/diagnostics.modules/Diagnostics.Health.part.gs
+A	refactor/diagnostics.modules/Diagnostics.Stage7.Baseline.part.gs
+A	refactor/diagnostics.modules/Diagnostics.Stage7.Core.part.gs
+A	refactor/diagnostics.modules/Diagnostics.Stage7.Historical.part.gs
+A	refactor/diagnostics.runtime/Diagnostics.BasicChecks.gs
+A	refactor/diagnostics.runtime/Diagnostics.Core.gs
+A	refactor/diagnostics.runtime/Diagnostics.Debug.gs
+A	refactor/diagnostics.runtime/Diagnostics.Health.gs
+A	refactor/diagnostics.runtime/Diagnostics.Stage7.Baseline.gs
+A	refactor/diagnostics.runtime/Diagnostics.Stage7.Core.gs
+A	refactor/diagnostics.runtime/Diagnostics.Stage7.Historical.gs
+A	tools/split_diagnostics.py
+
+[33md4cc13f[m [32mMon Apr 6 12:34:28 2026[m [36mAverixor[m 7.1.2
+A	.clasp.json
+A	.claspignore
+D	AccessControl.gs
+
+[33m113c8dd[m [32mMon Apr 6 11:59:44 2026[m [36mAverixor[m refactor(access): stage runtime split modules for GAS integration
+A	AccessControl.AuthResolver.gs
+A	AccessControl.Core.gs
+A	AccessControl.Lockout.gs
+A	AccessControl.Mutations.gs
+A	AccessControl.PublicApi.gs
+A	AccessControl.SheetRepository.gs
+A	AccessControl.gs.disabled
+A	backup/access-control-integration/AccessControl.gs.legacy
+
+[33mb83291d[m [32mMon Apr 6 11:54:11 2026[m [36mAverixor[m refactor(access): remove cross-file IIFE and build runtime facade
+A	refactor/access-control.runtime.bak/AccessControl.AuthResolver.gs
+A	refactor/access-control.runtime.bak/AccessControl.Core.gs
+A	refactor/access-control.runtime.bak/AccessControl.Lockout.gs
+A	refactor/access-control.runtime.bak/AccessControl.Mutations.gs
+A	refactor/access-control.runtime.bak/AccessControl.PublicApi.gs
+A	refactor/access-control.runtime.bak/AccessControl.SheetRepository.gs
+A	refactor/access-control.runtime/AccessControl.AuthResolver.gs
+A	refactor/access-control.runtime/AccessControl.Core.gs
+A	refactor/access-control.runtime/AccessControl.Lockout.gs
+A	refactor/access-control.runtime/AccessControl.Mutations.gs
+A	refactor/access-control.runtime/AccessControl.PublicApi.gs
+A	refactor/access-control.runtime/AccessControl.SheetRepository.gs
+A	tools/normalize_access_runtime.py
+
+[33mf80d67a[m [32mMon Apr 6 11:34:39 2026[m [36mAverixor[m chore(access): regenerate split chunks and complete public api grouping
+A	AccessControl.gs.bak
+A	refactor/access-control.chunks/00_preamble.part.gs
+A	refactor/access-control.chunks/01_reason_codes.part.gs
+A	refactor/access-control.chunks/02_utilities.part.gs
+A	refactor/access-control.chunks/03_hashing.part.gs
+A	refactor/access-control.chunks/04_sheet_operations_header_based_safe_reads_writes.part.gs
+A	refactor/access-control.chunks/05_entry_status.part.gs
+A	refactor/access-control.chunks/06_lockout_state.part.gs
+A	refactor/access-control.chunks/07_unified_mutation_operations.part.gs
+A	refactor/access-control.chunks/08_access_policy.part.gs
+A	refactor/access-control.chunks/09_unified_user_resolver.part.gs
+A	refactor/access-control.chunks/10_main_describe_function.part.gs
+A	refactor/access-control.chunks/11_assert_enforcement.part.gs
+A	refactor/access-control.chunks/12_email_role_lists.part.gs
+A	refactor/access-control.chunks/13_role_helpers.part.gs
+A	refactor/access-control.chunks/14_validation_diagnostics.part.gs
+A	refactor/access-control.chunks/15_sheet_ui.part.gs
+A	refactor/access-control.chunks/16_tests.part.gs
+A	refactor/access-control.chunks/17_exports.part.gs
+A	refactor/access-control.final/AccessControl.AuthResolver.gs
+A	refactor/access-control.final/AccessControl.Core.gs
+A	refactor/access-control.final/AccessControl.Lockout.gs
+A	refactor/access-control.final/AccessControl.Mutations.gs
+A	refactor/access-control.final/AccessControl.PublicApi.gs
+A	refactor/access-control.final/AccessControl.SheetRepository.gs
+A	refactor/access-control.modules/AccessControl.AuthResolver.part.gs
+A	refactor/access-control.modules/AccessControl.Core.part.gs
+A	refactor/access-control.modules/AccessControl.Lockout.part.gs
+A	refactor/access-control.modules/AccessControl.Mutations.part.gs
+A	refactor/access-control.modules/AccessControl.PublicApi.part.gs
+A	refactor/access-control.modules/AccessControl.SheetRepository.part.gs
+A	tools/split_access_control.py
+
+[33me9985b3[m [32mMon Apr 6 11:10:30 2026[m [36mAverixor[m Split Stage7 config into canonical config, compat config, and lock helpers
+A	LockHelpers.gs
+A	Stage7CompatConfig.gs
+M	Stage7Config.gs
+
+[33m0671f21[m [32mMon Apr 6 09:56:20 2026[m [36mAverixor[m 7.1.2
+M	Code.gs
+M	Summaries.gs
+
+[33m6a3cadd[m [32mMon Apr 6 09:38:32 2026[m [36mAverixor[m 7.1.2
+M	Code.gs
+
+[33mb5436c6[m [32mMon Apr 6 08:13:26 2026[m [36mAverixor[m 7.1.2
+A	.github/ISSUE_TEMPLATE/bug_report.md
+A	.github/ISSUE_TEMPLATE/feature_request.md
+
+[33m5e3e2be[m [32mSun Apr 5 22:37:33 2026[m [36mAverixor[m 7.1.2
+M	UseCases.gs
+
+[33m3ec3855[m [32mSun Apr 5 22:37:07 2026[m [36mAverixor[m 7.1.2
+M	SmokeTests.gs
+
+[33mfc1af1f[m [32mSun Apr 5 22:07:38 2026[m [36mAverixor[m 7.1.2
+M	AccessControl.gs
+
+[33m1bdcd01[m [32mSun Apr 5 21:37:26 2026[m [36mAverixor[m 7.1.2
+[33mf4ca0c8[m [32mSun Apr 5 21:36:17 2026[m [36mAverixor[m 7.1.2
+M	ProjectMetadata.gs
+M	SmokeTests.gs
+
+[33m86083f8[m [32mSun Apr 5 21:19:05 2026[m [36mAverixor[m 7.2
+M	SmokeTests.gs
+
+[33mf1c101a[m [32mSun Apr 5 20:58:22 2026[m [36mAverixor[m 7.2
+M	PersonsRepository.gs
+
+[33m62cbc7b[m [32mSun Apr 5 20:57:58 2026[m [36mAverixor[m 7.2
+M	SmokeTests.gs
+
+[33mb14be9f[m [32mSun Apr 5 20:15:19 2026[m [36mAverixor[m Delete CANONICALIZATION_AUDIT.md
+D	CANONICALIZATION_AUDIT.md
+
+[33mdf6de30[m [32mSun Apr 5 20:13:56 2026[m [36mAverixor[m Delete PATCH_NOTES_ACCESS_LOGIN_BY_CALLSIGN_2026-04-05.txt
+D	PATCH_NOTES_ACCESS_LOGIN_BY_CALLSIGN_2026-04-05.txt
+
+[33mb56006f[m [32mSun Apr 5 20:13:43 2026[m [36mAverixor[m Delete PATCH_NOTES_LOGIN_IDENTIFIER_CALLSIGN_2026-04-05.txt
+D	PATCH_NOTES_LOGIN_IDENTIFIER_CALLSIGN_2026-04-05.txt
+
+[33mdcc6f3d[m [32mSun Apr 5 20:13:27 2026[m [36mAverixor[m Delete PATCH_NOTES_LOGIN_IDENTIFIER_CALLSIGN_GPS_LOADING_2026-04-05.txt
+D	PATCH_NOTES_LOGIN_IDENTIFIER_CALLSIGN_GPS_LOADING_2026-04-05.txt
+
+[33m426dca3[m [32mSun Apr 5 20:13:09 2026[m [36mAverixor[m Delete SELF_CONTAINMENT_AUDIT_2026-03-29.md
+D	SELF_CONTAINMENT_AUDIT_2026-03-29.md
+
+[33m8070956[m [32mSun Apr 5 20:12:52 2026[m [36mAverixor[m Delete SELF_CONTAINMENT_VERIFICATION_REPORT.md
+D	SELF_CONTAINMENT_VERIFICATION_REPORT.md
+
+[33m42ebc8d[m [32mSun Apr 5 20:06:48 2026[m [36mAverixor[m 7.2
+A	_extras/README.md
+A	_extras/backups/AccessControl.gs.bak
+A	_extras/history/ACCESS_VIEWER_RESTRICTIONS_2026-03-29.md
+A	_extras/history/AUDIT_REPORT_2026-03-24.md
+A	_extras/history/CANONICALIZATION_AUDIT_2026-03-29.md
+A	_extras/history/CANONICAL_APIS_STAGE7_FINAL_STABILIZED.md
+A	_extras/history/CHANGELOG_STAGE7_FINAL_STABILIZED.md
+A	_extras/history/COMMANDS_TERMINAL.md
+A	_extras/history/COMPARISON_AND_MERGE_REPORT_2026-03-26.md
+A	_extras/history/COMPATIBILITY_ALIASES_STAGE7_FINAL_STABILIZED.md
+A	_extras/history/FILES_TO_CREATE_IN_GAS_WEB_EDITOR.txt
+A	_extras/history/FINAL_DELIVERY_REPORT_2026-03-29.md
+A	_extras/history/FINAL_STABILIZATION_REPORT_2026-03-26.md
+A	_extras/history/GAS_WEB_EDITOR_IMPORT_GUIDE.md
+A	_extras/history/IMPLEMENTATION_REPORT_2026-03-22.md
+A	_extras/history/PATCH_NOTES_ACCESS_LOGIN_BY_CALLSIGN_2026-04-05.txt
+A	_extras/history/PATCH_NOTES_LOGIN_IDENTIFIER_CALLSIGN_2026-04-05.txt
+A	_extras/history/PATCH_NOTES_LOGIN_IDENTIFIER_CALLSIGN_GPS_LOADING_2026-04-05.txt
+A	_extras/history/README.md
+A	_extras/history/RELEASE_NAMING_HOTFIX_2026-03-26.md
+A	_extras/history/RESOLVER_HOTFIX_2026-03-26.md
+A	_extras/history/SCHEMA.md
+A	_extras/history/SELF_CONTAINMENT_AUDIT_2026-03-29.md
+A	_extras/history/SELF_CONTAINMENT_VERIFICATION_REPORT_2026-03-29.md
+A	_extras/history/SEND_PANEL_TZ_IMPLEMENTATION_2026-03-26.md
+A	_extras/history/STABILIZATION_CHECK_REPORT_STAGE7_FINAL.md
+A	_extras/history/STABILIZATION_NOTES_2026-03-22.md
+A	_extras/history/STAGE7_REPORT.md
+A	_extras/history/TZ_EXECUTION_REPORT_2026-03-28.md
+A	_extras/package.json
+A	_extras/static-checks.js
+A	_extras/tools/package.json
+A	_extras/tools/static-checks.js
+A	_extras/tools/validate-gs-syntax.js
+A	_extras/validate-gs-syntax.js
+
+[33md95d707[m [32mSun Apr 5 20:06:08 2026[m [36mAverixor[m Delete _extras directory
+D	_extras/ARCHITECTURE.md
+D	_extras/AUDIT_REPORT_2026-03-24.md
+D	_extras/CANONICAL_APIS_STAGE7_FINAL_STABILIZED.md
+D	_extras/CHANGELOG.md
+D	_extras/CHANGELOG_STAGE7_FINAL_STABILIZED.md
+D	_extras/COMMANDS_TERMINAL.md
+D	_extras/COMPARISON_AND_MERGE_REPORT_2026-03-26.md
+D	_extras/COMPATIBILITY_ALIASES_STAGE7_FINAL_STABILIZED.md
+D	_extras/FILES_TO_CREATE_IN_GAS_WEB_EDITOR.txt
+D	_extras/FINAL_STABILIZATION_REPORT_2026-03-26.md
+D	_extras/GAS_WEB_EDITOR_IMPORT_GUIDE.md
+D	_extras/IMPLEMENTATION_REPORT_2026-03-22.md
+D	_extras/README.md
+D	_extras/RELEASE_NAMING_HOTFIX_2026-03-26.md
+D	_extras/RESOLVER_HOTFIX_2026-03-26.md
+D	_extras/RUNBOOK.md
+D	_extras/SCHEMA.md
+D	_extras/SECURITY.md
+D	_extras/SEND_PANEL_TZ_IMPLEMENTATION_2026-03-26.md
+D	_extras/STABILIZATION_CHECK_REPORT_STAGE7_FINAL.md
+D	_extras/STABILIZATION_NOTES_2026-03-22.md
+D	_extras/STAGE7_REPORT.md
+D	_extras/TZ_EXECUTION_REPORT_2026-03-28.md
+D	_extras/TZ_EXECUTION_REPORT_2026-03-29.md
+D	_extras/backups/AccessControl.gs.bak
+D	_extras/history/ACCESS_VIEWER_RESTRICTIONS_2026-03-29.md
+D	_extras/history/AUDIT_REPORT_2026-03-24.md
+D	_extras/history/CANONICALIZATION_AUDIT_2026-03-29.md
+D	_extras/history/CANONICAL_APIS_STAGE7_FINAL_STABILIZED.md
+D	_extras/history/CHANGELOG_STAGE7_FINAL_STABILIZED.md
+D	_extras/history/COMMANDS_TERMINAL.md
+D	_extras/history/COMPARISON_AND_MERGE_REPORT_2026-03-26.md
+D	_extras/history/COMPATIBILITY_ALIASES_STAGE7_FINAL_STABILIZED.md
+D	_extras/history/FILES_TO_CREATE_IN_GAS_WEB_EDITOR.txt
+D	_extras/history/FINAL_DELIVERY_REPORT_2026-03-29.md
+D	_extras/history/FINAL_STABILIZATION_REPORT_2026-03-26.md
+D	_extras/history/GAS_WEB_EDITOR_IMPORT_GUIDE.md
+D	_extras/history/IMPLEMENTATION_REPORT_2026-03-22.md
+D	_extras/history/PATCH_NOTES_ACCESS_LOGIN_BY_CALLSIGN_2026-04-05.txt
+D	_extras/history/PATCH_NOTES_LOGIN_IDENTIFIER_CALLSIGN_2026-04-05.txt
+D	_extras/history/PATCH_NOTES_LOGIN_IDENTIFIER_CALLSIGN_GPS_LOADING_2026-04-05.txt
+D	_extras/history/README.md
+D	_extras/history/RELEASE_NAMING_HOTFIX_2026-03-26.md
+D	_extras/history/RESOLVER_HOTFIX_2026-03-26.md
+D	_extras/history/SCHEMA.md
+D	_extras/history/SELF_CONTAINMENT_AUDIT_2026-03-29.md
+D	_extras/history/SELF_CONTAINMENT_VERIFICATION_REPORT_2026-03-29.md
+D	_extras/history/SEND_PANEL_TZ_IMPLEMENTATION_2026-03-26.md
+D	_extras/history/STABILIZATION_CHECK_REPORT_STAGE7_FINAL.md
+D	_extras/history/STABILIZATION_NOTES_2026-03-22.md
+D	_extras/history/STAGE7_REPORT.md
+D	_extras/history/TZ_EXECUTION_REPORT_2026-03-28.md
+D	_extras/package.json
+D	_extras/static-checks.js
+D	_extras/tools/package.json
+D	_extras/tools/static-checks.js
+D	_extras/tools/validate-gs-syntax.js
+D	_extras/validate-gs-syntax.js
+
+[33m29c3ebf[m [32mSun Apr 5 20:05:37 2026[m [36mAverixor[m Delete _extras/ACCESS_VIEWER_RESTRICTIONS_2026-03-29.md
+D	_extras/ACCESS_VIEWER_RESTRICTIONS_2026-03-29.md
+
+[33mfbb1d8e[m [32mSun Apr 5 20:04:51 2026[m [36mAverixor[m 7.2
+M	_extras/README.md
+A	_extras/history/CANONICALIZATION_AUDIT_2026-03-29.md
+A	_extras/history/PATCH_NOTES_ACCESS_LOGIN_BY_CALLSIGN_2026-04-05.txt
+A	_extras/history/PATCH_NOTES_LOGIN_IDENTIFIER_CALLSIGN_2026-04-05.txt
+A	_extras/history/PATCH_NOTES_LOGIN_IDENTIFIER_CALLSIGN_GPS_LOADING_2026-04-05.txt
+A	_extras/history/README.md
+A	_extras/history/SELF_CONTAINMENT_AUDIT_2026-03-29.md
+A	_extras/history/SELF_CONTAINMENT_VERIFICATION_REPORT_2026-03-29.md
+
+[33m0faff1d[m [32mSun Apr 5 20:03:38 2026[m [36mAverixor[m 7.2
+M	ARCHITECTURE.md
+M	CHANGELOG.md
+M	ProjectMetadata.gs
+M	README.md
+M	RUNBOOK.md
+M	SECURITY.md
+
+[33me0c6ebf[m [32mSun Apr 5 19:37:24 2026[m [36mAverixor[m 7.2
+M	Js.State.html
+
+[33maaf4136[m [32mSun Apr 5 19:37:00 2026[m [36mAverixor[m 7.2
+M	Js.Security.html
+
+[33me455158[m [32mSun Apr 5 19:18:15 2026[m [36mAverixor[m 7.2
+M	Js.State.html
+
+[33m233473f[m [32mSun Apr 5 19:17:55 2026[m [36mAverixor[m 7.2
+M	Js.Security.html
+
+[33m399af9c[m [32mSun Apr 5 18:37:02 2026[m [36mAverixor[m 7.2
+M	Stage7MaintenanceApi.gs
+
+[33m4e7df6e[m [32mSun Apr 5 18:36:10 2026[m [36mAverixor[m 7.2
+M	Js.Render.html
+
+[33m1f59b33[m [32mSun Apr 5 18:35:14 2026[m [36mAverixor[m 7.2
+M	Js.Diagnostics.html
+
+[33md68853e[m [32mSun Apr 5 18:34:34 2026[m [36mAverixor[m 7.2
+M	Js.Api.html
+
+[33m56c9539[m [32mSun Apr 5 18:03:22 2026[m [36mAverixor[m 7.2
+M	Stage7ServerApi.gs
+
+[33m75f745e[m [32mSun Apr 5 18:02:07 2026[m [36mAverixor[m 7.2
+M	Js.Security.html
+
+[33mbf4f05b[m [32mSun Apr 5 18:01:45 2026[m [36mAverixor[m 7.2
+M	Js.Helpers.html
+
+[33m07ff2c5[m [32mSun Apr 5 18:01:05 2026[m [36mAverixor[m 7.2
+M	Js.Api.html
+
+[33m9b458a4[m [32mSun Apr 5 18:00:11 2026[m [36mAverixor[m 7.2
+M	Js.Actions.html
+
+[33me343c4a[m [32mSun Apr 5 17:59:30 2026[m [36mAverixor[m 7.2
+M	AccessControl.gs
+
+[33m7a8ad8c[m [32mSun Apr 5 17:40:30 2026[m [36mAverixor[m 7.2
+M	AccessControl.gs
+
+[33mb0abf4e[m [32mSun Apr 5 17:39:57 2026[m [36mAverixor[m 7.2
+M	Js.Security.html
+
+[33m70317c6[m [32mSun Apr 5 17:39:17 2026[m [36mAverixor[m 7.2
+M	Js.Helpers.html
+
+[33mfa56e06[m [32mSun Apr 5 17:38:16 2026[m [36mAverixor[m 7.2
+M	Js.Api.html
+
+[33md3faad9[m [32mSun Apr 5 17:37:23 2026[m [36mAverixor[m 7.2
+M	Js.Actions.html
+
+[33m99cb077[m [32mSun Apr 5 17:35:26 2026[m [36mAverixor[m 7.2
+M	Stage7ServerApi.gs
+
+[33md90bf72[m [32mSun Apr 5 17:30:03 2026[m [36mAverixor[m 7.2
+M	Stage7ServerApi.gs
+
+[33m0b4d099[m [32mSun Apr 5 17:29:29 2026[m [36mAverixor[m 7.2
+M	Js.Actions.html
+
+[33m3a2bb24[m [32mSun Apr 5 17:28:54 2026[m [36mAverixor[m 7.2
+M	Js.Api.html
+
+[33m503ef61[m [32mSun Apr 5 17:28:26 2026[m [36mAverixor[m 7.2
+M	AccessControl.gs
+
+[33m171d0b7[m [32mSun Apr 5 17:27:53 2026[m [36mAverixor[m 7.2
+M	AccessControl.gs
+
+[33m68a29e6[m [32mSun Apr 5 13:31:36 2026[m [36mAverixor[m Delete Js.Security.html.jscheck
+D	Js.Security.html.jscheck
+
+[33mb1d620d[m [32mSun Apr 5 13:29:57 2026[m [36mAverixor[m Delete Js.Api.html.jscheck
+D	Js.Api.html.jscheck
+
+[33m52a8653[m [32mSun Apr 5 13:23:46 2026[m [36mAverixor[m 7.2
+M	AccessControl.gs
+M	Js.Api.html
+A	Js.Api.html.jscheck
+M	Js.Security.html
+A	Js.Security.html.jscheck
+A	PATCH_NOTES_LOGIN_IDENTIFIER_CALLSIGN_GPS_LOADING_2026-04-05.txt
+M	Stage7MaintenanceApi.gs
+M	Styles.html
+
+[33m03af5e6[m [32mSun Apr 5 11:46:08 2026[m [36mAverixor[m 7.2
+M	AccessControl.gs
+M	AccessEnforcement.gs
+M	Js.Api.html
+M	Js.Security.html
+A	PATCH_NOTES_LOGIN_IDENTIFIER_CALLSIGN_2026-04-05.txt
+M	Stage7MaintenanceApi.gs
+M	Styles.html
+
+[33m02fbecc[m [32mSun Apr 5 10:37:49 2026[m [36mAverixor[m 7.2
+M	Js.Security.html
+M	Styles.html
+
+[33m6aa8c3b[m [32mSun Apr 5 10:11:58 2026[m [36mAverixor[m 7.2
+M	Js.Security.html
+M	Styles.html
+
+[33m7ee2812[m [32mSun Apr 5 09:38:28 2026[m [36mAverixor[m 7.2
+M	Js.Security.html
+M	Sidebar.html
+M	Styles.html
+
+[33m25979cd[m [32mSun Apr 5 08:21:22 2026[m [36mAverixor[m 7.2
+M	AccessControl.gs
+M	Js.Actions.html
+M	Js.Api.html
+M	Js.Diagnostics.html
+M	Js.Helpers.html
+M	Js.Render.html
+M	Js.Security.html
+M	Js.State.html
+A	PATCH_NOTES_ACCESS_LOGIN_BY_CALLSIGN_2026-04-05.txt
+M	PersonCalendar.html
+M	SendPanelRepository.gs
+M	Stage7MaintenanceApi.gs
+M	Stage7ServerApi.gs
+
+[33ma8243c1[m [32mSat Apr 4 22:32:32 2026[m [36mAverixor[m 7.2
+M	Sidebar.html
+
+[33mf28163f[m [32mSat Apr 4 22:24:22 2026[m [36mAverixor[m 7.2
+M	Js.Actions.html
+M	Js.Diagnostics.html
+M	Js.Helpers.html
+M	Js.Render.html
+M	Js.Security.html
+M	Js.State.html
+M	PersonCalendar.html
+M	Sidebar.html
+
+[33m3652a70[m [32mSat Apr 4 21:12:35 2026[m [36mAverixor[m 7.2
+M	SendPanelFastPaths.gs
+
+[33m10a7a60[m [32mSat Apr 4 20:48:47 2026[m [36mAverixor[m 7.2
+M	Js.Api.html
+M	Js.Render.html
+A	SendPanelFastPaths.gs
+M	SendPanelRepository.gs
+M	Stage7ServerApi.gs
+
+[33maefdf08[m [32mSat Apr 4 20:05:47 2026[m [36mAverixor[m 7.2
+M	Js.Actions.html
+M	Js.Api.html
+M	Js.Render.html
+M	Js.State.html
+M	SendPanelRepository.gs
+M	Sidebar.html
+M	Stage7ServerApi.gs
+M	Styles.html
+
+[33ma6b2a05[m [32mSat Apr 4 17:40:21 2026[m [36mAverixor[m 7.2
+M	Js.Render.html
+
+[33m918dd01[m [32mSat Apr 4 17:37:25 2026[m [36mAverixor[m 7.2
+M	SendPanelRepository.gs
+
+[33m42cbf14[m [32mSat Apr 4 17:35:48 2026[m [36mAverixor[m 7.2
+M	WorkflowOrchestrator.gs
+
+[33m0980ced[m [32mSat Apr 4 17:34:43 2026[m [36mAverixor[m 7.2
+M	Js.Render.html
+
+[33mac7f015[m [32mSat Apr 4 16:39:38 2026[m [36mAverixor[m 7.2
+M	SendPanel.gs
+
+[33mf504d49[m [32mSat Apr 4 15:34:45 2026[m [36mAverixor[m 7.2
+M	appsscript.json
+
+[33m4ffe6e4[m [32mSat Apr 4 15:34:20 2026[m [36mAverixor[m 7.2
+M	WorkflowOrchestrator.gs
+
+[33m0d2f432[m [32mSat Apr 4 15:31:22 2026[m [36mAverixor[m 7.2
+M	VacationEngine.gs
+
+[33mf60a5dc[m [32mSat Apr 4 15:30:54 2026[m [36mAverixor[m 7.2
+M	Utils.gs
+
+[33mcee10af[m [32mSat Apr 4 15:30:16 2026[m [36mAverixor[m 7.2
+M	UseCases.gs
+
+[33mb242c33[m [32mSat Apr 4 15:29:41 2026[m [36mAverixor[m 7.2
+[33maefa91d[m [32mSat Apr 4 15:29:08 2026[m [36mAverixor[m 7.2
+M	Templates.gs
+
+[33m8fc68e6[m [32mSat Apr 4 15:26:03 2026[m [36mAverixor[m 7.2
+M	Summaries.gs
+
+[33m1ce58d9[m [32mSat Apr 4 15:25:27 2026[m [36mAverixor[m 7.2
+[33mf1b7855[m [32mSat Apr 4 15:24:49 2026[m [36mAverixor[m 7.2
+[33mf543cc9[m [32mSat Apr 4 15:24:23 2026[m [36mAverixor[m 7.2
+M	Stage7MaintenanceApi.gs
+
+[33mcd7873d[m [32mSat Apr 4 15:22:40 2026[m [36mAverixor[m Delete Stage7LegacyApiWrappers.gs
+D	Stage7LegacyApiWrappers.gs
+
+[33m11aac21[m [32mSat Apr 4 15:22:15 2026[m [36mAverixor[m 7.2
+M	Stage7Config.gs
+
+[33m03b0633[m [32mSat Apr 4 15:21:40 2026[m [36mAverixor[m 7.2
+M	Stage7CompatibilityMaintenanceApi.gs
+
+[33m87d5c28[m [32mSat Apr 4 15:12:21 2026[m [36mAverixor[m 7.2
+M	Stage7CompatibilityApi.gs
+
+[33mb953d68[m [32mSat Apr 4 15:11:44 2026[m [36mAverixor[m Delete Stage5MaintenanceApi.gs
+D	Stage5MaintenanceApi.gs
+
+[33m362eb9d[m [32mSat Apr 4 15:11:22 2026[m [36mAverixor[m Delete Stage4MaintenanceApi.gs
+D	Stage4MaintenanceApi.gs
+
+[33m259c439[m [32mSat Apr 4 15:10:15 2026[m [36mAverixor[m 7.2
+D	Stage4ServerApi.gs
+
+[33m7aaa00f[m [32mSat Apr 4 15:09:23 2026[m [36mAverixor[m Delete Stage4Config.gs
+D	Stage4Config.gs
+
+[33m0a25876[m [32mSat Apr 4 15:08:51 2026[m [36mAverixor[m 7.2
+D	Stage3ServerApi.gs
+
+[33mc7e88ea[m [32mSat Apr 4 15:04:44 2026[m [36mAverixor[m 7.2
+[33m962b0c6[m [32mSat Apr 4 15:03:13 2026[m [36mAverixor[m 7.2
+[33mf792f70[m [32mSat Apr 4 15:01:57 2026[m [36mAverixor[m 7.2
+M	Sidebar.html
+
+[33mabbbc6a[m [32mSat Apr 4 15:00:53 2026[m [36mAverixor[m 7.2
+[33m2d9f2b0[m [32mSat Apr 4 14:59:22 2026[m [36mAverixor[m 7.2
+[33mf9ec2ae[m [32mSat Apr 4 14:56:41 2026[m [36mAverixor[m 7.2
+M	SendPanelService.gs
+
+[33m0b0df40[m [32mSat Apr 4 14:54:06 2026[m [36mAverixor[m 7.2
+[33m9f411e6[m [32mSat Apr 4 14:53:05 2026[m [36mAverixor[m 7.2
+M	SendPanelConstants.gs
+
+[33m6cc1cd9[m [32mSat Apr 4 14:52:04 2026[m [36mAverixor[m 7.2
+M	SendPanel.gs
+
+[33m89347e2[m [32mSat Apr 4 14:50:24 2026[m [36mAverixor[m 7.2
+[33m8376d3d[m [32mSat Apr 4 14:49:38 2026[m [36mAverixor[m 7.2
+M	RoutingRegistry.gs
+
+[33m26790e8[m [32mSat Apr 4 14:48:20 2026[m [36mAverixor[m 7.2
+[33m62493d4[m [32mSat Apr 4 14:45:50 2026[m [36mAverixor[m 7.2
+M	PersonCalendar.html
+
+[33m65bf03d[m [32mSat Apr 4 14:38:51 2026[m [36mAverixor[m 7.2
+[33m4050b1a[m [32mSat Apr 4 14:36:04 2026[m [36mAverixor[m 7.2
+[33med409c4[m [32mSat Apr 4 14:35:16 2026[m [36mAverixor[m 7.2
+[33m611da6a[m [32mSat Apr 4 14:34:39 2026[m [36mAverixor[m 7.2
+[33m2b92088[m [32mSat Apr 4 14:34:08 2026[m [36mAverixor[m 7.2
+[33m037a5b2[m [32mSat Apr 4 14:32:44 2026[m [36mAverixor[m 7.2
+[33m643e721[m [32mSat Apr 4 14:27:58 2026[m [36mAverixor[m 7.2
+[33m7808f95[m [32mSat Apr 4 14:23:21 2026[m [36mAverixor[m 7.2
+[33m92490ea[m [32mSat Apr 4 14:21:07 2026[m [36mAverixor[m 7.2
+[33m09248e0[m [32mSat Apr 4 14:20:35 2026[m [36mAverixor[m 7.2
+[33m60bf118[m [32mSat Apr 4 14:20:13 2026[m [36mAverixor[m 7.2
+[33mc8c841a[m [32mSat Apr 4 14:19:52 2026[m [36mAverixor[m 7.2
+M	Js.Security.html
+
+[33m5195a92[m [32mSat Apr 4 14:19:24 2026[m [36mAverixor[m 7.2
+M	Js.Render.html
+
+[33mdbc0389[m [32mSat Apr 4 14:18:45 2026[m [36mAverixor[m 7.2
+[33mf167ec8[m [32mSat Apr 4 14:17:57 2026[m [36mAverixor[m 7.2
+[33mdecfc43[m [32mSat Apr 4 14:16:51 2026[m [36mAverixor[m 7.2
+M	Js.Core.html
+
+[33m14f45a5[m [32mSat Apr 4 14:15:05 2026[m [36mAverixor[m 7.2
+M	Js.Actions.html
+
+[33md4c720d[m [32mSat Apr 4 14:14:29 2026[m [36mAverixor[m 7.2
+M	JobRuntimeRepository.gs
+
+[33m04566a6[m [32mSat Apr 4 14:14:00 2026[m [36mAverixor[m 7.2
+[33ma26690d[m [32mSat Apr 4 14:11:53 2026[m [36mAverixor[m 7.2
+M	Dialogs.gs
+
+[33m6767ece[m [32mSat Apr 4 14:11:26 2026[m [36mAverixor[m 7.2
+M	DialogTemplates.gs
+
+[33mad8988c[m [32mSat Apr 4 13:47:15 2026[m [36mAverixor[m 7.2
+[33m55a3c17[m [32mSat Apr 4 13:44:54 2026[m [36mAverixor[m 7.2
+M	DataAccess.gs
+
+[33m55bfda7[m [32mSat Apr 4 13:43:46 2026[m [36mAverixor[m 7.2
+M	Code.gs
+
+[33m8c9b9f3[m [32mSat Apr 4 13:41:32 2026[m [36mAverixor[m 7.2
+M	AuditTrail.gs
+
+[33md50f534[m [32mSat Apr 4 13:40:31 2026[m [36mAverixor[m 7.2
+M	AlertsRepository.gs
+
+[33m7f041e3[m [32mSat Apr 4 13:39:05 2026[m [36mAverixor[m 7.2
+M	Actions.gs
+
+[33m7110c3f[m [32mSat Apr 4 13:36:52 2026[m [36mAverixor[m 7.2
+A	AccessPolicyChecks.gs
+
+[33m2c45b02[m [32mSat Apr 4 13:35:21 2026[m [36mAverixor[m 7.2
+M	SmokeTests.gs
+
+[33mea051d7[m [32mSat Apr 4 13:34:29 2026[m [36mAverixor[m 7.2
+M	AccessE2ETests.gs
+
+[33mef088d8[m [32mSat Apr 4 13:32:34 2026[m [36mAverixor[m 7.2
+M	AccessSheetTriggers.gs
+
+[33m1aafd7d[m [32mSat Apr 4 13:31:05 2026[m [36mAverixor[m 7.2
+M	AccessEnforcement.gs
+
+[33m0f8ecb6[m [32mSat Apr 4 13:09:04 2026[m [36mAverixor[m 7.2
+M	AccessControl.gs
+
+[33m7a1d5d3[m [32mTue Mar 31 19:49:35 2026[m [36mAverixor[m 7.2.1
+M	Sidebar.html
+
+[33m61e5c2c[m [32mTue Mar 31 19:48:33 2026[m [36mAverixor[m 7.2.1
+M	Js.Security.html
+
+[33m2feb52c[m [32mTue Mar 31 19:47:36 2026[m [36mAverixor[m 7.2.1
+M	AccessE2ETests.gs
+
+[33md6cf853[m [32mTue Mar 31 19:46:56 2026[m [36mAverixor[m 7.2.1
+M	AccessEnforcement.gs
+
+[33m1d82c11[m [32mTue Mar 31 19:46:18 2026[m [36mAverixor[m 7.2.1
+M	AccessControl.gs
+
+[33ma81d5bb[m [32mTue Mar 31 15:09:57 2026[m [36mQwaszx112233[m 7.2.1
+M	Stage7CompatibilityMaintenanceApi.gs
+
+[33m5aa939d[m [32mTue Mar 31 15:09:31 2026[m [36mQwaszx112233[m 7.2.1
+M	Stage7MaintenanceApi.gs
+
+[33m0143f87[m [32mTue Mar 31 15:06:15 2026[m [36mQwaszx112233[m 7.2.1
+M	Triggers.gs
+
+[33m3ae5c1c[m [32mTue Mar 31 15:05:30 2026[m [36mQwaszx112233[m 7.2.1
+M	JobRuntime.gs
+
+[33m517fe44[m [32mTue Mar 31 15:03:07 2026[m [36mQwaszx112233[m 7.2.1
+M	JobRuntimeRepository.gs
+
+[33me93229b[m [32mMon Mar 30 22:43:36 2026[m [36mQwaszx112233[m 7.2.1
+M	JobRuntimeRepository.gs
+
+[33m9d84be1[m [32mMon Mar 30 22:42:58 2026[m [36mQwaszx112233[m 7.2.1
+M	UseCases.gs
+
+[33m29c5de6[m [32mMon Mar 30 22:42:10 2026[m [36mQwaszx112233[m 7.2.1
+M	LogsRepository.gs
+
+[33m083c50c[m [32mMon Mar 30 22:41:30 2026[m [36mQwaszx112233[m 7.2.1
+M	Utils.gs
+
+[33m2bbd40f[m [32mMon Mar 30 22:40:38 2026[m [36mQwaszx112233[m 7.2.1
+M	OperationRepository.gs
+
+[33m0be01c8[m [32mMon Mar 30 22:38:50 2026[m [36mQwaszx112233[m 7.2.1
+M	WorkflowOrchestrator.gs
+
+[33ma999029[m [32mMon Mar 30 15:45:16 2026[m [36mQwaszx112233[m 7.2.1
+M	Js.State.html
+
+[33m4d0f15c[m [32mMon Mar 30 15:44:22 2026[m [36mQwaszx112233[m 7.2.1
+M	Sidebar.html
+
+[33mf90040c[m [32mMon Mar 30 15:43:08 2026[m [36mQwaszx112233[m 7.2.1
+M	Js.Render.html
+
+[33m3665289[m [32mMon Mar 30 12:33:42 2026[m [36mQwaszx112233[m gas_wasb_stage7_1_3_selfcontained_stabilized
+[33me16f6a8[m [32mMon Mar 30 12:31:59 2026[m [36mQwaszx112233[m 7.1.3
+[33mda39bee[m [32mSun Mar 29 22:09:07 2026[m [36mQwaszx112233[m 7.2.1
+[33mb4c6232[m [32mSun Mar 29 22:08:17 2026[m [36mQwaszx112233[m 7.2.1
+A	CANONICALIZATION_AUDIT.md
+M	DeprecatedRegistry.gs
+M	Diagnostics.gs
+M	Js.Api.html
+M	Js.State.html
+M	ProjectMetadata.gs
+M	README.md
+M	RUNBOOK.md
+M	RoutingRegistry.gs
+A	SELF_CONTAINMENT_VERIFICATION_REPORT.md
+M	SendPanel.gs
+M	ServiceSheetsBootstrap.gs
+M	SidebarServer.gs
+M	SmokeTests.gs
+A	Stage7CompatibilityApi.gs
+M	Stage7CompatibilityMaintenanceApi.gs
+M	Stage7Config.gs
+M	Stage7MaintenanceApi.gs
+M	Stage7ServerApi.gs
+
+[33m07e0791[m [32mSun Mar 29 21:24:22 2026[m [36mQwaszx112233[m 7.2.1
+[33m77bbd44[m [32mSun Mar 29 21:23:26 2026[m [36mQwaszx112233[m 7.2.1
+M	Stage7Config.gs
+
+[33m7514760[m [32mSun Mar 29 21:07:34 2026[m [36mQwaszx112233[m 7.2.1
+M	_extras/tools/static-checks.js
+
+[33m399424c[m [32mSun Mar 29 21:06:54 2026[m [36mQwaszx112233[m 7.2.1
+M	Js.Core.html
+M	Js.Render.html
+M	Js.State.html
+A	SELF_CONTAINMENT_AUDIT_2026-03-29.md
+M	SendPanel.gs
+M	SendPanelConstants.gs
+A	Stage7LegacyApiWrappers.gs
+
+[33mcb2cb71[m [32mSun Mar 29 12:58:16 2026[m [36mQwaszx112233[m 7.2
+M	_extras/history/AUDIT_REPORT_2026-03-24.md
+M	_extras/history/FILES_TO_CREATE_IN_GAS_WEB_EDITOR.txt
+M	_extras/history/FINAL_STABILIZATION_REPORT_2026-03-26.md
+M	_extras/history/RESOLVER_HOTFIX_2026-03-26.md
+M	_extras/history/STAGE7_REPORT.md
+M	_extras/tools/static-checks.js
+M	_extras/tools/validate-gs-syntax.js
+
+[33ma2882cc[m [32mSun Mar 29 12:57:36 2026[m [36mQwaszx112233[m 7.2
+M	ARCHITECTURE.md
+M	AccessControl.gs
+M	AccessEnforcement.gs
+M	AlertsRepository.gs
+M	AuditTrail.gs
+M	CHANGELOG.md
+M	DataAccess.gs
+M	DeprecatedRegistry.gs
+M	Diagnostics.gs
+M	DialogPresenter.gs
+M	DialogTemplates.gs
+M	DomainTests.gs
+M	JobRuntime.gs
+M	JobRuntimeRepository.gs
+M	Js.Actions.html
+M	Js.Api.html
+M	Js.Diagnostics.html
+M	Js.Helpers.html
+M	Js.Render.html
+M	Js.State.html
+M	LifecycleRetention.gs
+M	OperationRepository.gs
+M	OperationSafety.gs
+M	PreviewLinkService.gs
+M	ProjectMetadata.gs
+M	Reconciliation.gs
+M	RoutingRegistry.gs
+M	SelectionActionService.gs
+M	SendPanelService.gs
+M	ServerResponse.gs
+M	ServiceSheetsBootstrap.gs
+M	SheetSchemas.gs
+M	SmokeTests.gs
+M	SpreadsheetActionsApi.gs
+M	SpreadsheetProtection.gs
+A	Stage7CompatibilityMaintenanceApi.gs
+A	Stage7Config.gs
+A	Stage7MaintenanceApi.gs
+A	Stage7ServerApi.gs
+M	SummaryService.gs
+M	TemplateRegistry.gs
+M	TemplateResolver.gs
+M	Templates.gs
+M	Triggers.gs
+M	UseCases.gs
+M	VacationService.gs
+M	Validation.gs
+M	WorkflowOrchestrator.gs
+
+[33mce531d6[m [32mSun Mar 29 08:17:25 2026[m [36mQwaszx112233[m 7.1.2
+M	_extras/history/FINAL_DELIVERY_REPORT_2026-03-29.md
+M	_extras/history/TZ_EXECUTION_REPORT_2026-03-28.md
+M	_extras/tools/package.json
+M	_extras/tools/static-checks.js
+
+[33mc7a735b[m [32mSun Mar 29 08:16:41 2026[m [36mQwaszx112233[m 7.1.2
+M	AccessControl.gs
+M	AccessE2ETests.gs
+M	Diagnostics.gs
+M	ServiceSheetsBootstrap.gs
+M	SmokeTests.gs
+M	Stage4Config.gs
+
+[33m5b64c73[m [32mSun Mar 29 07:36:36 2026[m [36mQwaszx112233[m 7.1.1
+A	ARCHITECTURE.md
+M	AccessControl.gs
+A	CHANGELOG.md
+M	Code.gs
+M	DeprecatedRegistry.gs
+M	Diagnostics.gs
+M	JavaScript.html
+M	Js.Helpers.html
+A	Js.Security.html
+M	ProjectMetadata.gs
+A	README.md
+A	RUNBOOK.md
+M	SECURITY.md
+M	Sidebar.html
+M	SmokeTests.gs
+M	Stage4Config.gs
+M	Summaries.gs
+M	Triggers.gs
+M	UseCases.gs
+
+[33m12bb9f3[m [32mSun Mar 29 07:21:45 2026[m [36mQwaszx112233[m 7.1.1
+M	AccessControl.gs
+M	AccessEnforcement.gs
+M	Diagnostics.gs
+M	DialogPresenter.gs
+M	Js.Actions.html
+M	Js.Events.html
+M	Js.Helpers.html
+M	ProjectMetadata.gs
+M	RoutingRegistry.gs
+M	Sidebar.html
+M	SmokeTests.gs
+M	SpreadsheetProtection.gs
+
+[33m7f4b6c2[m [32mSun Mar 29 07:20:39 2026[m [36mQwaszx112233[m 7.1.1
+M	_extras/ARCHITECTURE.md
+M	_extras/README.md
+M	_extras/RUNBOOK.md
+M	_extras/SECURITY.md
+M	_extras/history/FINAL_DELIVERY_REPORT_2026-03-29.md
+M	_extras/history/RELEASE_NAMING_HOTFIX_2026-03-26.md
+M	_extras/tools/static-checks.js
+
+[33m5dbe1b0[m [32mSun Mar 29 07:00:54 2026[m [36mQwaszx112233[m 7.1.1
+M	AccessControl.gs
+A	AccessE2ETests.gs
+M	AccessEnforcement.gs
+M	AlertsRepository.gs
+M	Diagnostics.gs
+M	DialogPresenter.gs
+M	Js.Actions.html
+M	Js.Events.html
+M	Js.Helpers.html
+M	ProjectMetadata.gs
+M	RoutingRegistry.gs
+M	ServiceSheetsBootstrap.gs
+M	Sidebar.html
+M	SmokeTests.gs
+M	SpreadsheetProtection.gs
+
+[33mc2ea132[m [32mSun Mar 29 06:59:45 2026[m [36mQwaszx112233[m 7.1.1
+M	_extras/ARCHITECTURE.md
+A	_extras/CHANGELOG.md
+M	_extras/README.md
+M	_extras/RUNBOOK.md
+M	_extras/SECURITY.md
+A	_extras/history/ACCESS_VIEWER_RESTRICTIONS_2026-03-29.md
+A	_extras/history/AUDIT_REPORT_2026-03-24.md
+A	_extras/history/CANONICAL_APIS_STAGE7_FINAL_STABILIZED.md
+A	_extras/history/CHANGELOG_STAGE7_FINAL_STABILIZED.md
+A	_extras/history/COMMANDS_TERMINAL.md
+A	_extras/history/COMPARISON_AND_MERGE_REPORT_2026-03-26.md
+A	_extras/history/COMPATIBILITY_ALIASES_STAGE7_FINAL_STABILIZED.md
+A	_extras/history/FILES_TO_CREATE_IN_GAS_WEB_EDITOR.txt
+A	_extras/history/FINAL_DELIVERY_REPORT_2026-03-29.md
+A	_extras/history/FINAL_STABILIZATION_REPORT_2026-03-26.md
+A	_extras/history/GAS_WEB_EDITOR_IMPORT_GUIDE.md
+A	_extras/history/IMPLEMENTATION_REPORT_2026-03-22.md
+A	_extras/history/RELEASE_NAMING_HOTFIX_2026-03-26.md
+A	_extras/history/RESOLVER_HOTFIX_2026-03-26.md
+A	_extras/history/SCHEMA.md
+A	_extras/history/SEND_PANEL_TZ_IMPLEMENTATION_2026-03-26.md
+A	_extras/history/STABILIZATION_CHECK_REPORT_STAGE7_FINAL.md
+A	_extras/history/STABILIZATION_NOTES_2026-03-22.md
+A	_extras/history/STAGE7_REPORT.md
+A	_extras/history/TZ_EXECUTION_REPORT_2026-03-28.md
+A	_extras/tools/package.json
+A	_extras/tools/static-checks.js
+A	_extras/tools/validate-gs-syntax.js
+
+[33m9a01b2a[m [32mSun Mar 29 06:12:19 2026[m [36mQwaszx112233[m 7.1.1
+[33mc4495ce[m [32mSun Mar 29 06:11:18 2026[m [36mQwaszx112233[m Delete package.json
+D	package.json
+
+[33mde479d8[m [32mSun Mar 29 06:11:06 2026[m [36mQwaszx112233[m Delete static-checks.js
+D	static-checks.js
+
+[33m1c306f3[m [32mSun Mar 29 06:10:55 2026[m [36mQwaszx112233[m Delete validate-gs-syntax.js
+D	validate-gs-syntax.js
+
+[33m5b15537[m [32mSun Mar 29 06:10:28 2026[m [36mQwaszx112233[m Delete TZ_EXECUTION_REPORT_2026-03-28.md
+D	TZ_EXECUTION_REPORT_2026-03-28.md
+
+[33m5290057[m [32mSun Mar 29 06:10:10 2026[m [36mQwaszx112233[m Delete SCHEMA.md
+D	SCHEMA.md
+
+[33m5c60653[m [32mSun Mar 29 06:09:49 2026[m [36mQwaszx112233[m 7.1.1
+A	_extras/ACCESS_VIEWER_RESTRICTIONS_2026-03-29.md
+A	_extras/ARCHITECTURE.md
+A	_extras/AUDIT_REPORT_2026-03-24.md
+A	_extras/CANONICAL_APIS_STAGE7_FINAL_STABILIZED.md
+A	_extras/CHANGELOG_STAGE7_FINAL_STABILIZED.md
+A	_extras/COMMANDS_TERMINAL.md
+A	_extras/COMPARISON_AND_MERGE_REPORT_2026-03-26.md
+A	_extras/COMPATIBILITY_ALIASES_STAGE7_FINAL_STABILIZED.md
+A	_extras/FILES_TO_CREATE_IN_GAS_WEB_EDITOR.txt
+A	_extras/FINAL_STABILIZATION_REPORT_2026-03-26.md
+A	_extras/GAS_WEB_EDITOR_IMPORT_GUIDE.md
+A	_extras/IMPLEMENTATION_REPORT_2026-03-22.md
+A	_extras/README.md
+A	_extras/RELEASE_NAMING_HOTFIX_2026-03-26.md
+A	_extras/RESOLVER_HOTFIX_2026-03-26.md
+A	_extras/RUNBOOK.md
+A	_extras/SCHEMA.md
+A	_extras/SECURITY.md
+A	_extras/SEND_PANEL_TZ_IMPLEMENTATION_2026-03-26.md
+A	_extras/STABILIZATION_CHECK_REPORT_STAGE7_FINAL.md
+A	_extras/STABILIZATION_NOTES_2026-03-22.md
+A	_extras/STAGE7_REPORT.md
+A	_extras/TZ_EXECUTION_REPORT_2026-03-28.md
+A	_extras/TZ_EXECUTION_REPORT_2026-03-29.md
+A	_extras/backups/AccessControl.gs.bak
+A	_extras/package.json
+A	_extras/static-checks.js
+A	_extras/validate-gs-syntax.js
+
+[33m29167eb[m [32mSun Mar 29 06:09:19 2026[m [36mQwaszx112233[m Delete docs directory
+D	docs/archive/CHANGELOG_STAGE4.md
+D	docs/archive/PUBLIC_API_STAGE4.md
+D	docs/archive/STAGE4_REPORT.md
+D	docs/archive/STAGE6A_TRANSITION_NOTES.md
+D	docs/reference/CHANGELOG_STAGE5.md
+D	docs/reference/JOBS_RUNTIME.md
+D	docs/reference/PUBLIC_API_STAGE5.md
+D	docs/reference/SPREADSHEET_ACTION_API.md
+D	docs/reference/STAGE5_REPORT.md
+D	docs/reference/STAGE6A_REPORT.md
+D	docs/reference/SUNSET_POLICY.md
+
+[33mec7ae28[m [32mSun Mar 29 06:08:19 2026[m [36mQwaszx112233[m Delete STAGE7_REPORT.md
+D	STAGE7_REPORT.md
+
+[33m2ec9120[m [32mSun Mar 29 06:08:04 2026[m [36mQwaszx112233[m Delete RUNBOOK.md
+D	RUNBOOK.md
+
+[33m9ff5868[m [32mSun Mar 29 06:07:53 2026[m [36mQwaszx112233[m Delete STABILIZATION_NOTES_2026-03-22.md
+D	STABILIZATION_NOTES_2026-03-22.md
+
+[33meb6b127[m [32mSun Mar 29 06:07:44 2026[m [36mQwaszx112233[m Delete STABILIZATION_CHECK_REPORT_STAGE7_FINAL.md
+D	STABILIZATION_CHECK_REPORT_STAGE7_FINAL.md
+
+[33m7abfbda[m [32mSun Mar 29 06:07:34 2026[m [36mQwaszx112233[m Delete SEND_PANEL_TZ_IMPLEMENTATION_2026-03-26.md
+D	SEND_PANEL_TZ_IMPLEMENTATION_2026-03-26.md
+
+[33m45b17df[m [32mSun Mar 29 06:07:22 2026[m [36mQwaszx112233[m Delete RESOLVER_HOTFIX_2026-03-26.md
+D	RESOLVER_HOTFIX_2026-03-26.md
+
+[33m7d47178[m [32mSun Mar 29 06:07:08 2026[m [36mQwaszx112233[m Delete RELEASE_NAMING_HOTFIX_2026-03-26.md
+D	RELEASE_NAMING_HOTFIX_2026-03-26.md
+
+[33m9142b3a[m [32mSun Mar 29 06:06:53 2026[m [36mQwaszx112233[m Delete README.md
+D	README.md
+
+[33m22b50cc[m [32mSun Mar 29 06:06:36 2026[m [36mQwaszx112233[m Delete IMPLEMENTATION_REPORT_2026-03-22.md
+D	IMPLEMENTATION_REPORT_2026-03-22.md
+
+[33m5364ab9[m [32mSun Mar 29 06:06:18 2026[m [36mQwaszx112233[m Delete GAS_WEB_EDITOR_IMPORT_GUIDE.md
+D	GAS_WEB_EDITOR_IMPORT_GUIDE.md
+
+[33m758ae92[m [32mSun Mar 29 06:06:07 2026[m [36mQwaszx112233[m Delete FINAL_STABILIZATION_REPORT_2026-03-26.md
+D	FINAL_STABILIZATION_REPORT_2026-03-26.md
+
+[33m4cbcba5[m [32mSun Mar 29 06:05:57 2026[m [36mQwaszx112233[m Delete FILES_TO_CREATE_IN_GAS_WEB_EDITOR.txt
+D	FILES_TO_CREATE_IN_GAS_WEB_EDITOR.txt
+
+[33m5d78207[m [32mSun Mar 29 06:05:34 2026[m [36mQwaszx112233[m Delete _extras directory
+D	_extras/ACCESS_VIEWER_RESTRICTIONS_2026-03-29.md
+D	_extras/ARCHITECTURE.md
+D	_extras/AUDIT_REPORT_2026-03-24.md
+D	_extras/CANONICAL_APIS_STAGE7_FINAL_STABILIZED.md
+D	_extras/CHANGELOG_STAGE7_FINAL_STABILIZED.md
+D	_extras/COMMANDS_TERMINAL.md
+D	_extras/COMPARISON_AND_MERGE_REPORT_2026-03-26.md
+D	_extras/COMPATIBILITY_ALIASES_STAGE7_FINAL_STABILIZED.md
+D	_extras/FILES_TO_CREATE_IN_GAS_WEB_EDITOR.txt
+D	_extras/FINAL_STABILIZATION_REPORT_2026-03-26.md
+D	_extras/GAS_WEB_EDITOR_IMPORT_GUIDE.md
+D	_extras/IMPLEMENTATION_REPORT_2026-03-22.md
+D	_extras/README.md
+D	_extras/RELEASE_NAMING_HOTFIX_2026-03-26.md
+D	_extras/RESOLVER_HOTFIX_2026-03-26.md
+D	_extras/RUNBOOK.md
+D	_extras/SCHEMA.md
+D	_extras/SECURITY.md
+D	_extras/SEND_PANEL_TZ_IMPLEMENTATION_2026-03-26.md
+D	_extras/STABILIZATION_CHECK_REPORT_STAGE7_FINAL.md
+D	_extras/STABILIZATION_NOTES_2026-03-22.md
+D	_extras/STAGE7_REPORT.md
+D	_extras/TZ_EXECUTION_REPORT_2026-03-28.md
+D	_extras/package.json
+D	_extras/static-checks.js
+D	_extras/validate-gs-syntax.js
+
+[33mb9e5dfb[m [32mSun Mar 29 06:05:10 2026[m [36mQwaszx112233[m Delete COMPATIBILITY_ALIASES_STAGE7_FINAL_STABILIZED.md
+D	COMPATIBILITY_ALIASES_STAGE7_FINAL_STABILIZED.md
+
+[33mea9542f[m [32mSun Mar 29 06:04:57 2026[m [36mQwaszx112233[m Delete COMPARISON_AND_MERGE_REPORT_2026-03-26.md
+D	COMPARISON_AND_MERGE_REPORT_2026-03-26.md
+
+[33maf15f3c[m [32mSun Mar 29 06:04:47 2026[m [36mQwaszx112233[m Delete COMMANDS_TERMINAL.md
+D	COMMANDS_TERMINAL.md
+
+[33m3ece4f8[m [32mSun Mar 29 06:04:38 2026[m [36mQwaszx112233[m Delete CHANGELOG_STAGE7_FINAL_STABILIZED.md
+D	CHANGELOG_STAGE7_FINAL_STABILIZED.md
+
+[33mf5b996e[m [32mSun Mar 29 06:04:23 2026[m [36mQwaszx112233[m Delete CANONICAL_APIS_STAGE7_FINAL_STABILIZED.md
+D	CANONICAL_APIS_STAGE7_FINAL_STABILIZED.md
+
+[33m47c8ff2[m [32mSun Mar 29 06:04:07 2026[m [36mQwaszx112233[m Delete AUDIT_REPORT_2026-03-24.md
+D	AUDIT_REPORT_2026-03-24.md
+
+[33mef81416[m [32mSun Mar 29 06:03:32 2026[m [36mQwaszx112233[m Delete ARCHITECTURE.md
+D	ARCHITECTURE.md
+
+[33mf88ef5c[m [32mSun Mar 29 05:41:28 2026[m [36mQwaszx112233[m 7.1.1
+M	SpreadsheetProtection.gs
+
+[33m3889381[m [32mSun Mar 29 05:40:15 2026[m [36mQwaszx112233[m 7.1.1
+[33m17d216f[m [32mSun Mar 29 05:39:40 2026[m [36mQwaszx112233[m Update SmokeTests.gs
+M	SmokeTests.gs
+
+[33me389f78[m [32mSun Mar 29 05:38:51 2026[m [36mQwaszx112233[m 7.1.1
+M	ServiceSheetsBootstrap.gs
+
+[33m7d15d6d[m [32mSun Mar 29 05:38:15 2026[m [36mQwaszx112233[m 7.1.1
+M	RoutingRegistry.gs
+
+[33mfa1ab2c[m [32mSun Mar 29 05:37:41 2026[m [36mQwaszx112233[m 7.1.1
+M	ProjectMetadata.gs
+
+[33m0311041[m [32mSun Mar 29 05:36:42 2026[m [36mQwaszx112233[m 7.1.1
+M	Js.Helpers.html
+
+[33m8e2cb6e[m [32mSun Mar 29 05:35:55 2026[m [36mQwaszx112233[m 7.1.1
+M	Js.Events.html
+
+[33m808536b[m [32mSun Mar 29 05:35:18 2026[m [36mQwaszx112233[m 7.1.1
+M	Js.Actions.html
+
+[33md2b2433[m [32mSun Mar 29 05:34:14 2026[m [36mQwaszx112233[m 7.1.1
+M	Diagnostics.gs
+
+[33m2ae6830[m [32mSun Mar 29 05:33:43 2026[m [36mQwaszx112233[m 7.1.1
+M	AccessEnforcement.gs
+
+[33md18ca7d[m [32mSun Mar 29 05:33:17 2026[m [36mQwaszx112233[m 7.1.1
+M	AccessControl.gs
+
+[33m342b642[m [32mSun Mar 29 05:08:37 2026[m [36mQwaszx112233[m 7.1.1
+M	AccessControl.gs
+M	AccessEnforcement.gs
+M	AccessSheetTriggers.gs
+M	Js.Helpers.html
+M	ServiceSheetsBootstrap.gs
+M	Sidebar.html
+M	SidebarServer.gs
+M	Stage5MaintenanceApi.gs
+M	UseCases.gs
+
+[33m5667cd1[m [32mSun Mar 29 04:41:26 2026[m [36mQwaszx112233[m 7.1.1
+M	AccessControl.gs
+
+[33m7c2bf6a[m [32mSun Mar 29 04:24:36 2026[m [36mQwaszx112233[m 7.1.1
+[33m505e44a[m [32mSun Mar 29 04:22:05 2026[m [36mQwaszx112233[m 7.1.1
+M	AccessControl.gs
+M	AccessEnforcement.gs
+A	AccessSheetTriggers.gs
+M	Code.gs
+M	Js.Core.html
+M	Js.Helpers.html
+M	Stage5MaintenanceApi.gs
+
+[33m2e54c2e[m [32mSun Mar 29 03:20:44 2026[m [36mQwaszx112233[m 7.1.1
+A	_extras/ACCESS_VIEWER_RESTRICTIONS_2026-03-29.md
+A	_extras/ARCHITECTURE.md
+A	_extras/AUDIT_REPORT_2026-03-24.md
+A	_extras/CANONICAL_APIS_STAGE7_FINAL_STABILIZED.md
+A	_extras/CHANGELOG_STAGE7_FINAL_STABILIZED.md
+A	_extras/COMMANDS_TERMINAL.md
+A	_extras/COMPARISON_AND_MERGE_REPORT_2026-03-26.md
+A	_extras/COMPATIBILITY_ALIASES_STAGE7_FINAL_STABILIZED.md
+A	_extras/FILES_TO_CREATE_IN_GAS_WEB_EDITOR.txt
+A	_extras/FINAL_STABILIZATION_REPORT_2026-03-26.md
+A	_extras/GAS_WEB_EDITOR_IMPORT_GUIDE.md
+A	_extras/IMPLEMENTATION_REPORT_2026-03-22.md
+A	_extras/README.md
+A	_extras/RELEASE_NAMING_HOTFIX_2026-03-26.md
+A	_extras/RESOLVER_HOTFIX_2026-03-26.md
+A	_extras/RUNBOOK.md
+A	_extras/SCHEMA.md
+A	_extras/SECURITY.md
+A	_extras/SEND_PANEL_TZ_IMPLEMENTATION_2026-03-26.md
+A	_extras/STABILIZATION_CHECK_REPORT_STAGE7_FINAL.md
+A	_extras/STABILIZATION_NOTES_2026-03-22.md
+A	_extras/STAGE7_REPORT.md
+A	_extras/TZ_EXECUTION_REPORT_2026-03-28.md
+A	_extras/package.json
+A	_extras/static-checks.js
+A	_extras/validate-gs-syntax.js
+
+[33m20b0bb7[m [32mSun Mar 29 03:19:50 2026[m [36mQwaszx112233[m 7.1.1
+M	AccessControl.gs
+A	AccessEnforcement.gs
+M	Js.Actions.html
+M	Js.Helpers.html
+M	PersonCards.gs
+M	Sidebar.html
+M	SidebarServer.gs
+M	Stage4Config.gs
+M	Stage5MaintenanceApi.gs
+M	Styles.html
+M	Triggers.gs
+M	UseCases.gs
+
+[33m640ef88[m [32mSun Mar 29 02:29:14 2026[m [36mQwaszx112233[m 7.1.1
+M	Js.Helpers.html
+
+[33m939aa15[m [32mSun Mar 29 02:18:16 2026[m [36mQwaszx112233[m 7.1.1
+M	DialogTemplates.gs
+M	Js.Actions.html
+M	Js.Core.html
+M	Js.Render.html
+M	Js.State.html
+M	PersonCards.gs
+M	SendPanel.gs
+M	SendPanelConstants.gs
+
+[33m6c631dd[m [32mSun Mar 29 01:59:26 2026[m [36mQwaszx112233[m 7.1.1
+M	Sidebar.html
+
+[33m2f0463b[m [32mSun Mar 29 01:56:55 2026[m [36mQwaszx112233[m 7.1.1
+M	AccessControl.gs
+M	Js.Helpers.html
+M	Stage5MaintenanceApi.gs
+
+[33m2becee8[m [32mSun Mar 29 01:05:00 2026[m [36mQwaszx112233[m 7.1.1
+M	Js.Helpers.html
+
+[33m80c5225[m [32mSun Mar 29 01:03:00 2026[m [36mQwaszx112233[m 7.1.1
+M	Js.Helpers.html
+
+[33ma059202[m [32mSun Mar 29 00:51:53 2026[m [36mQwaszx112233[m 7.1.1
+M	Js.Helpers.html
+
+[33md887781[m [32mSun Mar 29 00:48:55 2026[m [36mQwaszx112233[m 7.1.1
+[33m8f9aba6[m [32mSun Mar 29 00:47:50 2026[m [36mQwaszx112233[m 7.1.1
+M	Js.Actions.html
+M	Js.Api.html
+M	Js.Helpers.html
+M	Sidebar.html
+M	Stage5MaintenanceApi.gs
+M	Styles.html
+
+[33m517fd85[m [32mSun Mar 29 00:20:29 2026[m [36mQwaszx112233[m 7.1.1
+M	ProjectMetadata.gs
+
+[33m886ab5c[m [32mSun Mar 29 00:13:04 2026[m [36mQwaszx112233[m 7.1.1
+M	Js.Helpers.html
+
+[33m16d8d7b[m [32mSun Mar 29 00:08:16 2026[m [36mQwaszx112233[m 7.1.1
+M	AccessControl.gs
+
+[33m7e1b343[m [32mSun Mar 29 00:00:16 2026[m [36mQwaszx112233[m 7.1.1
+M	Styles.html
+
+[33mee41a1b[m [32mSat Mar 28 23:38:52 2026[m [36mQwaszx112233[m 7.1.1
+M	Sidebar.html
+
+[33m71c66ad[m [32mSat Mar 28 23:34:21 2026[m [36mQwaszx112233[m 7.1.1
+M	Styles.html
+
+[33m16e56b7[m [32mSat Mar 28 23:33:41 2026[m [36mQwaszx112233[m 7.1.1
+M	Js.Helpers.html
+
+[33m4ea5341[m [32mSat Mar 28 23:33:12 2026[m [36mQwaszx112233[m 7.1.1
+M	Js.Render.html
+
+[33ma783b78[m [32mSat Mar 28 22:53:51 2026[m [36mQwaszx112233[m 7.1.1
+M	AccessControl.gs
+M	Styles.html
+
+[33m52c6b35[m [32mSat Mar 28 22:33:40 2026[m [36mQwaszx112233[m 7.1.1
+M	AccessControl.gs
+M	AlertsRepository.gs
+M	JobRuntimeRepository.gs
+M	Js.Helpers.html
+M	ProjectMetadata.gs
+A	ServiceSheetsBootstrap.gs
+M	Sidebar.html
+M	Styles.html
+
+[33m4156b38[m [32mSat Mar 28 22:14:32 2026[m [36mQwaszx112233[m 7.1.1
+M	AccessControl.gs
+M	Js.Helpers.html
+
+[33m73c50c5[m [32mSat Mar 28 21:26:16 2026[m [36mQwaszx112233[m 7.1.1
+M	AccessControl.gs
+M	Js.Core.html
+M	Js.Helpers.html
+M	Js.Render.html
+M	SCHEMA.md
+M	SECURITY.md
+M	Sidebar.html
+M	Styles.html
+
+[33mbd5eb64[m [32mSat Mar 28 21:06:49 2026[m [36mQwaszx112233[m 7.1
+[33m60dec96[m [32mSat Mar 28 21:06:18 2026[m [36mQwaszx112233[m 7.1
+M	AccessControl.gs
+M	Js.Helpers.html
+M	Js.Render.html
+M	SECURITY.md
+M	Sidebar.html
+
+[33me3ee0df[m [32mSat Mar 28 20:16:52 2026[m [36mQwaszx112233[m 7.1.1
+M	Sidebar.html
+
+[33m833de74[m [32mSat Mar 28 20:15:46 2026[m [36mQwaszx112233[m 7.1.1
+M	Js.Render.html
+
+[33mc0e0dfe[m [32mSat Mar 28 19:18:40 2026[m [36mQwaszx112233[m 7.1.1
+M	Js.Render.html
+
+[33m6282d3a[m [32mSat Mar 28 19:18:04 2026[m [36mQwaszx112233[m 7.1.1
+M	SendPanel.gs
+
+[33m1318ded[m [32mSat Mar 28 18:20:49 2026[m [36mQwaszx112233[m 7.1.1
+M	SendPanelRepository.gs
+
+[33m337bdf5[m [32mSat Mar 28 18:17:40 2026[m [36mQwaszx112233[m 7.1.1
+M	SendPanelConstants.gs
+
+[33me96008c[m [32mSat Mar 28 18:12:22 2026[m [36mQwaszx112233[m 7.1.1
+M	SheetStandards.gs
+
+[33m10e26e0[m [32mSat Mar 28 17:33:14 2026[m [36mQwaszx112233[m 7.1.1
+M	AccessControl.gs
+M	AuditTrail.gs
+M	FILES_TO_CREATE_IN_GAS_WEB_EDITOR.txt
+M	JobRuntime.gs
+M	JobRuntimeRepository.gs
+M	Js.Api.html
+M	Js.Core.html
+M	Js.Diagnostics.html
+M	Js.Helpers.html
+M	Js.Render.html
+M	Log.gs
+M	ProjectMetadata.gs
+A	SCHEMA.md
+A	SECURITY.md
+M	Sidebar.html
+M	SmokeTests.gs
+M	Stage4Config.gs
+M	Stage4MaintenanceApi.gs
+M	Stage5MaintenanceApi.gs
+A	TZ_EXECUTION_REPORT_2026-03-28.md
+M	Triggers.gs
+
+[33m947d44f[m [32mSat Mar 28 17:16:30 2026[m [36mQwaszx112233[m 7.1.9
+M	ARCHITECTURE.md
+A	AUDIT_REPORT_2026-03-24.md
+A	CANONICAL_APIS_STAGE7_FINAL_STABILIZED.md
+A	CHANGELOG_STAGE7_FINAL_STABILIZED.md
+A	COMMANDS_TERMINAL.md
+A	COMPARISON_AND_MERGE_REPORT_2026-03-26.md
+A	COMPATIBILITY_ALIASES_STAGE7_FINAL_STABILIZED.md
+A	FILES_TO_CREATE_IN_GAS_WEB_EDITOR.txt
+A	FINAL_STABILIZATION_REPORT_2026-03-26.md
+A	GAS_WEB_EDITOR_IMPORT_GUIDE.md
+A	IMPLEMENTATION_REPORT_2026-03-22.md
+M	README.md
+A	RELEASE_NAMING_HOTFIX_2026-03-26.md
+A	RESOLVER_HOTFIX_2026-03-26.md
+M	RUNBOOK.md
+A	SEND_PANEL_TZ_IMPLEMENTATION_2026-03-26.md
+A	STABILIZATION_CHECK_REPORT_STAGE7_FINAL.md
+A	STABILIZATION_NOTES_2026-03-22.md
+A	STAGE7_REPORT.md
+A	docs/archive/CHANGELOG_STAGE4.md
+A	docs/archive/PUBLIC_API_STAGE4.md
+A	docs/archive/STAGE4_REPORT.md
+A	docs/archive/STAGE6A_TRANSITION_NOTES.md
+A	docs/reference/CHANGELOG_STAGE5.md
+A	docs/reference/JOBS_RUNTIME.md
+A	docs/reference/PUBLIC_API_STAGE5.md
+A	docs/reference/SPREADSHEET_ACTION_API.md
+A	docs/reference/STAGE5_REPORT.md
+A	docs/reference/STAGE6A_REPORT.md
+A	docs/reference/SUNSET_POLICY.md
+
+[33m04af091[m [32mSat Mar 28 15:42:57 2026[m [36mQwaszx112233[m 7.1.8
+M	AuditTrail.gs
+M	DialogTemplates.gs
+M	JobRuntime.gs
+M	JobRuntimeRepository.gs
+M	Js.Api.html
+M	Js.Core.html
+M	Js.Helpers.html
+M	Js.State.html
+M	Log.gs
+M	PersonCards.gs
+M	SendPanel.gs
+M	SendPanelConstants.gs
+M	Sidebar.html
+M	Stage4Config.gs
+M	Stage5MaintenanceApi.gs
+M	Triggers.gs
+M	UseCases.gs
+
+[33m7a4b412[m [32mFri Mar 27 22:47:56 2026[m [36mQwaszx112233[m Delete Dockerfile
+D	Dockerfile
+
+[33m3a9baea[m [32mFri Mar 27 22:46:29 2026[m [36mQwaszx112233[m 7.1.7
+A	AccessControl.gs
+A	AlertsRepository.gs
+M	AuditTrail.gs
+M	DialogTemplates.gs
+A	Dockerfile
+M	JobRuntime.gs
+M	JobRuntimeRepository.gs
+M	Js.Api.html
+M	Js.Core.html
+M	Js.Helpers.html
+M	Js.State.html
+A	LifecycleRetention.gs
+M	Log.gs
+M	PersonCards.gs
+M	README.md
+A	SecurityRedaction.gs
+M	SendPanel.gs
+M	SendPanelConstants.gs
+M	SheetStandards.gs
+M	Sidebar.html
+A	SpreadsheetProtection.gs
+M	Stage4Config.gs
+M	Stage5MaintenanceApi.gs
+M	Triggers.gs
+M	UseCases.gs
+A	package.json
+A	static-checks.js
+A	validate-gs-syntax.js
+
+[33me2cfffc[m [32mFri Mar 27 14:12:32 2026[m [36mQwaszx112233[m 7.1.6
+M	SheetStandards.gs
+
+[33m889934e[m [32mFri Mar 27 13:43:17 2026[m [36mQwaszx112233[m 7.1.7
+M	Diagnostics.gs
+M	DomainTests.gs
+M	Js.Api.html
+M	Js.Core.html
+M	Js.Render.html
+M	Js.State.html
+M	README.md
+M	Reconciliation.gs
+M	SendPanel.gs
+M	SendPanelConstants.gs
+M	SendPanelRepository.gs
+M	SendPanelService.gs
+M	SheetSchemas.gs
+M	Stage3ServerApi.gs
+M	UseCases.gs
+
+[33m04b7458[m [32mFri Mar 27 13:31:04 2026[m [36mQwaszx112233[m 7.1.6
+M	AuditTrail.gs
+M	Code.gs
+M	DataAccess.gs
+M	DateUtils.gs
+M	DeprecatedRegistry.gs
+M	Diagnostics.gs
+M	DialogPresenter.gs
+M	DialogTemplates.gs
+M	Dialogs.gs
+M	DomainTests.gs
+M	JobRuntime.gs
+M	JobRuntimeRepository.gs
+M	Js.Actions.html
+M	Js.Api.html
+M	Js.Core.html
+M	Js.Diagnostics.html
+M	Js.Events.html
+M	Js.Helpers.html
+M	Js.Render.html
+M	Js.State.html
+M	Log.gs
+M	LogsRepository.gs
+M	MonthSheets.gs
+M	OperationRepository.gs
+M	OperationSafety.gs
+M	PersonCalendar.html
+M	PersonCards.gs
+M	PersonsRepository.gs
+M	PreviewLinkService.gs
+M	README.md
+M	Reconciliation.gs
+M	RoutingRegistry.gs
+M	SelectionActionService.gs
+M	SendPanel.gs
+M	SendPanelConstants.gs
+M	SendPanelRepository.gs
+M	SendPanelService.gs
+M	ServerResponse.gs
+M	SheetSchemas.gs
+M	SheetStandards.gs
+M	Sidebar.html
+M	SidebarServer.gs
+M	SmokeTests.gs
+M	SpreadsheetActionsApi.gs
+M	Stage3ServerApi.gs
+M	Stage4Config.gs
+M	Stage4ServerApi.gs
+M	Stage5MaintenanceApi.gs
+M	Styles.html
+M	Summaries.gs
+M	TemplateRegistry.gs
+M	TemplateResolver.gs
+M	Templates.gs
+M	Triggers.gs
+M	UseCases.gs
+M	Utils.gs
+M	VacationEngine.gs
+M	VacationsRepository.gs
+M	Validation.gs
+M	WorkflowOrchestrator.gs
+
+[33mc9933e1[m [32mFri Mar 27 13:28:35 2026[m [36mQwaszx112233[m 7.1.3
+M	Actions.gs
+
+[33mf4d8a2d[m [32mFri Mar 27 13:20:43 2026[m [36mQwaszx112233[m 7.1.5
+M	Sidebar.html
+
+[33m629fecd[m [32mFri Mar 27 13:08:08 2026[m [36mQwaszx112233[m Delete STAGE7_REPORT.md
+D	STAGE7_REPORT.md
+
+[33m9ee6172[m [32mFri Mar 27 12:58:56 2026[m [36mQwaszx112233[m Delete STABILIZATION_NOTES_2026-03-22.md
+D	STABILIZATION_NOTES_2026-03-22.md
+
+[33m782d35c[m [32mFri Mar 27 12:58:42 2026[m [36mQwaszx112233[m Delete STABILIZATION_CHECK_REPORT_STAGE7_FINAL.md
+D	STABILIZATION_CHECK_REPORT_STAGE7_FINAL.md
+
+[33m34a1592[m [32mFri Mar 27 12:58:27 2026[m [36mQwaszx112233[m Delete EMOJI_CLEANUP_REPORT_2026-03-27.txt
+D	EMOJI_CLEANUP_REPORT_2026-03-27.txt
+
+[33m192d499[m [32mFri Mar 27 12:57:25 2026[m [36mQwaszx112233[m Delete SEND_PANEL_TZ_IMPLEMENTATION_2026-03-26.md
+D	SEND_PANEL_TZ_IMPLEMENTATION_2026-03-26.md
+
+[33m568279e[m [32mFri Mar 27 12:56:34 2026[m [36mQwaszx112233[m Delete RESOLVER_HOTFIX_2026-03-26.md
+D	RESOLVER_HOTFIX_2026-03-26.md
+
+[33m02871e8[m [32mFri Mar 27 12:56:21 2026[m [36mQwaszx112233[m Delete RELEASE_NAMING_HOTFIX_2026-03-26.md
+D	RELEASE_NAMING_HOTFIX_2026-03-26.md
+
+[33m0c1538f[m [32mFri Mar 27 12:56:02 2026[m [36mQwaszx112233[m Delete GAS_WEB_EDITOR_IMPORT_GUIDE.md
+D	GAS_WEB_EDITOR_IMPORT_GUIDE.md
+
+[33m7ae2693[m [32mFri Mar 27 12:55:48 2026[m [36mQwaszx112233[m Delete IMPLEMENTATION_REPORT_2026-03-22.md
+D	IMPLEMENTATION_REPORT_2026-03-22.md
+
+[33ma0733f4[m [32mFri Mar 27 12:55:36 2026[m [36mQwaszx112233[m Delete FINAL_STABILIZATION_REPORT_2026-03-26.md
+D	FINAL_STABILIZATION_REPORT_2026-03-26.md
+
+[33m09bedab[m [32mFri Mar 27 12:55:23 2026[m [36mQwaszx112233[m Delete FILES_TO_CREATE_IN_GAS_WEB_EDITOR.txt
+D	FILES_TO_CREATE_IN_GAS_WEB_EDITOR.txt
+
+[33mb25d5fb[m [32mFri Mar 27 12:55:06 2026[m [36mQwaszx112233[m Delete docs directory
+D	docs/archive/CHANGELOG_STAGE4.md
+D	docs/archive/PUBLIC_API_STAGE4.md
+D	docs/archive/STAGE4_REPORT.md
+D	docs/archive/STAGE6A_TRANSITION_NOTES.md
+D	docs/reference/CHANGELOG_STAGE5.md
+D	docs/reference/JOBS_RUNTIME.md
+D	docs/reference/PUBLIC_API_STAGE5.md
+D	docs/reference/SPREADSHEET_ACTION_API.md
+D	docs/reference/STAGE5_REPORT.md
+D	docs/reference/STAGE6A_REPORT.md
+D	docs/reference/SUNSET_POLICY.md
+
+[33m41c9ef4[m [32mFri Mar 27 12:54:52 2026[m [36mQwaszx112233[m Delete AUDIT_REPORT_2026-03-24.md
+D	AUDIT_REPORT_2026-03-24.md
+
+[33mdd39f0d[m [32mFri Mar 27 12:54:40 2026[m [36mQwaszx112233[m Delete COMPATIBILITY_ALIASES_STAGE7_FINAL_STABILIZED.md
+D	COMPATIBILITY_ALIASES_STAGE7_FINAL_STABILIZED.md
+
+[33mebba0ed[m [32mFri Mar 27 12:54:31 2026[m [36mQwaszx112233[m Delete COMPARISON_AND_MERGE_REPORT_2026-03-26.md
+D	COMPARISON_AND_MERGE_REPORT_2026-03-26.md
+
+[33mc39953a[m [32mFri Mar 27 12:54:21 2026[m [36mQwaszx112233[m Delete COMMANDS_TERMINAL.md
+D	COMMANDS_TERMINAL.md
+
+[33mb1bbbc4[m [32mFri Mar 27 12:54:09 2026[m [36mQwaszx112233[m Delete CHANGELOG_STAGE7_FINAL_STABILIZED.md
+D	CHANGELOG_STAGE7_FINAL_STABILIZED.md
+
+[33mbc9f907[m [32mFri Mar 27 12:53:40 2026[m [36mQwaszx112233[m Delete CANONICAL_APIS_STAGE7_FINAL_STABILIZED.md
+D	CANONICAL_APIS_STAGE7_FINAL_STABILIZED.md
+
+[33m3f84dc2[m [32mFri Mar 27 12:52:41 2026[m [36mQwaszx112233[m 7.1.5
+M	ARCHITECTURE.md
+M	Actions.gs
+M	AuditTrail.gs
+M	Code.gs
+M	DataAccess.gs
+M	DateUtils.gs
+M	DeprecatedRegistry.gs
+M	Diagnostics.gs
+M	DialogPresenter.gs
+M	DialogTemplates.gs
+M	Dialogs.gs
+M	DomainTests.gs
+A	EMOJI_CLEANUP_REPORT_2026-03-27.txt
+M	JobRuntime.gs
+M	JobRuntimeRepository.gs
+M	Js.Actions.html
+M	Js.Api.html
+M	Js.Core.html
+M	Js.Diagnostics.html
+M	Js.Events.html
+M	Js.Helpers.html
+M	Js.Render.html
+M	Js.State.html
+M	Log.gs
+M	LogsRepository.gs
+M	MonthSheets.gs
+M	OperationRepository.gs
+M	OperationSafety.gs
+M	PersonCalendar.html
+M	PersonCards.gs
+M	PersonsRepository.gs
+M	PreviewLinkService.gs
+M	README.md
+M	RUNBOOK.md
+M	Reconciliation.gs
+M	RoutingRegistry.gs
+M	SelectionActionService.gs
+M	SendPanel.gs
+M	SendPanelConstants.gs
+M	SendPanelRepository.gs
+M	SendPanelService.gs
+M	ServerResponse.gs
+M	SheetSchemas.gs
+M	SheetStandards.gs
+M	Sidebar.html
+M	SidebarServer.gs
+M	SmokeTests.gs
+M	SpreadsheetActionsApi.gs
+M	Stage3ServerApi.gs
+M	Stage4Config.gs
+M	Stage4ServerApi.gs
+M	Stage5MaintenanceApi.gs
+M	Styles.html
+M	Summaries.gs
+M	TemplateRegistry.gs
+M	TemplateResolver.gs
+M	Templates.gs
+M	Triggers.gs
+M	UseCases.gs
+M	Utils.gs
+M	VacationEngine.gs
+M	VacationsRepository.gs
+M	Validation.gs
+M	WorkflowOrchestrator.gs
+
+[33mb24bdda[m [32mFri Mar 27 11:53:13 2026[m [36mQwaszx112233[m 7.1.5
+[33mf20043e[m [32mFri Mar 27 10:54:51 2026[m [36mQwaszx112233[m 7.1.4
+M	Actions.gs
+M	Code.gs
+M	DataAccess.gs
+M	Diagnostics.gs
+M	DialogTemplates.gs
+M	Dialogs.gs
+M	Js.Actions.html
+M	Js.Core.html
+M	Js.Diagnostics.html
+M	Js.Events.html
+M	Js.Helpers.html
+M	Js.Render.html
+M	Js.State.html
+M	MonthSheets.gs
+M	PersonCalendar.html
+M	PersonCards.gs
+M	SendPanel.gs
+M	SendPanelConstants.gs
+M	SendPanelRepository.gs
+M	Sidebar.html
+M	SidebarServer.gs
+M	Stage3ServerApi.gs
+M	Summaries.gs
+M	Templates.gs
+M	UseCases.gs
+M	Utils.gs
+M	VacationEngine.gs
+
+[33m7b69694[m [32mThu Mar 26 22:46:15 2026[m [36mQwaszx112233[m 7.1.2
+M	Reconciliation.gs
+M	SendPanel.gs
+M	SendPanelRepository.gs
+
+[33mc76d23a[m [32mThu Mar 26 19:19:08 2026[m [36mQwaszx112233[m 7.1.
+M	Js.Api.html
+M	Js.Core.html
+M	Js.State.html
+
+[33m9ed3d17[m [32mThu Mar 26 19:14:14 2026[m [36mQwaszx112233[m 7.1.1.1.4
+[33m4f1be1b[m [32mThu Mar 26 18:44:57 2026[m [36mQwaszx112233[m Add files via upload
+M	Diagnostics.gs
+M	DomainTests.gs
+M	Js.Core.html
+M	Js.Render.html
+M	Js.State.html
+M	README.md
+M	Reconciliation.gs
+A	SEND_PANEL_TZ_IMPLEMENTATION_2026-03-26.md
+M	SendPanel.gs
+M	SendPanelConstants.gs
+M	SendPanelRepository.gs
+M	SendPanelService.gs
+M	SheetSchemas.gs
+M	UseCases.gs
+
+[33m0b284c7[m [32mThu Mar 26 15:14:39 2026[m [36mQwaszx112233[m 7.1.1.1.3
+M	Actions.gs
+M	Code.gs
+M	DataAccess.gs
+M	Diagnostics.gs
+M	DialogTemplates.gs
+M	Dialogs.gs
+M	Js.Actions.html
+M	Js.Core.html
+M	Js.Diagnostics.html
+M	Js.Events.html
+M	Js.Helpers.html
+M	Js.Render.html
+M	Js.State.html
+M	MonthSheets.gs
+M	PersonCalendar.html
+M	PersonCards.gs
+M	README.md
+M	SendPanel.gs
+M	SendPanelConstants.gs
+M	SidebarServer.gs
+M	Summaries.gs
+M	Templates.gs
+M	Utils.gs
+
+[33m3aeb834[m [32mThu Mar 26 14:46:25 2026[m [36mQwaszx112233[m 7,1,1,1,3
+M	Diagnostics.gs
+A	RESOLVER_HOTFIX_2026-03-26.md
+M	SmokeTests.gs
+
+[33mc53522f[m [32mThu Mar 26 14:41:12 2026[m [36mQwaszx112233[m 7,1,1,1,3
+[33mf212553[m [32mThu Mar 26 14:19:27 2026[m [36mQwaszx112233[m 7,1,1,1,2
+M	Diagnostics.gs
+
+[33m737c843[m [32mThu Mar 26 14:12:09 2026[m [36mQwaszx112233[m 7,1,1,1,2
+M	ARCHITECTURE.md
+M	Diagnostics.gs
+M	README.md
+A	RELEASE_NAMING_HOTFIX_2026-03-26.md
+M	RUNBOOK.md
+M	STAGE7_REPORT.md
+M	SmokeTests.gs
+
+[33m36d381f[m [32mThu Mar 26 13:10:25 2026[m [36mQwaszx112233[m 7,1,1,1,1
+A	CANONICAL_APIS_STAGE7_FINAL_STABILIZED.md
+A	CHANGELOG_STAGE7_FINAL_STABILIZED.md
+A	COMPARISON_AND_MERGE_REPORT_2026-03-26.md
+A	COMPATIBILITY_ALIASES_STAGE7_FINAL_STABILIZED.md
+M	DataAccess.gs
+M	DateUtils.gs
+M	Diagnostics.gs
+M	DictionaryRepository.gs
+M	DomainTests.gs
+A	FINAL_STABILIZATION_REPORT_2026-03-26.md
+M	Js.Core.html
+M	Js.Render.html
+M	Js.State.html
+M	PersonsRepository.gs
+M	ProjectMetadata.gs
+A	STABILIZATION_CHECK_REPORT_STAGE7_FINAL.md
+M	SelectionActionService.gs
+M	SendPanel.gs
+M	SendPanelRepository.gs
+M	SheetStandards.gs
+M	SidebarServer.gs
+M	SmokeTests.gs
+M	Summaries.gs
+M	SummaryService.gs
+M	TemplateResolver.gs
+M	Templates.gs
+M	UseCases.gs
+M	Utils.gs
+M	VacationEngine.gs
+M	Validation.gs
+
+[33m3eac66b[m [32mThu Mar 26 00:53:54 2026[m [36mQwaszx112233[m 1,0,0,0,0
+M	Js.Core.html
+
+[33m3149dcd[m [32mThu Mar 26 00:09:54 2026[m [36mQwaszx112233[m 1,0,0,0,0
+M	Js.Render.html
+M	OperationRepository.gs
+M	Stage5MaintenanceApi.gs
+
+[33m4339035[m [32mWed Mar 25 22:52:52 2026[m [36mQwaszx112233[m 1,1,1,1
+M	Diagnostics.gs
+M	Stage3ServerApi.gs
+
+[33m95f91c1[m [32mWed Mar 25 22:36:41 2026[m [36mQwaszx112233[m 1,1,1
+M	ARCHITECTURE.md
+M	COMMANDS_TERMINAL.md
+M	Diagnostics.gs
+M	FILES_TO_CREATE_IN_GAS_WEB_EDITOR.txt
+M	GAS_WEB_EDITOR_IMPORT_GUIDE.md
+M	Js.Diagnostics.html
+M	ProjectMetadata.gs
+M	README.md
+M	SmokeTests.gs
+M	VacationEngine.gs
+
+[33m81d7fc9[m [32mWed Mar 25 21:34:19 2026[m [36mQwaszx112233[m Update health check severity and status handling
+M	Diagnostics.gs
+
+[33m9b0b2c1[m [32mWed Mar 25 21:31:36 2026[m [36mQwaszx112233[m 1,1
+M	DataAccess.gs
+M	Diagnostics.gs
+M	MonthSheets.gs
+M	PersonCards.gs
+M	PersonsRepository.gs
+M	SelectionActionService.gs
+M	SheetStandards.gs
+M	Summaries.gs
+M	UseCases.gs
+M	VacationEngine.gs
+M	VacationService.gs
+M	VacationsRepository.gs
+M	Validation.gs
+
+[33ma031979[m [32mWed Mar 25 21:03:35 2026[m [36mQwaszx112233[m Delete SUNSET_POLICY.md
+D	SUNSET_POLICY.md
+
+[33m088fdbf[m [32mWed Mar 25 21:03:03 2026[m [36mQwaszx112233[m Delete STAGE6A_REPORT.md
+D	STAGE6A_REPORT.md
+
+[33m304debb[m [32mWed Mar 25 21:02:38 2026[m [36mQwaszx112233[m Delete STAGE5_REPORT.md
+D	STAGE5_REPORT.md
+
+[33m5eb3a0c[m [32mWed Mar 25 20:34:57 2026[m [36mQwaszx112233[m Delete package.json
+D	package.json
+
+[33mdbaef81[m [32mWed Mar 25 20:34:44 2026[m [36mQwaszx112233[m Delete clasp.json.example
+D	clasp.json.example
+
+[33m323ef90[m [32mWed Mar 25 20:34:06 2026[m [36mQwaszx112233[m Delete dev-shell.ps1
+D	dev-shell.ps1
+
+[33m68b41d7[m [32mWed Mar 25 20:32:49 2026[m [36mQwaszx112233[m Delete .clasp.json.example
+D	.clasp.json.example
+
+[33m140a852[m [32mWed Mar 25 20:32:34 2026[m [36mQwaszx112233[m Delete .claspignore
+D	.claspignore
+
+[33m2387ebc[m [32mWed Mar 25 20:32:21 2026[m [36mQwaszx112233[m Delete .gitignore
+D	.gitignore
+
+[33mc6f3fe7[m [32mWed Mar 25 20:31:51 2026[m [36mQwaszx112233[m Delete watch-sync-simple.ps1
+D	watch-sync-simple.ps1
+
+[33m3d74822[m [32mWed Mar 25 20:28:55 2026[m [36mQwaszx112233[m 1
+M	COMMANDS_TERMINAL.md
+A	FILES_TO_CREATE_IN_GAS_WEB_EDITOR.txt
+A	GAS_WEB_EDITOR_IMPORT_GUIDE.md
+M	Js.Actions.html
+M	Js.Helpers.html
+M	Js.State.html
+M	ProjectMetadata.gs
+M	README.md
+M	RUNBOOK.md

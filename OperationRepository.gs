@@ -115,29 +115,6 @@ const OperationRepository_ = (function() {
   }
 
   return sh;
-  }  var headerLabels = (typeof stage7GetServiceSheetHeaderLabels_ === 'function')
-    ? stage7GetServiceSheetHeaderLabels_(name, headers)
-    : headers.slice();
-
-  if (sh.getMaxColumns() < headerLabels.length) {
-    sh.insertColumnsAfter(sh.getMaxColumns(), headerLabels.length - sh.getMaxColumns());
-  }
-
-  var current = sh.getRange(1, 1, 1, headerLabels.length).getValues()[0];
-  var same = true;
-  for (var i = 0; i < headerLabels.length; i++) {
-    if (String(current[i] || '') !== String(headerLabels[i] || '')) {
-      same = false;
-      break;
-    }
-  }
-
-  if (!same) {
-    sh.getRange(1, 1, 1, headerLabels.length).setValues([headerLabels.slice()]);
-  }
-
-  if (typeof stage7ApplyTableTheme_ === 'function') {
-    stage7ApplyTableTheme_(sh, 1, headerLabels.length, { freeze: false });
   }
 
   function ensureServiceSheets() {
