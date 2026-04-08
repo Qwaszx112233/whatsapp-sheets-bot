@@ -877,5 +877,4 @@ const OperationRepository_ = (function() {
     runRepair: runRepair,
     _classifyVerification: _classifyVerification
   };
-}
 })();
