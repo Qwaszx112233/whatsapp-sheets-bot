@@ -22,7 +22,24 @@
     const headers = sh.getRange(1, 1, 1, lastColumn).getValues()[0];
     const map = {};
     for (let i = 0; i < headers.length; i++) {
-      const key = String(headers[i] || '').trim().toLowerCase();
+      const raw = String(headers[i] || '').trim().toLowerCase();
+      const aliases = {
+        'електронна пошта': 'email',
+        'телефон': 'phone',
+        'роль': 'role',
+        'увімкнено': 'enabled',
+        'примітка': 'note',
+        "ім’я для відображення": 'display_name',
+        'позивний': 'person_callsign',
+        'самоприв’язка дозволена': 'self_bind_allowed',
+        'поточний хеш ключа': 'user_key_current_hash',
+        'попередній хеш ключа': 'user_key_prev_hash',
+        'остання активність': 'last_seen_at',
+        'остання ротація': 'last_rotated_at',
+        'невдалі спроби': 'failed_attempts',
+        'блокування до (ms)': 'locked_until_ms'
+      };
+      const key = aliases[raw] || raw;
       if (key) map[key] = i + 1;
     }
     return map;

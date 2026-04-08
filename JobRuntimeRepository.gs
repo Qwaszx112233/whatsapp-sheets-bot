@@ -67,19 +67,21 @@ const JobRuntimeRepository_ = (function() {
   }
 
   function _ensureHeader(sh) {
-    _ensureSheetColumns(sh, ALL_COLUMNS.length);
+  _ensureSheetColumns(sh, ALL_COLUMNS.length);
 
-    const current = sh.getRange(1, 1, 1, ALL_COLUMNS.length).getValues()[0];
-    if (!_headersEqual(current, ALL_COLUMNS)) {
-      sh.getRange(1, 1, 1, ALL_COLUMNS.length).setValues([ALL_COLUMNS]);
-    }
+  const headerLabels = (typeof stage7GetServiceSheetHeaderLabels_ === 'function')
+    ? stage7GetServiceSheetHeaderLabels_(_sheetName(), ALL_COLUMNS)
+    : ALL_COLUMNS.slice();
 
-    if (sh.getFrozenRows() < 1) {
-      sh.setFrozenRows(1);
-    }
+  const current = sh.getRange(1, 1, 1, ALL_COLUMNS.length).getValues()[0];
+  if (!_headersEqual(current, headerLabels)) {
+    sh.getRange(1, 1, 1, ALL_COLUMNS.length).setValues([headerLabels]);
   }
 
-  function _sheet() {
+  if (typeof stage7ApplyTableTheme_ === 'function') {
+    stage7ApplyTableTheme_(sh, 1, ALL_COLUMNS.length, { freeze: false });
+  }
+  }  function _sheet() {
     const ss = SpreadsheetApp.getActive();
     let sh = ss.getSheetByName(_sheetName());
     if (!sh) {

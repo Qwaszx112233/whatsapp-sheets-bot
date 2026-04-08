@@ -185,30 +185,48 @@ const Stage7AuditTrail_ = (function () {
     const width = Math.max(sheet.getLastColumn(), HEADERS.length, 1);
     return sheet.getRange(headerRow, 1, 1, width).getValues()[0];
   }
+    function _isHeaderValid_(sheet, headerRow) {
+      if (sheet.getLastRow() < headerRow) return false;
 
-  function _isHeaderValid_(sheet, headerRow) {
-    if (sheet.getLastRow() < headerRow) return false;
+      const headerLabels = (typeof stage7GetServiceSheetHeaderLabels_ === 'function')
+        ? stage7GetServiceSheetHeaderLabels_(_getSheetConfig_().sheetName, HEADERS)
+        : HEADERS.slice();
 
-    const existing = _readHeaderRow_(sheet, headerRow);
-    for (let i = 0; i < HEADERS.length; i++) {
-      if (String(existing[i] || '').trim() !== HEADERS[i]) {
-        return false;
+      const existing = _readHeaderRow_(sheet, headerRow);
+      for (let i = 0; i < headerLabels.length; i++) {
+        if (String(existing[i] || '').trim() !== headerLabels[i]) {
+          return false;
+        }
       }
+      return true;
     }
-    return true;
-  }
 
-  function _ensureHeader_(sheet, headerRow) {
-    const valid = _isHeaderValid_(sheet, headerRow);
-    if (valid) return false;
+    function _ensureHeader_(sheet, headerRow) {
+      const valid = _isHeaderValid_(sheet, headerRow);
+      if (valid) return false;
 
-    sheet.getRange(headerRow, 1, 1, HEADERS.length).setValues([HEADERS]);
-    sheet.getRange(headerRow, 1, 1, HEADERS.length)
-      .setFontWeight('bold')
-      .setBackground('#e8eaed');
+      const headerLabels = (typeof stage7GetServiceSheetHeaderLabels_ === 'function')
+        ? stage7GetServiceSheetHeaderLabels_(_getSheetConfig_().sheetName, HEADERS)
+        : HEADERS.slice();
 
-    if (sheet.getFrozenRows() !== headerRow) {
-      sheet.setFrozenRows(headerRow);
+      sheet.getRange(headerRow, 1, 1, HEADERS.length).setValues([headerLabels]);
+
+      if (typeof stage7ApplyTableTheme_ === 'function') {
+        stage7ApplyTableTheme_(sheet, headerRow, HEADERS.length, { freeze: false });
+      } else {
+        sheet.getRange(headerRow, 1, 1, HEADERS.length)
+          .setFontWeight('bold')
+          .setBackground('#e8eaed');
+      }
+
+      return true;
+    } else {
+        sheet.getRange(headerRow, 1, 1, HEADERS.length)
+          .setFontWeight('bold')
+          .setBackground('#e8eaed');
+      }
+
+      return true;
     }
 
     return true;

@@ -236,7 +236,7 @@
         exists: !!sh,
         headersPresent: SHEET_HEADERS.every(h => headerMap[h] !== undefined),
         missingHeaders: SHEET_HEADERS.filter(h => headerMap[h] === undefined),
-        headersCanonical: sh ? sh.getRange(1, 1, 1, SHEET_HEADERS.length).getValues()[0].every((v, i) => v === SHEET_HEADERS[i]) : false
+        headersCanonical: sh ? (typeof stage7AccessHeadersCanonical_ === 'function' ? stage7AccessHeadersCanonical_(sh) : sh.getRange(1, 1, 1, SHEET_HEADERS.length).getValues()[0].every((v, i) => v === SHEET_HEADERS[i])) : false
       },
       dataIntegrity: {
         duplicateEmails: [],

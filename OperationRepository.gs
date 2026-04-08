@@ -83,17 +83,65 @@ const OperationRepository_ = (function() {
   }
 
   function _sheet(name, headers) {
-    var ss = _ss();
-    var sh = ss.getSheetByName(name);
-    if (!sh) {
-      sh = ss.insertSheet(name);
-      sh.getRange(1, 1, 1, headers.length).setValues([headers.slice()]);
-      sh.setFrozenRows(1);
-    }
-    return sh;
+  var ss = _ss();
+  var sh = ss.getSheetByName(name);
+  if (!sh) {
+    sh = ss.insertSheet(name);
   }
 
-  function ensureServiceSheets() {
+  var headerLabels = (typeof stage7GetServiceSheetHeaderLabels_ === 'function')
+    ? stage7GetServiceSheetHeaderLabels_(name, headers)
+    : headers.slice();
+
+  if (sh.getMaxColumns() < headerLabels.length) {
+    sh.insertColumnsAfter(sh.getMaxColumns(), headerLabels.length - sh.getMaxColumns());
+  }
+
+  var current = sh.getRange(1, 1, 1, headerLabels.length).getValues()[0];
+  var same = true;
+  for (var i = 0; i < headerLabels.length; i++) {
+    if (String(current[i] || '') !== String(headerLabels[i] || '')) {
+      same = false;
+      break;
+    }
+  }
+
+  if (!same) {
+    sh.getRange(1, 1, 1, headerLabels.length).setValues([headerLabels.slice()]);
+  }
+
+  if (typeof stage7ApplyTableTheme_ === 'function') {
+    stage7ApplyTableTheme_(sh, 1, headerLabels.length, { freeze: false });
+  }
+
+  return sh;
+  }  var headerLabels = (typeof stage7GetServiceSheetHeaderLabels_ === 'function')
+    ? stage7GetServiceSheetHeaderLabels_(name, headers)
+    : headers.slice();
+
+  if (sh.getMaxColumns() < headerLabels.length) {
+    sh.insertColumnsAfter(sh.getMaxColumns(), headerLabels.length - sh.getMaxColumns());
+  }
+
+  var current = sh.getRange(1, 1, 1, headerLabels.length).getValues()[0];
+  var same = true;
+  for (var i = 0; i < headerLabels.length; i++) {
+    if (String(current[i] || '') !== String(headerLabels[i] || '')) {
+      same = false;
+      break;
+    }
+  }
+
+  if (!same) {
+    sh.getRange(1, 1, 1, headerLabels.length).setValues([headerLabels.slice()]);
+  }
+
+  if (typeof stage7ApplyTableTheme_ === 'function') {
+    stage7ApplyTableTheme_(sh, 1, headerLabels.length, { freeze: false });
+  }
+
+  return sh;
+  }  function ensureServiceSheets() {
     return {
       ops: _sheet(SHEETS.OPS, OPS_HEADERS).getName(),
       active: _sheet(SHEETS.ACTIVE, ACTIVE_HEADERS).getName(),
@@ -109,23 +157,25 @@ const OperationRepository_ = (function() {
   }
 
   function _rowsAsObjects(sheet) {
-    var lastRow = sheet.getLastRow();
-    if (lastRow < 2) return [];
-    var map = _headerMap(sheet);
-    var values = sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn()).getValues();
-    var headers = Object.keys(map);
-    return values.map(function(row, idx) {
-      var out = { __row: idx + 2 };
-      headers.forEach(function(header) { out[header] = row[map[header] - 1]; });
-      return out;
-    });
-  }
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return [];
 
-  function _normalizeOperationId(value) {
-    return String(value == null ? '' : value).trim();
-  }
+  var name = String(sheet.getName() || '').trim();
+  var headers = [];
+  if (name === SHEETS.OPS) headers = OPS_HEADERS.slice();
+  else if (name === SHEETS.ACTIVE) headers = ACTIVE_HEADERS.slice();
+  else if (name === SHEETS.CHECKPOINTS) headers = CHECKPOINT_HEADERS.slice();
+  else headers = (sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0] || []).map(function(v) { return String(v || ''); });
 
-  function _sameOperationId(left, right) {
+  var width = Math.min(sheet.getLastColumn(), headers.length);
+  var values = sheet.getRange(2, 1, lastRow - 1, width).getValues();
+
+  return values.map(function(row, idx) {
+    var out = { __row: idx + 2 };
+    headers.forEach(function(header, hIdx) { out[header] = row[hIdx]; });
+    return out;
+  });
+  }  function _sameOperationId(left, right) {
     var a = _normalizeOperationId(left);
     var b = _normalizeOperationId(right);
     return !!a && !!b && a === b;

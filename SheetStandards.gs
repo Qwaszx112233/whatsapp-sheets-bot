@@ -3,15 +3,28 @@ function applyGlobalSheetStandards_() {
   const ss = SpreadsheetApp.getActive();
   ss.getSheets().forEach(sh => {
     const name = sh.getName();
-    if (/^\d{2}$/.test(name) || name === CONFIG.SEND_PANEL_SHEET) {
+    const isMonth = /^\d{2}$/.test(name);
+
+    if (isMonth) {
       applyFontStandardsToSheet_(sh);
       applyFreezeStandardsToSheet_(sh);
       applyColumnWidthsStandardsToSheet_(sh);
+      return;
+    }
+
+    if (typeof stage7IsRequiredNonMonthSheet_ === 'function' && stage7IsRequiredNonMonthSheet_(name)) {
+      applyFontStandardsToSheet_(sh);
+      applyColumnWidthsStandardsToSheet_(sh);
+      try {
+        sh.setFrozenRows(0);
+        sh.setFrozenColumns(0);
+      } catch (_) {}
+      if (typeof stage7ApplyTableTheme_ === 'function') {
+        stage7ApplyTableTheme_(sh, 1, Math.max(sh.getLastColumn(), 1), { freeze: false });
+      }
     }
   });
-}
-
-function applyFontStandardsToSheet_(sheet) {
+}function applyFontStandardsToSheet_(sheet) {
   const maxR = sheet.getMaxRows();
   const maxC = sheet.getMaxColumns();
   if (maxR < 1 || maxC < 1) return;
@@ -22,12 +35,15 @@ function applyFontStandardsToSheet_(sheet) {
 
 function applyFreezeStandardsToSheet_(sheet) {
   try {
-    sheet.setFrozenRows(1);
-    sheet.setFrozenColumns(7);
+    if (/^\d{2}$/.test(String(sheet.getName() || '').trim())) {
+      sheet.setFrozenRows(1);
+      sheet.setFrozenColumns(7);
+    } else {
+      sheet.setFrozenRows(0);
+      sheet.setFrozenColumns(0);
+    }
   } catch (e) { }
-}
-
-function applyColumnWidthsStandardsToSheet_(sheet) {
+}function applyColumnWidthsStandardsToSheet_(sheet) {
   const isSendPanel = sheet.getName() === CONFIG.SEND_PANEL_SHEET;
   const maxCols = sheet.getMaxColumns();
   const widths = isSendPanel
