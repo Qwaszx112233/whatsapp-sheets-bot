@@ -86,6 +86,18 @@ function _applyBasicSystemSheetStandards_(sheet, headerRow, lastCol) {
   } catch (_) {}
 }
 
+function _applyAccessCheckboxes_(sheet) {
+  if (!sheet || sheet.getName() !== 'ACCESS') return;
+
+  const lastRow = Math.max(sheet.getMaxRows(), 2);
+
+  // enabled = col 4
+  sheet.getRange(2, 4, lastRow - 1, 1).insertCheckboxes();
+
+  // self_bind_allowed = col 8
+  sheet.getRange(2, 8, lastRow - 1, 1).insertCheckboxes();
+}
+
 function ensureSystemSheetByName_(sheetName) {
   const record = _systemSheetRecordByName_(sheetName);
   if (!record) throw new Error('Unknown system sheet: ' + sheetName);
@@ -120,6 +132,10 @@ function ensureSystemSheetByName_(sheetName) {
   }
 
   _applyBasicSystemSheetStandards_(sheet, headerRow, lastCol);
+
+  if (record.name === 'ACCESS') {
+    _applyAccessCheckboxes_(sheet);
+  }
 
   return {
     name: record.name,
