@@ -246,7 +246,7 @@ function _assertStage4Meta_(result, functionName) {
  * @private
  */
 function _runContractTest_(report, name, fn, options) {
-  _smokePush_(report, name, () => {
+  _smokePush_(report, name, function() {
     const result = fn();
     _assertStage4Meta_(result, name);
     return `success=${result.success}`;
@@ -325,31 +325,31 @@ function runStage4ScenarioTests(options = {}) {
   };
 
   // --- Core API Contract Tests ---
-  _runContractTest_(report, 'apiStage7GetMonthsList', () => {
+  _runContractTest_(report, 'apiStage7GetMonthsList', function() {
     const result = apiStage7GetMonthsList();
     _smokeAssert_(Array.isArray(result.data.result.months), 'months[] not returned');
     return result;
   });
 
-  _runContractTest_(report, 'apiStage7GetSidebarData', () => {
+  _runContractTest_(report, 'apiStage7GetSidebarData', function() {
     const result = apiStage7GetSidebarData(testDate);
     _smokeAssert_(Array.isArray(result.data.result.personnel), 'personnel[] not returned');
     return result;
   }, { skipOnError: true });
 
-  _runContractTest_(report, 'apiStage7GetSendPanelData', () => {
+  _runContractTest_(report, 'apiStage7GetSendPanelData', function() {
     const result = apiStage7GetSendPanelData();
     _smokeAssert_(Array.isArray(result.data.result.rows), 'rows[] not returned');
     return result;
   }, { skipOnError: true });
 
-  _runContractTest_(report, 'apiGenerateSendPanelForDate', () => {
+  _runContractTest_(report, 'apiGenerateSendPanelForDate', function() {
     const result = apiGenerateSendPanelForDate({ dryRun: true, date: testDate });
     _smokeAssert_(Array.isArray(result.data.result.rows), 'rows[] not returned');
     return result;
   });
 
-  _runContractTest_(report, 'apiGenerateSendPanelForRange', () => {
+  _runContractTest_(report, 'apiGenerateSendPanelForRange', function() {
     const result = apiGenerateSendPanelForRange({ 
       dryRun: true, 
       startDate: testDate, 
@@ -359,61 +359,61 @@ function runStage4ScenarioTests(options = {}) {
     return result;
   });
 
-  _runContractTest_(report, 'apiMarkPanelRowsAsSent', () => {
+  _runContractTest_(report, 'apiMarkPanelRowsAsSent', function() {
     const startRow = Number(CONFIG.SEND_PANEL_DATA_START_ROW) || 3;
     return apiMarkPanelRowsAsSent([startRow], { dryRun: true });
   }, { skipOnError: true });
 
-  _runContractTest_(report, 'apiMarkPanelRowsAsUnsent', () => {
+  _runContractTest_(report, 'apiMarkPanelRowsAsUnsent', function() {
     const startRow = Number(CONFIG.SEND_PANEL_DATA_START_ROW) || 3;
     return apiMarkPanelRowsAsUnsent([startRow], { dryRun: true });
   }, { skipOnError: true });
 
-  _runContractTest_(report, 'apiSendPendingRows', () => {
+  _runContractTest_(report, 'apiSendPendingRows', function() {
     return apiSendPendingRows({ dryRun: true, limit: 10 });
   }, { skipOnError: true });
 
-  _runContractTest_(report, 'apiBuildDaySummary', () => {
+  _runContractTest_(report, 'apiBuildDaySummary', function() {
     const result = apiBuildDaySummary(testDate);
     _smokeAssert_(typeof result.data.result.summary === 'string', 'summary not returned');
     return result;
   }, { skipOnError: true });
 
-  _runContractTest_(report, 'apiBuildDetailedSummary', () => {
+  _runContractTest_(report, 'apiBuildDetailedSummary', function() {
     const result = apiBuildDetailedSummary(testDate);
     _smokeAssert_(typeof result.data.result.summary === 'string', 'summary not returned');
     return result;
   }, { skipOnError: true });
 
-  _runContractTest_(report, 'apiOpenPersonCard', () => {
+  _runContractTest_(report, 'apiOpenPersonCard', function() {
     _smokeAssert_(!!testCallsign, 'No test callsign available');
     const result = apiOpenPersonCard(testCallsign, testDate);
     _smokeAssert_(!!result.data.result.callsign, 'callsign not returned');
     return result;
   }, { skipOnError: true });
 
-  _runContractTest_(report, 'apiCheckVacationsAndBirthdays', () => {
+  _runContractTest_(report, 'apiCheckVacationsAndBirthdays', function() {
     return apiCheckVacationsAndBirthdays(testDate);
   });
 
-  _runContractTest_(report, 'apiStage7SwitchBotToMonth', () => {
+  _runContractTest_(report, 'apiStage7SwitchBotToMonth', function() {
     return apiStage7SwitchBotToMonth(getBotMonthSheetName_());
   });
 
-  _runContractTest_(report, 'apiStage7CreateNextMonth', () => {
+  _runContractTest_(report, 'apiStage7CreateNextMonth', function() {
     return apiStage7CreateNextMonth({ dryRun: true, switchToNewMonth: false });
   }, { skipOnError: true });
 
-  _runContractTest_(report, 'apiRunReconciliation', () => {
+  _runContractTest_(report, 'apiRunReconciliation', function() {
     return apiRunReconciliation({ mode: 'report', dryRun: true, date: testDate });
   });
 
-  _runContractTest_(report, 'apiRunMaintenanceScenario', () => {
+  _runContractTest_(report, 'apiRunMaintenanceScenario', function() {
     return apiRunMaintenanceScenario({ type: 'healthCheck', shallow: true });
   });
 
   // --- Jobs API Suite ---
-  _smokePush_(report, 'jobs api contract suite', () => {
+  _smokePush_(report, 'jobs api contract suite', function() {
     const jobList = apiListStage7Jobs();
     const jobInstall = apiInstallStage7Jobs();
     
@@ -428,7 +428,7 @@ function runStage4ScenarioTests(options = {}) {
   }, { skipOnError: true });
 
   // --- Deprecated Registry Sanity ---
-  _smokePush_(report, 'deprecated registry sanity', () => {
+  _smokePush_(report, 'deprecated registry sanity', function() {
     const registry = getDeprecatedRegistry_();
     _smokeAssert_(Array.isArray(registry) && registry.length >= 5, 'Deprecated registry too small');
     
@@ -439,7 +439,7 @@ function runStage4ScenarioTests(options = {}) {
     return `deprecated=${registry.length}`;
   });
 
-  _smokePush_(report, 'deprecated registry token resolution', () => {
+  _smokePush_(report, 'deprecated registry token resolution', function() {
     getDeprecatedRegistry_()
       .filter(item => !!item.verifySourceToken)
       .forEach(item => {
@@ -456,7 +456,7 @@ function runStage4ScenarioTests(options = {}) {
   });
 
   // --- Helper Consistency ---
-  _smokePush_(report, 'canonical helper consistency', () => {
+  _smokePush_(report, 'canonical helper consistency', function() {
     _smokeAssert_(
       typeof HtmlUtils_ === 'object' && typeof HtmlUtils_.escapeHtml === 'function',
       'HtmlUtils_.escapeHtml missing'
@@ -471,7 +471,7 @@ _smokeAssert_(_escapeHtml_(testStr) === HtmlUtils_.escapeHtml(testStr), '_escape
   });
 
   // --- Bundle Metadata ---
-  _smokePush_(report, 'bundle metadata / manifest / docs markers', () => {
+  _smokePush_(report, 'bundle metadata / manifest / docs markers', function() {
     const meta = getProjectBundleMetadata_();
     
     _smokeAssert_(meta.manifestIncluded === true, 'manifestIncluded must be true');
@@ -495,7 +495,7 @@ _smokeAssert_(_escapeHtml_(testStr) === HtmlUtils_.escapeHtml(testStr), '_escape
   });
 
   // --- Diagnostics Modes ---
-  _smokePush_(report, 'stage7 diagnostics modes available', () => {
+  _smokePush_(report, 'stage7 diagnostics modes available', function() {
     const requiredModes = [
       'runHistoricalQuickDiagnosticsInternal_',
       'runHistoricalStructuralDiagnosticsInternal_',
@@ -542,7 +542,7 @@ function runStage5ScenarioTests(options = {}) {
   ];
 
   messagingTests.forEach(({ name, fn, expectedKind }) => {
-    _runContractTest_(report, name, () => {
+    _runContractTest_(report, name, function() {
       const result = fn({});
       _smokeAssert_(result.data.result.kind === expectedKind, `Invalid kind for ${name}`);
       return result;
@@ -550,46 +550,46 @@ function runStage5ScenarioTests(options = {}) {
   });
 
   // --- Commander Summary ---
-  _runContractTest_(report, 'apiBuildCommanderSummaryPreview', () => {
+  _runContractTest_(report, 'apiBuildCommanderSummaryPreview', function() {
     const result = apiBuildCommanderSummaryPreview({});
     _smokeAssert_(result.data.result.kind === 'summaryPreview', 'Invalid kind for commander preview');
     return result;
   }, { skipOnError: true });
 
-  _runContractTest_(report, 'apiBuildCommanderSummaryLink', () => {
+  _runContractTest_(report, 'apiBuildCommanderSummaryLink', function() {
     const result = apiBuildCommanderSummaryLink({});
     _smokeAssert_(result.data.result.kind === 'summaryPreview', 'Invalid kind for commander link preview');
     return result;
   }, { skipOnError: true });
 
   // --- Logging & Diagnostics ---
-  _runContractTest_(report, 'apiLogPreparedMessages', () => {
+  _runContractTest_(report, 'apiLogPreparedMessages', function() {
     const result = apiLogPreparedMessages({ mode: 'selection', dryRun: true });
     _smokeAssert_(!!result.data.result.kind, 'LOG preview missing prepared result');
     return result;
   }, { skipOnError: true });
 
-  _runContractTest_(report, 'apiRunSelectionDiagnostics', () => {
+  _runContractTest_(report, 'apiRunSelectionDiagnostics', function() {
     const result = apiRunSelectionDiagnostics({});
     _smokeAssert_(result.data.result.kind === 'selectionDiagnostics', 'Selection diagnostics missing expected kind');
     return result;
   }, { skipOnError: true });
 
   // --- Health & Diagnostics ---
-  _runContractTest_(report, 'apiStage7HealthCheck', () => {
+  _runContractTest_(report, 'apiStage7HealthCheck', function() {
     const result = apiStage7HealthCheck({ mode: 'quick' });
     _smokeAssert_(Array.isArray(result.data.result.checks), 'checks[] not returned');
     return result;
   }, { skipOnError: true });
 
-  _runContractTest_(report, 'apiRunStage7Diagnostics', () => {
+  _runContractTest_(report, 'apiRunStage7Diagnostics', function() {
     const result = apiRunStage7Diagnostics({ mode: 'structural' });
     _smokeAssert_(Array.isArray(result.data.result.checks), 'checks[] not returned');
     return result;
   }, { skipOnError: true });
 
   // --- Regression Test Self-Check ---
-  _smokePush_(report, 'apiRunStage7RegressionTests contract', () => {
+  _smokePush_(report, 'apiRunStage7RegressionTests contract', function() {
     _smokeAssert_(
       typeof apiRunStage7RegressionTests === 'function',
       'apiRunStage7RegressionTests missing'
@@ -645,7 +645,7 @@ function runRegressionTestSuite(options = {}) {
   // -------------------------------------------------------------------------
   // 1. Canonical Scenario Contract
   // -------------------------------------------------------------------------
-  _smokePush_(report, 'canonical scenario contract suite', () => {
+  _smokePush_(report, 'canonical scenario contract suite', function() {
     const scenarios = runStage5ScenarioTests(options);
     _smokeAssert_(Array.isArray(scenarios.checks), 'runStage5ScenarioTests() missing checks[]');
     _smokeAssert_(scenarios.checks.length >= 11, 'Insufficient canonical contract checks');
@@ -655,7 +655,7 @@ function runRegressionTestSuite(options = {}) {
   // -------------------------------------------------------------------------
   // 2. Release Metadata Validation
   // -------------------------------------------------------------------------
-  _smokePush_(report, 'release metadata truth model', () => {
+  _smokePush_(report, 'release metadata truth model', function() {
     _smokeAssert_(String(meta.stage) === '7.1', 'metadata.stage must be 7.1');
     
     _smokeAssert_(
@@ -691,7 +691,7 @@ function runRegressionTestSuite(options = {}) {
   // -------------------------------------------------------------------------
   // 3. Physical Bundle Layout
   // -------------------------------------------------------------------------
-  _smokePush_(report, 'physical bundle layout', () => {
+  _smokePush_(report, 'physical bundle layout', function() {
     const requiredFiles = [
       'appsscript.json',
       'README.md',
@@ -722,7 +722,7 @@ function runRegressionTestSuite(options = {}) {
   // -------------------------------------------------------------------------
   // 4. Documentation Hierarchy
   // -------------------------------------------------------------------------
-  _smokePush_(report, 'docs hierarchy truthfulness', () => {
+  _smokePush_(report, 'docs hierarchy truthfulness', function() {
     const activeDocs = docs?.active ? Object.values(docs.active) : [];
     const historicalDocs = Array.isArray(docs.historical) ? docs.historical : [];
     
@@ -753,7 +753,7 @@ function runRegressionTestSuite(options = {}) {
   // -------------------------------------------------------------------------
   // 5. Release Naming Consistency
   // -------------------------------------------------------------------------
-  _smokePush_(report, 'release naming consistency', () => {
+  _smokePush_(report, 'release naming consistency', function() {
     _smokeAssert_(
       release.archiveBaseName === 'gas_wasb_stage7_1_2_final_clean',
       'archiveBaseName must be gas_wasb_stage7_1_2_final_clean'
@@ -780,7 +780,7 @@ function runRegressionTestSuite(options = {}) {
   // -------------------------------------------------------------------------
   // 6. Client Runtime Policy
   // -------------------------------------------------------------------------
-  _smokePush_(report, 'client runtime policy', () => {
+  _smokePush_(report, 'client runtime policy', function() {
     const policy = meta.clientRuntimePolicy || {};
     
     _smokeAssert_(policy.runtimeFile === 'JavaScript.html', 'runtimeFile must be JavaScript.html');
@@ -801,7 +801,7 @@ function runRegressionTestSuite(options = {}) {
   // -------------------------------------------------------------------------
   // 7. Client Bootstrap Helpers
   // -------------------------------------------------------------------------
-  _smokePush_(report, 'client bootstrap helpers', () => {
+  _smokePush_(report, 'client bootstrap helpers', function() {
     _smokeAssert_(typeof include === 'function', 'include() missing');
     _smokeAssert_(typeof includeTemplate === 'function', 'includeTemplate() missing');
     
@@ -814,7 +814,7 @@ function runRegressionTestSuite(options = {}) {
   // -------------------------------------------------------------------------
   // 8. Sidebar Template Include Path
   // -------------------------------------------------------------------------
-  _smokePush_(report, 'sidebar template include path', () => {
+  _smokePush_(report, 'sidebar template include path', function() {
     const rawSidebar = include('Sidebar');
     
     const hasIncludeTemplate = rawSidebar.indexOf("<?!= includeTemplate('JavaScript'); ?>") !== -1 ||
@@ -831,7 +831,7 @@ function runRegressionTestSuite(options = {}) {
   // -------------------------------------------------------------------------
   // 9. JavaScript Runtime Modularity
   // -------------------------------------------------------------------------
-  _smokePush_(report, 'javascript runtime is modular', () => {
+  _smokePush_(report, 'javascript runtime is modular', function() {
     const rawJavaScript = include('JavaScript');
     const runtime = includeTemplate('JavaScript');
     
@@ -849,7 +849,7 @@ function runRegressionTestSuite(options = {}) {
   // -------------------------------------------------------------------------
   // 10. Runtime Wording Hygiene
   // -------------------------------------------------------------------------
-  _smokePush_(report, 'runtime wording hygiene', () => {
+  _smokePush_(report, 'runtime wording hygiene', function() {
     const rawJavaScript = include('JavaScript');
     const rawSidebar = include('Sidebar');
     const runtimeContract = getClientRuntimeContract_();
@@ -885,7 +885,7 @@ function runRegressionTestSuite(options = {}) {
   // -------------------------------------------------------------------------
   // 11. Lifecycle Retention Cleanup API
   // -------------------------------------------------------------------------
-  _smokePush_(report, 'lifecycle retention cleanup api contract', () => {
+  _smokePush_(report, 'lifecycle retention cleanup api contract', function() {
     _smokeAssert_(
       _smokeHasFn_('apiStage7RunLifecycleRetentionCleanup'),
       'apiStage7RunLifecycleRetentionCleanup missing'
@@ -901,7 +901,7 @@ function runRegressionTestSuite(options = {}) {
   // -------------------------------------------------------------------------
   // 12. Public Diagnostics Wording
   // -------------------------------------------------------------------------
-  _smokePush_(report, 'public diagnostics wording is stage7-1', () => {
+  _smokePush_(report, 'public diagnostics wording is stage7-1', function() {
     const quick = runQuickDiagnostics_({ mode: 'quick' });
     const full = runFullDiagnostics_({ mode: 'full' });
     const sunset = runSunsetDiagnostics_({ mode: 'compatibility sunset' });
@@ -958,7 +958,7 @@ function runRegressionTestSuite(options = {}) {
   // -------------------------------------------------------------------------
   // 13. Maintenance Public Wording
   // -------------------------------------------------------------------------
-  _smokePush_(report, 'maintenance public wording is release-neutral', () => {
+  _smokePush_(report, 'maintenance public wording is release-neutral', function() {
     const responses = [
       apiStage7HealthCheck({ mode: 'quick' }),
       apiRunStage7Diagnostics({ mode: 'quick' }),
@@ -999,7 +999,7 @@ function runRegressionTestSuite(options = {}) {
   // -------------------------------------------------------------------------
   // 14. Diagnostics Modes Availability
   // -------------------------------------------------------------------------
-  _smokePush_(report, 'diagnostics modes available', () => {
+  _smokePush_(report, 'diagnostics modes available', function() {
     const requiredModes = [
       'runQuickDiagnostics_',
       'runStructuralDiagnostics_',
@@ -1018,7 +1018,7 @@ function runRegressionTestSuite(options = {}) {
   // -------------------------------------------------------------------------
   // 15. Full Diagnostics Suite Execution
   // -------------------------------------------------------------------------
-  _smokePush_(report, 'diagnostics suite', () => {
+  _smokePush_(report, 'diagnostics suite', function() {
     const diagnostics = runFullDiagnostics_({ mode: 'full' });
     _smokeAssert_(Array.isArray(diagnostics.checks), 'runFullDiagnostics_() missing checks[]');
     return `checks=${diagnostics.checks.length}`;
@@ -1027,7 +1027,7 @@ function runRegressionTestSuite(options = {}) {
   // -------------------------------------------------------------------------
   // 16. Job Runtime Contract
   // -------------------------------------------------------------------------
-  _smokePush_(report, 'job runtime contract', () => {
+  _smokePush_(report, 'job runtime contract', function() {
     const runtime = JobRuntime_.buildRuntimeReport();
     _smokeAssert_(typeof runtime === 'object', 'JobRuntime_.buildRuntimeReport() did not return object');
     return `jobs=${runtime.totalJobs || 0}`;
@@ -1036,7 +1036,7 @@ function runRegressionTestSuite(options = {}) {
   // -------------------------------------------------------------------------
   // 17. Template Governance Contract
   // -------------------------------------------------------------------------
-  _smokePush_(report, 'template governance contract', () => {
+  _smokePush_(report, 'template governance contract', function() {
     const templates = TemplateRegistry_.list();
     _smokeAssert_(Array.isArray(templates), 'TemplateRegistry_.list() did not return array');
     
@@ -1049,7 +1049,7 @@ function runRegressionTestSuite(options = {}) {
   // -------------------------------------------------------------------------
   // 18. Compatibility Sunset Report
   // -------------------------------------------------------------------------
-  _smokePush_(report, 'compatibility sunset report', () => {
+  _smokePush_(report, 'compatibility sunset report', function() {
     const sunset = getCompatibilitySunsetReport_();
     _smokeAssert_(typeof sunset.total === 'number', 'getCompatibilitySunsetReport_() missing total');
     _smokeAssert_(typeof sunset.counts === 'object', 'getCompatibilitySunsetReport_() missing counts');
@@ -1059,7 +1059,7 @@ function runRegressionTestSuite(options = {}) {
   // -------------------------------------------------------------------------
   // 19. Hardening Domain Tests
   // -------------------------------------------------------------------------
-  _smokePush_(report, 'hardening domain test suite', () => {
+  _smokePush_(report, 'hardening domain test suite', function() {
     const domain = runStage6ADomainTests_({ dryRun: true });
     _smokeAssert_(Array.isArray(domain.checks), 'runStage6ADomainTests_() missing checks[]');
     _smokeAssert_(domain.total >= 20, 'Insufficient Stage 7A domain tests');
@@ -1070,7 +1070,7 @@ function runRegressionTestSuite(options = {}) {
   // -------------------------------------------------------------------------
   // 20. Routing Registry Coverage
   // -------------------------------------------------------------------------
-  _smokePush_(report, 'hardening routing registry coverage', () => {
+  _smokePush_(report, 'hardening routing registry coverage', function() {
     const coverage = getRouteCoverageReport_();
     _smokeAssert_(coverage.total >= 20, 'Routing registry too small');
     _smokeAssert_(
@@ -1083,7 +1083,7 @@ function runRegressionTestSuite(options = {}) {
   // -------------------------------------------------------------------------
   // 21. Job Runtime Governance
   // -------------------------------------------------------------------------
-  _smokePush_(report, 'hardening job runtime governance', () => {
+  _smokePush_(report, 'hardening job runtime governance', function() {
     const runtime = JobRuntime_.buildRuntimeReport();
     _smokeAssert_(
       runtime.storagePolicy?.policy === 'hybrid-sheet-plus-properties',
@@ -1099,7 +1099,7 @@ function runRegressionTestSuite(options = {}) {
   // -------------------------------------------------------------------------
   // 22. Safety-Aware Response Contract
   // -------------------------------------------------------------------------
-  _smokePush_(report, 'safety-aware response contract', () => {
+  _smokePush_(report, 'safety-aware response contract', function() {
     const response = buildServerResponse_(
       true, 'OK', null, {}, [],
       {
@@ -1134,7 +1134,7 @@ function runRegressionTestSuite(options = {}) {
   // -------------------------------------------------------------------------
   // 23. Lifecycle Repository Contract
   // -------------------------------------------------------------------------
-  _smokePush_(report, 'lifecycle repository contract', () => {
+  _smokePush_(report, 'lifecycle repository contract', function() {
     _smokeAssert_(typeof OperationRepository_ === 'object', 'OperationRepository_ missing');
     _smokeAssert_(typeof OperationRepository_.buildFingerprint === 'function', 'buildFingerprint() missing');
     _smokeAssert_(typeof OperationRepository_.transitionStatus === 'function', 'transitionStatus() missing');
@@ -1158,7 +1158,7 @@ function runRegressionTestSuite(options = {}) {
   // -------------------------------------------------------------------------
   // 24. Access Security E2E (Dry Run)
   // -------------------------------------------------------------------------
-  _smokePush_(report, 'access security e2e dry-run', () => {
+  _smokePush_(report, 'access security e2e dry-run', function() {
     const runner = _smokeResolveAccessSecurityRunner_();
     _smokeAssert_(runner && typeof runner.fn === 'function', 'Access security runner missing');
     
@@ -1175,7 +1175,7 @@ function runRegressionTestSuite(options = {}) {
   // -------------------------------------------------------------------------
   // 25. Security Hardening Helpers
   // -------------------------------------------------------------------------
-  _smokePush_(report, 'security hardening helpers', () => {
+  _smokePush_(report, 'security hardening helpers', function() {
     _smokeAssert_(typeof AccessControl_ === 'object', 'AccessControl_ missing');
     _smokeAssert_(typeof SecurityRedaction_ === 'object', 'SecurityRedaction_ missing');
     _smokeAssert_(typeof applySpreadsheetProtections_ === 'function', 'applySpreadsheetProtections_ missing');
@@ -1187,7 +1187,7 @@ function runRegressionTestSuite(options = {}) {
   // -------------------------------------------------------------------------
   // 26. Maintenance Repair API Contract
   // -------------------------------------------------------------------------
-  _smokePush_(report, 'maintenance repair api contract', () => {
+  _smokePush_(report, 'maintenance repair api contract', function() {
     const requiredApis = [
       'apiStage7ListPendingRepairs',
       'apiStage7GetOperationDetails',
@@ -1204,7 +1204,7 @@ function runRegressionTestSuite(options = {}) {
   // -------------------------------------------------------------------------
   // 27. Pending Repairs Visibility
   // -------------------------------------------------------------------------
-  _smokePush_(report, 'pending repairs visibility contract', () => {
+  _smokePush_(report, 'pending repairs visibility contract', function() {
     const result = apiStage7ListPendingRepairs({});
     _assertStage4Meta_(result, 'apiStage7ListPendingRepairs');
     
@@ -1218,7 +1218,7 @@ function runRegressionTestSuite(options = {}) {
   // -------------------------------------------------------------------------
   // 28. Historical Documentation Status
   // -------------------------------------------------------------------------
-  _smokePush_(report, 'historical docs kept non-active', () => {
+  _smokePush_(report, 'historical docs kept non-active', function() {
     _smokeAssert_(docs.active.changelog === 'CHANGELOG.md', 'CHANGELOG must be active');
     
     const historical = docs.historical || [];
