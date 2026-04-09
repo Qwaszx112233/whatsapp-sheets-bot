@@ -396,7 +396,7 @@ const SendPanelFastPaths_ = (function() {
     _applyVisualStateToRows_(panel, [row]);
 
     return _buildResponse_(
-      'Рядок швидко позначено як відправлений',
+      'Рядок позначено як відправлений',
       {
         rows: [],
         updatedRows: [row],

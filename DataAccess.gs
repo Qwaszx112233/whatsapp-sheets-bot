@@ -138,7 +138,6 @@ const DataAccess_ = (function() {
   };
 })();
 
-
 /************ ЗАВАНТАЖЕННЯ ДАНИХ З КЕШЕМ ************/
 
 function _phonesFindColumnIndex_(headers, predicates, fallbackIndex) {

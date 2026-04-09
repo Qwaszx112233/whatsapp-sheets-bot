@@ -620,11 +620,14 @@
       '<div class="access-login-modal__dialog">',
       '  <div class="access-login-modal__header">',
       '    <div>',
+
       '      <div class="access-login-modal__title">Увійти</div>',
       '      <div class="access-login-modal__subtext">Введіть email або телефон і свій позивний</div>',
       '    </div>',
+
       '    <button type="button" id="btnCloseAccessLoginModal" class="access-login-modal__close">Вихід</button>',
       '  </div>',
+
       '  <div class="access-login-modal__content">',
       '    <div id="accessLoginModalMessage" class="access-login-modal__message"></div>',
       '    <div id="accessLoginModalLoading" class="access-login-modal__loading" style="display:none;">',
@@ -632,15 +635,18 @@
       '      <div id="accessLoginModalLoadingText" class="access-login-modal__loading-text">Підтверджую вхід...</div>',
       '      <div class="access-login-modal__loading-subtext">Зачекайте, будь ласка. Іде перевірка даних, часу та точки входу.</div>',
       '    </div>',
+
       '    <div id="accessLoginModalBody" class="access-login-modal__body is-form">',
       '      <label class="access-login-modal__field">',
       '        <span class="access-login-modal__label">Email або телефон</span>',
       '        <input id="accessLoginIdentifierInput" class="access-login-modal__input" type="text" autocomplete="username" placeholder="Введіть email або телефон">',
       '      </label>',
+
       '      <label class="access-login-modal__field">',
       '        <span class="access-login-modal__label">Позивний</span>',
       '        <input id="accessLoginCallsignInput" class="access-login-modal__input access-login-modal__input--callsign" type="text" autocomplete="off" placeholder="Введіть свій позивний">',
       '      </label>',
+
       '      <div class="access-login-modal__actions">',
       '        <button type="button" id="accessLoginSubmitBtn" class="access-login-modal__submit">Увійти</button>',
       '      </div>',
@@ -827,7 +833,6 @@
     }
   }
 
-
   function buildAccessTechDetailsText_(access) {
     const normalized = normalizeAccessForUi_(access || {});
     const raw = (access && (access.raw || access)) || {};
@@ -896,6 +901,7 @@
     return `
       <div class="result-item">
         <div class="result-label">Перевірка доступу</div>
+
         <div class="result-value">
           <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
             <button class="btn btn-primary" type="button" onclick="SidebarApp.copyResultText('${escapeJsString(reportText)}')">Копіювати звіт</button>
@@ -992,7 +998,14 @@
 
     banner.style.display = 'block';
     banner.classList.remove(
-      'is-guest', 'is-viewer', 'is-operator', 'is-maintainer', 'is-admin', 'is-sysadmin', 'is-owner', 'is-safe-mode'
+      'is-guest', 
+      'is-viewer', 
+      'is-operator', 
+      'is-maintainer', 
+      'is-admin', 
+      'is-sysadmin', 
+      'is-owner', 
+      'is-safe-mode'
     );
     banner.classList.add('is-' + String(access.role || 'guest').toLowerCase());
     if (!access.knownUser) banner.classList.add('is-safe-mode');

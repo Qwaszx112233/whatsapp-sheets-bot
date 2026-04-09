@@ -185,6 +185,7 @@ function openPersonCardByCallsignAndDate_(callsign, dateStr) {
           }
         </style>
       </head>
+
       <body>
         <div class="card">
           <div class="title">${HtmlUtils_.escapeHtml(data.callsign)}</div>
@@ -238,6 +239,7 @@ function openPersonCardByCallsignAndDate_(callsign, dateStr) {
             if (error.message) return String(error.message);
             return String(error);
           }
+
           function gsRun(method) {
             const args = Array.prototype.slice.call(arguments, 1);
             return new Promise((resolve, reject) => {
@@ -255,10 +257,12 @@ function openPersonCardByCallsignAndDate_(callsign, dateStr) {
               }
             });
           }
+
           function openCalendar() {
             gsRun('openPersonCalendar', '${HtmlUtils_.escapeHtml(data.callsign)}')
               .catch(err => alert('✕ ' + normalizeError(err)));
           }
+          
           function openMainSidebar() {
             gsRun('showSidebar')
               .catch(err => alert('✕ ' + normalizeError(err)));

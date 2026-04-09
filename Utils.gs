@@ -162,8 +162,6 @@ function getDisplayName_(personOrName) {
   }
 }
 
-
-
 function trimToEncoded_(text, maxLen) {
   const source = String(text || '');
   if (!source) return '';

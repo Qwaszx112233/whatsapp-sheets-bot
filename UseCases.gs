@@ -603,7 +603,6 @@ const Stage7UseCases_ = (function() {
     });
   }
 
-
   function listMonths(options) {
     const payload = Object.assign({}, options || {});
     return WorkflowOrchestrator_.run({

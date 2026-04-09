@@ -39,6 +39,7 @@ function debugSendPanelNow() {
     'apiError: ' + (apiError || '—')
   );
 }
+
 function debugSendPanelBridge_() {
   const ss = SpreadsheetApp.getActive();
   const sh = ss.getSheetByName(CONFIG.SEND_PANEL_SHEET);
@@ -104,6 +105,7 @@ function debugSendPanelBridge_() {
 // STAGE 7 MERGED DIAGNOSTICS OVERRIDE LAYER
 // Відновлює повний набір старих перевірок + додає актуальні Stage 7 checks.
 // =========================================================
+
 function debugAccess() {
   Logger.log(JSON.stringify(AccessControl_.describe(), null, 2));
 }

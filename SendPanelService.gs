@@ -10,6 +10,7 @@ const SendPanelService_ = (function() {
   function preview(dateStr) {
     return SendPanelRepository_.preview(assertUaDateString_(dateStr));
   }
+
 /**
  * SendPanelService.gs — stage 7 domain service for SEND_PANEL.
  *

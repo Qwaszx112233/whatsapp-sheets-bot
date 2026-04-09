@@ -15,21 +15,58 @@ const OperationRepository_ = (function() {
   });
 
   const OPS_HEADERS = Object.freeze([
-    'TimestampStarted', 'TimestampFinished', 'OperationId', 'ParentOperationId', 'Scenario', 'RawScenario',
-    'Initiator', 'RunSource', 'Status', 'Fingerprint', 'AffectedRows', 'AffectedEntities',
-    'VerificationResult', 'RepairNeeded', 'ErrorMessage', 'TransitionReason', 'Notes',
-    'ResolvedByOperationId', 'ResolvedAt', 'ResolutionStatus', 'LastHeartbeat', 'ExpiresAt',
-    'PayloadJson', 'ResultJson', 'CheckpointCount'
+    'TimestampStarted', 
+    'TimestampFinished', 
+    'OperationId', 
+    'ParentOperationId', 
+    'Scenario', 
+    'RawScenario',
+    'Initiator', 
+    'RunSource', 
+    'Status', 
+    'Fingerprint', 
+    'AffectedRows', 
+    'AffectedEntities',
+    'VerificationResult', 
+    'RepairNeeded', 
+    'ErrorMessage', 
+    'TransitionReason', 
+    'Notes',
+    'ResolvedByOperationId', 
+    'ResolvedAt', 
+    'ResolutionStatus', 
+    'LastHeartbeat', 
+    'ExpiresAt',
+    'PayloadJson',
+    'ResultJson', 
+    'CheckpointCount'
   ]);
 
   const ACTIVE_HEADERS = Object.freeze([
-    'OperationId', 'Scenario', 'Fingerprint', 'Status', 'StartedAt', 'LastHeartbeat',
-    'Initiator', 'RunSource', 'ExpiresAt', 'LockHolder', 'ParentOperationId', 'Notes', 'PayloadJson'
+    'OperationId', 
+    'Scenario', 
+    'Fingerprint', 
+    'Status', 
+    'StartedAt', 
+    'LastHeartbeat',
+    'Initiator', 
+    'RunSource', 
+    'ExpiresAt', 
+    'LockHolder', 
+    'ParentOperationId', 
+    'Notes', 
+    'PayloadJson'
   ]);
 
   const CHECKPOINT_HEADERS = Object.freeze([
-    'OperationId', 'CheckpointIndex', 'ProcessedUpTo', 'LastProcessedEntity', 'LastProcessedRow',
-    'CheckpointTimestamp', 'CheckpointPayload', 'VerificationSnapshot'
+    'OperationId', 
+    'CheckpointIndex', 
+    'ProcessedUpTo', 
+    'LastProcessedEntity', 
+    'LastProcessedRow',
+    'CheckpointTimestamp', 
+    'CheckpointPayload', 
+    'VerificationSnapshot'
   ]);
 
   const FINAL_STATUSES = Object.freeze({ COMMITTED: true, FAILED: true, FAILED_STALE: true, ABANDONED: true, CANCELLED: true });
@@ -881,8 +918,6 @@ const OperationRepository_ = (function() {
   };
 })();
 
-
 function _normalizeOperationId(value) {
   return String(value == null ? '' : value).trim();
 }
-

@@ -185,6 +185,7 @@ const Reconciliation_ = (function () {
     const selected = stage7AsArray_(issues).filter(function (item) {
       return !allowedTypes.length || allowedTypes.indexOf(item.type) !== -1;
     });
+    
     return {
       selectedCount: selected.length,
       repairableCount: selected.filter(function (item) { return item.repairable; }).length,
@@ -245,6 +246,7 @@ const Reconciliation_ = (function () {
       expectedRow.code || '',
       expectedRow.tasks || ''
     ]]);
+
     panel.getRange(nextRow, 6, 1, 2).setValues([[
       expectedRow.sent === true ? getSendPanelSentMark_() : getSendPanelUnsentMark_(),
       resolveSendPanelActionCellValue_(expectedRow.link || '', status, expectedRow.sent === true)

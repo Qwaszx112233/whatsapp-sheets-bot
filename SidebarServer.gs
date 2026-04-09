@@ -167,17 +167,14 @@ function testCommanderPhone() {
     let result = `🔍 ПОШУК ТЕЛЕФОНУ КОМАНДИРА
 `;
     result += `============================
-
 `;
     result += `Роль в конфігу: "${role}"
-
 `;
     result += `📞 Canonical lookup: ${findPhone_({ role: role }) || '✕'}
 `;
     result += `📞 byRole[${role}]: ${phoneIndex && phoneIndex.byRole ? (phoneIndex.byRole[role] || phoneIndex.byRole[_normCallsignKey_(role)] || '✕') : '✕'}
 `;
     result += `📞 byCallsign[${role}]: ${phoneIndex && phoneIndex.byCallsign ? (phoneIndex.byCallsign[role] || phoneIndex.byCallsign[_normCallsignKey_(role)] || '✕') : '✕'}
-
 `;
     result += `📋 Можливі кандидати:
 `;
@@ -195,7 +192,6 @@ function testCommanderPhone() {
 
     if (!found) {
       result += `  (нічого не знайдено)
-
 `;
       result += `✕ В листі PHONES немає запису для командира. Додайте роль або позивний "${role}".`;
     }
@@ -205,7 +201,6 @@ function testCommanderPhone() {
     ui.alert('✕ Помилка', String(e && e.message ? e.message : e), ui.ButtonSet.OK);
   }
 }
-
 
 // ==================== REQUIRED HEALTHCHECK BRIDGE WRAPPERS ====================
 function generateSendPanelSidebar(options) {
@@ -227,4 +222,3 @@ function getDetailedDaySummaryByDate(dateStr) {
 function markMultipleAsSentFromSidebar(rowNumbers, opts) {
   return apiMarkPanelRowsAsSent(rowNumbers, opts || {});
 }
-

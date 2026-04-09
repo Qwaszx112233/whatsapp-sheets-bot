@@ -48,6 +48,7 @@ function _addHealthCheck_(report, item) {
     report.ok = false;
   }
 }
+
 function _runHealthCheckItem_(report, title, severity, fn) {
   try {
     const result = fn() || {};
@@ -69,6 +70,7 @@ function _runHealthCheckItem_(report, title, severity, fn) {
     });
   }
 }
+
 function healthCheck() {
   const report = {
     ok: true,

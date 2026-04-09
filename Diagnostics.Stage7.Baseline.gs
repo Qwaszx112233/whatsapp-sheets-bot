@@ -141,7 +141,6 @@ function runStage3HealthCheck_(options) {
   };
 }
 
-
 // =========================
 // STAGE 7 DIAGNOSTICS 2.0
 // =========================
@@ -320,6 +319,7 @@ function runStage4HealthCheck_(options) {
     ts: new Date().toISOString()
   };
 }
+
 function runStage5MetadataConsistencyCheck_() {
   const checks = [];
   const meta = typeof getProjectBundleMetadata_ === 'function' ? getProjectBundleMetadata_() : PROJECT_BUNDLE_METADATA_;
@@ -384,6 +384,7 @@ function runStage5MetadataConsistencyCheck_() {
 
   return checks;
 }
+
 function runQuickDiagnostics_(options) {
   var opts = options || {};
   var legacyHealth = _diagNormalizeReportChecks_(healthCheck(), 'Health');
@@ -391,6 +392,7 @@ function runQuickDiagnostics_(options) {
   var checks = _diagMergeChecks_(legacyHealth, stage7);
   return _diagBuildReport_(checks, opts.mode || 'quick', 'Stage 7 quick diagnostics');
 }
+
 function runStructuralDiagnostics_(options) {
   var opts = options || {};
   var checks = _diagMergeChecks_(
@@ -400,6 +402,7 @@ function runStructuralDiagnostics_(options) {
   );
   return _diagBuildReport_(checks, opts.mode || 'structural', 'Stage 7 structural diagnostics');
 }
+
 function runOperationalDiagnostics_(options) {
   var opts = options || {};
   var extra = [];
@@ -414,12 +417,14 @@ function runOperationalDiagnostics_(options) {
   );
   return _diagBuildReport_(checks, opts.mode || 'operational', 'Stage 7 operational diagnostics');
 }
+
 function runSunsetDiagnostics_(options) {
   var opts = options || {};
   var checks = [];
   _diagAppendCompatibilitySplitCheck_(checks);
   return _diagBuildReport_(_diagNormalizeReportChecks_({ checks: checks }), opts.mode || 'compatibility sunset', 'Stage 7 compatibility diagnostics');
 }
+
 function runHardeningDiagnostics_(options) {
   var opts = options || {};
   var extra = [];
@@ -431,6 +436,7 @@ function runHardeningDiagnostics_(options) {
   );
   return _diagBuildReport_(checks, opts.mode || 'stage7-hardening', 'Stage 7 lifecycle hardening diagnostics');
 }
+
 function runFullDiagnostics_(options) {
   var opts = options || {};
   var extra = [];
@@ -450,6 +456,7 @@ function runFullDiagnostics_(options) {
 
   return _diagBuildReport_(checks, opts.mode || 'full', _releaseStageLabel_());
 }
+
 function runFullVerboseDiagnostics_(options) {
   var base = runFullDiagnostics_(options || {});
   var hardening = runHardeningDiagnostics_({ mode: 'stage7-hardening' });

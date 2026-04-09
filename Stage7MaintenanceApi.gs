@@ -427,7 +427,6 @@ function apiListStage7JobRuntime() {
   );
 }
 
-
 function apiStage7ListPendingRepairs(filters) {
   _stage7AssertRole_('maintainer', 'list pending repairs');
   return _stage7BuildMaintenanceResponse_(
@@ -502,7 +501,6 @@ function apiStage7RunRepair(operationId, options) {
     );
   }
 }
-
 
 function apiStage7RunLifecycleRetentionCleanup() {
   _stage7AssertRole_('sysadmin', 'cleanup lifecycle retention');

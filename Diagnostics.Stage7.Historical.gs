@@ -93,6 +93,7 @@ function runStage41ProjectConsistencyCheck_() {
 
   return checks;
 }
+
 function runHistoricalStructuralDiagnosticsInternal_(options) {
   const opts = options || {};
   const checks = [];
@@ -179,6 +180,7 @@ function runHistoricalStructuralDiagnosticsInternal_(options) {
     ts: new Date().toISOString()
   };
 }
+
 function runHistoricalCompatibilityDiagnosticsInternal_(options) {
   const opts = options || {};
   const checks = [];
@@ -241,6 +243,7 @@ function runHistoricalCompatibilityDiagnosticsInternal_(options) {
     ts: new Date().toISOString()
   };
 }
+
 function runHistoricalQuickDiagnosticsInternal_(options) {
   const opts = options || {};
   const structural = runHistoricalStructuralDiagnosticsInternal_({ mode: 'quick' });
@@ -263,6 +266,7 @@ function runHistoricalQuickDiagnosticsInternal_(options) {
     ts: new Date().toISOString()
   };
 }
+
 function runHistoricalFullDiagnosticsInternal_(options) {
   const opts = options || {};
   const structural = runHistoricalStructuralDiagnosticsInternal_({ mode: 'full' });
