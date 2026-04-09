@@ -822,7 +822,7 @@ function runRegressionTestSuite(options = {}) {
     _smokeAssert_(hasIncludeTemplate, 'Sidebar.html must include JavaScript via includeTemplate');
     
     const hasRawInclude = rawSidebar.indexOf("<?!= include('JavaScript'); ?>") !== -1 ||
-                          rawSidebar.indexOf('<?!= include('JavaScript'); ?>') !== -1;
+                          // rawSidebar.indexOf('<?!= include('JavaScript'); ?>') !== -1;  // FIXED: removed problematic check
     _smokeAssert_(!hasRawInclude, 'Sidebar.html must not use raw include for JavaScript');
     
     return 'sidebar-include-ok';
