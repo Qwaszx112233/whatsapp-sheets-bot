@@ -9,15 +9,11 @@ function applyGlobalSheetStandards_() {
     const isMonth = /^\d{2}$/.test(name);
 
     if (isMonth) {
-      applyFontStandardsToSheet_(sh);
       applyFreezeStandardsToSheet_(sh);
-      applyColumnWidthsStandardsToSheet_(sh);
       return;
     }
 
     if (typeof stage7IsRequiredNonMonthSheet_ === 'function' && stage7IsRequiredNonMonthSheet_(name)) {
-      applyFontStandardsToSheet_(sh);
-      applyColumnWidthsStandardsToSheet_(sh);
       try {
         sh.setFrozenRows(0);
         sh.setFrozenColumns(0);
@@ -27,13 +23,6 @@ function applyGlobalSheetStandards_() {
       }
     }
   });
-}function applyFontStandardsToSheet_(sheet) {
-  const maxR = sheet.getMaxRows();
-  const maxC = sheet.getMaxColumns();
-  if (maxR < 1 || maxC < 1) return;
-  sheet.getRange(1, 1, maxR, maxC)
-    .setFontFamily('Times New Roman')
-    .setFontSize(12);
 }
 
 function applyFreezeStandardsToSheet_(sheet) {
@@ -42,22 +31,10 @@ function applyFreezeStandardsToSheet_(sheet) {
       sheet.setFrozenRows(1);
       sheet.setFrozenColumns(7);
     } else {
-      sheet.setFrozenRows(0);
+      sheet.setFrozenRows(1);
       sheet.setFrozenColumns(0);
     }
   } catch (e) { }
-}function applyColumnWidthsStandardsToSheet_(sheet) {
-  const isSendPanel = sheet.getName() === CONFIG.SEND_PANEL_SHEET;
-  const maxCols = sheet.getMaxColumns();
-  const widths = isSendPanel
-    ? [320, 120, 80, 150, 80, 80, 120].slice(0, maxCols)
-    : [110, 110, 110, 110, 150, 40, 315].slice(0, maxCols);
-
-  widths.forEach((w, i) => {
-    if (Number(w) > 0) {
-      try { sheet.setColumnWidth(i + 1, w); } catch (e) { }
-    }
-  });
 }
 
 /************ ПОШУК СЬОГОДНІШНЬОГО СТОВПЦЯ ************/

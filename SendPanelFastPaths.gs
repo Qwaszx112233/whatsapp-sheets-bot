@@ -160,7 +160,6 @@ const SendPanelFastPaths_ = (function() {
 
     panel.getRange(dataStartRow, 1, Math.max(1, dataLastRow - dataStartRow + 1), 7).setBackground(null);
     try { panel.setFrozenRows(headerRow); } catch (_) {}
-    try { applyColumnWidthsStandardsToSheet_(panel); } catch (_) {}
     setSendPanelMetadata_(panel, safeMonth, safeDate);
   }
 

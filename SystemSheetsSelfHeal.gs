@@ -292,20 +292,9 @@ function _ensureSheetSize_(sheet, minRows, minCols) {
 }
 
 function _applyBasicSystemSheetStandards_(sheet, headerRow, lastCol) {
-  try {
-    if (typeof applyFontStandardsToSheet_ === "function") {
-      applyFontStandardsToSheet_(sheet);
-    }
-  } catch (_) {}
 
   try {
-    if (typeof applyColumnWidthsStandardsToSheet_ === "function") {
-      applyColumnWidthsStandardsToSheet_(sheet);
-    }
-  } catch (_) {}
-
-  try {
-    sheet.setFrozenRows(0);
+    sheet.setFrozenRows(1);
     sheet.setFrozenColumns(0);
   } catch (_) {}
 

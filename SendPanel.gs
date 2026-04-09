@@ -426,7 +426,6 @@ function rebuildSendPanelCore_() {
 
   panel.getRange(CONFIG.SEND_PANEL_DATA_START_ROW, 1, rows.length, 7).setValues(rows);
   ensureSendPanelStatusFormula_(panel);
-  applyColumnWidthsStandardsToSheet_(panel);
   panel.setFrozenRows(CONFIG.SEND_PANEL_HEADER_ROW);
   normalizeSendPanelDailyState_(panel);
 
