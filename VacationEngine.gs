@@ -680,28 +680,36 @@ function _veParseBirthdayParts_(birthday) {
 
 function _veBuildBirthdayCommanderMessage_(data) {
   const d = _vePrepareData_(data);
+  const name = String(d.fml || d.name || d.callsign || '').trim();
+  const age = Number(d.age);
+
+  function yearsWord_(n) {
+    const v = Math.abs(Number(n)) % 100;
+    const v1 = v % 10;
+    if (v > 10 && v < 20) return 'років';
+    if (v1 === 1) return 'рік';
+    if (v1 >= 2 && v1 <= 4) return 'роки';
+    return 'років';
+  }
+
+  let datePart = '';
+  if (d.birthday && Number.isFinite(age) && age > 0) {
+    datePart = `${d.birthday} (${age} ${yearsWord_(age)})`;
+  } else if (d.birthday) {
+    datePart = d.birthday;
+  } else if (Number.isFinite(age) && age > 0) {
+    datePart = `${age} ${yearsWord_(age)}`;
+  }
 
   if (d.daysUntil === 3) {
-    return _veRenderTemplateOrFallback_(
-      BIRTHDAY_ENGINE_CONFIG.COMMANDER_TEMPLATE_3,
-      d,
-      `Через 3 дні День народження: ${d.fml || d.callsign} (${d.birthday}).`
-    );
+    return `Через 3 дні День народження: ${name}${datePart ? ` — ${datePart}` : ''}.`; 
   }
 
   if (d.daysUntil === 2) {
-    return _veRenderTemplateOrFallback_(
-      BIRTHDAY_ENGINE_CONFIG.COMMANDER_TEMPLATE_2,
-      d,
-      `Через 2 дні День народження: ${d.fml || d.callsign} (${d.birthday}).`
-    );
+    return `Через 2 дні День народження: ${name}${datePart ? ` — ${datePart}` : ''}.`; 
   }
 
-  return _veRenderTemplateOrFallback_(
-    BIRTHDAY_ENGINE_CONFIG.COMMANDER_TEMPLATE_1,
-    d,
-    `Завтра День народження: ${d.fml || d.callsign} (${d.birthday}).`
-  );
+  return `Завтра День народження: ${name}${datePart ? ` — ${datePart}` : ''}.`; 
 }
 
 function _veBuildBirthdayGreetingMessage_(data) {
