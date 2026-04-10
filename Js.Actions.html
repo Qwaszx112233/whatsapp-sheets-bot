@@ -176,6 +176,29 @@
     return `${b} (${a} ${formatYearsUa(a)})`;
   }
 
+
+  function formatBirthdayDayWord(days) {
+    const n = Math.abs(Number(days)) % 100;
+    const n1 = n % 10;
+    if (n > 10 && n < 20) return 'днів';
+    if (n1 === 1) return 'день';
+    if (n1 >= 2 && n1 <= 4) return 'дні';
+    return 'днів';
+  }
+
+  function formatBirthdayCardNote(daysUntil, mode) {
+    const d = Number(daysUntil);
+    if (!Number.isFinite(d)) return '';
+
+    if (d === 0) return '🥳 Сьогодні день народження!';
+    if (d === 1) return '⏳ Завтра день народження';
+
+    const word = formatBirthdayDayWord(d);
+    return mode === 'commander'
+      ? `Нагадування: через ${d} ${word}`
+      : `До свята: ${d} ${word}`;
+  }
+
   function renderBirthdayResult(rawData) {
     const data = normalizeBirthdayData(rawData);
     const esc = value => escapeHtml(String(value || ''));
@@ -196,12 +219,12 @@
         data.commanderMessages.forEach(row => {
           html += `
             <div style="${itemStyle}">
-              <div style="${fmlStyle}">🎂 ${esc(row.callsign || row.fml)}</div>
-              <div style="font-size:12px;color:#374151;margin-top:4px;">
-                ${esc(row.fml)} • ${esc(formatBirthdayWithAge(row.birthday, row.age))}
+              <div style="${fmlStyle}; text-align:left;">🎂 ${esc(row.fml || row.callsign)}</div>
+              <div style="font-size:13px;color:#111827;margin-top:4px;text-align:left;font-weight:500;">
+                ${esc(formatBirthdayWithAge(row.birthday, row.age))}
               </div>
-              <div style="font-size:12px;color:#374151;margin-top:6px; white-space:pre-wrap;">
-                ${esc(row.message || '')}
+              <div style="font-size:12px;color:#6b7280;margin-top:4px;text-align:left;line-height:1.35;">
+                ${esc(formatBirthdayCardNote(row.daysUntil, 'commander'))}
               </div>
               ${
                 row.link
@@ -224,12 +247,12 @@
         data.birthdayMessages.forEach(person => {
           html += `
             <div style="${itemStyle}">
-              <div style="${fmlStyle}">🎂 ${esc(person.displayName || person.fml)}</div>
-              <div style="font-size:12px;color:#374151;margin-top:4px;">
-                ${esc(person.fml)} • ${esc(formatBirthdayWithAge(person.birthday, person.age))}
+              <div style="${fmlStyle}; text-align:left;">🎂 ${esc(person.fml || person.displayName)}</div>
+              <div style="font-size:13px;color:#111827;margin-top:4px;text-align:left;font-weight:500;">
+                ${esc(formatBirthdayWithAge(person.birthday, person.age))}
               </div>
-              <div style="font-size:12px;color:#374151;margin-top:6px; white-space:pre-wrap;">
-                ${esc(person.message || '')}
+              <div style="font-size:12px;color:#6b7280;margin-top:4px;text-align:left;line-height:1.35;">
+                ${esc(formatBirthdayCardNote(person.daysUntil, 'person'))}
               </div>
               ${
                 person.link
@@ -259,9 +282,9 @@
         data.today.forEach(person => {
           html += `
             <div style="${itemStyle}">
-              <div style="${fmlStyle}">🎉 ${esc(person.displayName || person.fml)}</div>
-              <div style="font-size:12px;color:#374151;margin-top:4px;">
-                ${esc(person.fml)} • ${esc(formatBirthdayWithAge(person.birthday, person.age))}
+              <div style="${fmlStyle}; text-align:left;">🎉 ${esc(person.fml || person.displayName)}</div>
+              <div style="font-size:13px;color:#111827;margin-top:4px;text-align:left;font-weight:500;">
+                ${esc(formatBirthdayWithAge(person.birthday, person.age))}
               </div>
               ${
                 person.phone
@@ -284,9 +307,9 @@
         data.tomorrow.forEach(person => {
           html += `
             <div style="${itemStyle}">
-              <div style="${fmlStyle}">🎂 ${esc(person.displayName || person.fml)}</div>
-              <div style="font-size:12px;color:#374151;margin-top:4px;">
-                ${esc(person.fml)} • ${esc(formatBirthdayWithAge(person.birthday, person.age))}
+              <div style="${fmlStyle}; text-align:left;">🎂 ${esc(person.fml || person.displayName)}</div>
+              <div style="font-size:13px;color:#111827;margin-top:4px;text-align:left;font-weight:500;">
+                ${esc(formatBirthdayWithAge(person.birthday, person.age))}
               </div>
               ${
                 person.phone
