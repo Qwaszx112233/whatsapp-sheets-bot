@@ -404,7 +404,11 @@
           break;
 
         case 'clearLog': {
-          const result = await ActionDispatcher.run('clearLog', () => MaintenanceApi.clearLog());
+          const result = await ActionDispatcher.run(
+            'clearLog',
+            () => MaintenanceApi.clearLog(),
+            { successMessage: '' }
+          );
           if (result?.success) clearConsole();
           displayInResult(
             result?.success ? 'success' : 'error',

@@ -685,7 +685,7 @@ function _veBuildBirthdayCommanderMessage_(data) {
     return _veRenderTemplateOrFallback_(
       BIRTHDAY_ENGINE_CONFIG.COMMANDER_TEMPLATE_3,
       d,
-      `🎂 Через 3 дні День народження: ${d.fml || d.callsign} (${d.birthday}).`
+      `Через 3 дні День народження: ${d.fml || d.callsign} (${d.birthday}).`
     );
   }
 
@@ -693,14 +693,14 @@ function _veBuildBirthdayCommanderMessage_(data) {
     return _veRenderTemplateOrFallback_(
       BIRTHDAY_ENGINE_CONFIG.COMMANDER_TEMPLATE_2,
       d,
-      `🎂 Через 2 дні День народження: ${d.fml || d.callsign} (${d.birthday}).`
+      `Через 2 дні День народження: ${d.fml || d.callsign} (${d.birthday}).`
     );
   }
 
   return _veRenderTemplateOrFallback_(
     BIRTHDAY_ENGINE_CONFIG.COMMANDER_TEMPLATE_1,
     d,
-    `🎂 Завтра День народження: ${d.fml || d.callsign} (${d.birthday}).`
+    `Завтра День народження: ${d.fml || d.callsign} (${d.birthday}).`
   );
 }
 
@@ -719,7 +719,7 @@ function _veBuildBirthdayGreetingMessage_(data) {
 
   const ageLine = d.age ? ` З ${d.age}-річчям!` : ' З Днем Народження!';
   return [
-    `🎂 Вітаю, ${d.name}!`,
+    `Вітаю, ${d.name}!`,
     '',
     `${ageLine}`,
     `Бажаю здоров'я, витримки, сил і мирного неба.`,
