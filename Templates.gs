@@ -73,7 +73,7 @@ function _loadTemplatesMap_() {
 
   const ss = SpreadsheetApp.getActive();
   const sh = ss.getSheetByName(TEMPLATES_SHEET_NAME);
-  if (!sh) return {}; // листа нет — вернём пусто (HealthCheck скажет как исправить)
+  if (!sh) return {};
 
   const lastRow = sh.getLastRow();
   if (lastRow < 2) return {};
