@@ -685,7 +685,7 @@ function _veBuildBirthdayCommanderMessage_(data) {
     return _veRenderTemplateOrFallback_(
       BIRTHDAY_ENGINE_CONFIG.COMMANDER_TEMPLATE_3,
       d,
-      `🎂 Нагадування: у ${d.callsign} (${d.fml}) через 3 дні День Народження (${d.birthday}).`
+      `🎂 Через 3 дні День народження: ${d.fml || d.callsign} (${d.birthday}).`
     );
   }
 
@@ -693,14 +693,14 @@ function _veBuildBirthdayCommanderMessage_(data) {
     return _veRenderTemplateOrFallback_(
       BIRTHDAY_ENGINE_CONFIG.COMMANDER_TEMPLATE_2,
       d,
-      `🎂 Нагадування: у ${d.callsign} (${d.fml}) через 2 дні День Народження (${d.birthday}).`
+      `🎂 Через 2 дні День народження: ${d.fml || d.callsign} (${d.birthday}).`
     );
   }
 
   return _veRenderTemplateOrFallback_(
     BIRTHDAY_ENGINE_CONFIG.COMMANDER_TEMPLATE_1,
     d,
-    `🎂 Нагадування: у ${d.callsign} (${d.fml}) завтра День Народження (${d.birthday}).`
+    `🎂 Завтра День народження: ${d.fml || d.callsign} (${d.birthday}).`
   );
 }
 
@@ -803,7 +803,7 @@ function runBirthdayEngine_(targetDate) {
           displayName: name,
           birthday: item.birthday,
           age: age,
-          daysUntil: 0,
+          daysUntil: daysUntil,
           phone: phone,
           message: message,
           link: phone ? _veWaLink_(phone, message) : '',
