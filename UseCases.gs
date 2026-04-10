@@ -835,7 +835,7 @@ const Stage7UseCases_ = (function() {
         const birthdays = runBirthdayEngine_(targetDate) || {};
         return {
           success: true,
-          message: 'Перевірку відпусток і ДН виконано',
+          message: 'Перевірку відпусток виконано',
           result: {
             date: input.dateStr || input.date,
             vacations: vacations,
